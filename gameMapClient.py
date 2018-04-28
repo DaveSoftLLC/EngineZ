@@ -36,13 +36,13 @@ while running:
     mx,my = mouse.get_pos()
     m = mouse.get_pressed()
     keysPressed = key.get_pressed()
-    if keysPressed[K_w] and 0<playerList[1][1]-5:
+    if keysPressed[K_w] and 300<playerList[1][1]-5:
         playerList[1][1] -= 5
-    if keysPressed[K_s] and playerList[1][1]+5<background.get_height():
+    if keysPressed[K_s] and playerList[1][1]+5<background.get_height()-300:
         playerList[1][1] += 5
-    if keysPressed[K_a] and 0<playerList[1][0]-5:
+    if keysPressed[K_a] and 400<playerList[1][0]-5:
         playerList[1][0] -= 5
-    if keysPressed[K_d] and playerList[1][0]+5<background.get_height():
+    if keysPressed[K_d] and playerList[1][0]+5<background.get_width()-400:
         playerList[1][0] += 5
     draw.circle(screen, (0,255,0),(400,300),5)
     for p in otherPlayers:

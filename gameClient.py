@@ -13,19 +13,21 @@ def getData():
     global playerList
     global otherPlayers
     while running:
-        MESSAGE = input('Enter text')
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((TCP_IP, TCP_PORT))
         s.send(str(playerList).encode('utf-8'))
-        data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
+        try:
+            data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
+            otherPlayers[data[0]] = data[1:]
+        except:
+            pass
         s.close()
-        if MESSAGE == 'QUIT':
-            break
-threading.Thread(target=getData)
+threading.Thread(target=getData).start()
 while running:
     for e in event.get():
         if e.type == QUIT:
             running = False
+    screen.fill(0)
     mx,my = mouse.get_pos()
     m = mouse.get_pressed()
     if m[0] == 1:

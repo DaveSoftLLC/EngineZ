@@ -65,4 +65,4 @@ def mysqlStuff(insert,user="",score="",data=""):
 
           db.close()
 mysqlStuff("hi");
-entryExists("lol");
+print(entryExists("lol"));

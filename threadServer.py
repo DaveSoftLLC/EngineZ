@@ -10,12 +10,15 @@ playerDict = {}
 def listen():
      while True:
           lis = ''
+          print("Before looking")
           conn, addr = s.accept()
+          print("After looking")
           conn.settimeout(10)
           threading.Thread(target = listenClient,args=(conn,addr)).start()
 def listenClient(conn,addr):
      global BUFFER_SIZE
      global playerDict
+     print('thread')
      while True:
           try:
                data = conn.recv(BUFFER_SIZE)

@@ -1,6 +1,6 @@
 import socket, threading
 from pygame import *
-TCP_IP = '192.227.178.111'
+TCP_IP = '10.88.214.97'
 TCP_PORT = 5005
 BUFFER_SIZE = 100
 running = True
@@ -12,16 +12,16 @@ def getData():
     global running
     global playerList
     global otherPlayers
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((TCP_IP, TCP_PORT))
     while running:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((TCP_IP, TCP_PORT))
         s.send(str(playerList).encode('utf-8'))
         data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
         try:
             otherPlayers = data
         except:
             pass
-        s.close()
+    s.close()
 threading.Thread(target=getData).start()
 while running:
     for e in event.get():
@@ -34,6 +34,7 @@ while running:
         playerList[1] = (mx,my)
     draw.circle(screen, (0,255,0), playerList[1],5)
     for p in otherPlayers:
-        draw.circle(screen, (0,255,0), otherPlayers[p][0],5)
+        if p != playerList[0]:
+            draw.circle(screen, (255,255,0), otherPlayers[p][0],5)
     display.flip()
 quit()

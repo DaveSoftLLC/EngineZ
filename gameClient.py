@@ -1,6 +1,6 @@
 import socket, threading
 from pygame import *
-TCP_IP = '10.88.214.97'
+TCP_IP = '192.227.178.111'
 TCP_PORT = 5005
 BUFFER_SIZE = 100
 running = True
@@ -21,7 +21,7 @@ def getData():
             otherPlayers = data
         except:
             pass
-    s.close()
+        s.close()
 threading.Thread(target=getData).start()
 while running:
     for e in event.get():

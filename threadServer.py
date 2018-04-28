@@ -27,7 +27,9 @@ def listenClient(conn,addr):
                          break
                     try:
                          playerList = eval(decoded)
-                         playerDict[playerList[0]] = player[1:]
+                         playerDict[playerList[0]] = playerList[1:]
+                    except:
+                         pass
                     conn.send(str(playerDict).encode('utf-8'))
                else:
                     pass

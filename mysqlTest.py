@@ -15,7 +15,7 @@ def entryExists(user):
      cur = db.cursor()
 
           # Use all the SQL you like
-     cur.execute("SELECT * FROM leaderboard WHERE playerName=" + user)
+     cur.execute("SELECT * FROM leaderboard WHERE playerName='" + user + "'")
           
           # print all the first cell of all the rows
      for row in cur.fetchall():

@@ -1,4 +1,3 @@
-<<<<<<< HEAD:socket test with opencomputers.py
 import socket,MySQLdb
 from pygame import *
 import os, threading
@@ -83,4 +82,3 @@ def listenClient(conn,addr):
                break
      conn.close()
 listen()
->>>>>>> 1f7d2d010bb1f143bce0704ea77e67df8c564c61:threadServer.py

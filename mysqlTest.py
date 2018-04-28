@@ -39,7 +39,7 @@ def mysqlStuff(insert,user="",score="",data=""):
           cur = db.cursor()
 
           # Use all the SQL you like
-          cur.execute("INSERT")
+          cur.execute("SELECT * from  leaderboard")
 
           # print all the first cell of all the rows
           for row in cur.fetchall():

@@ -1,5 +1,5 @@
 import MySQLdb
-def mysqlStuff(String data):
+def mysqlStuff(data):
      db = MySQLdb.connect(host="localhost",    # your host, usually localhost
                      user="engineZ",         # your username
                      passwd="engineZ",  # your password
@@ -14,7 +14,7 @@ def mysqlStuff(String data):
 
      # print all the first cell of all the rows
      for row in cur.fetchall():
-         print row[0]
+         print(row[0])
 
      db.close()
 mysqlStuff("hi");

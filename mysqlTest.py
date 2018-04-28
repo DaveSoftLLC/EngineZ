@@ -19,7 +19,7 @@ def entryExists(user):
           
           # print all the first cell of all the rows
      for row in cur.fetchall():
-          if(len(row[0]) < 1):
+          if(len(row[1]) < 1):
                db.close()
                return False
           else:

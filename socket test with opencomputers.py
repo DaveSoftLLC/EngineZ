@@ -1,7 +1,6 @@
 import socket
 from pygame import *
 import os, threading
-mixer.init()
 TCP_IP = '192.227.178.111'
 TCP_PORT = 5005
 BUFFER_SIZE = 100  # Normally 1024, but we want fast response

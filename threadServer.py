@@ -6,7 +6,7 @@ BUFFER_SIZE = 100  # Normally 1024, but we want fast response
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((TCP_IP, TCP_PORT))
 s.listen(1)
-def listen():
+def listen():#Looking for sockets
      while True:
           lis = ''
           conn, addr = s.accept()
@@ -28,6 +28,6 @@ def listenClient(conn,addr):
                     pass
           except:
                print('Connection Broken')
+               break
      conn.close()
 listen()
-

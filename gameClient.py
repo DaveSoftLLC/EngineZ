@@ -16,9 +16,9 @@ def getData():
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((TCP_IP, TCP_PORT))
         s.send(str(playerList).encode('utf-8'))
+        data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
         try:
-            data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
-            otherPlayers[data[0]] = data[1:]
+            otherPlayers = data
         except:
             pass
         s.close()

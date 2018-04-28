@@ -21,7 +21,7 @@ def getData():
             otherPlayers = data
         except:
             pass
-        s.close()
+    s.close()
 threading.Thread(target=getData).start()
 while running:
     for e in event.get():

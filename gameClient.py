@@ -16,9 +16,9 @@ def getData():
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((TCP_IP, TCP_PORT))
         s.send(str(playerList).encode('utf-8'))
+        data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
         try:
-            data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
-            otherPlayers[data[0]] = data[1:]
+            otherPlayers = data
         except:
             pass
         s.close()
@@ -34,6 +34,7 @@ while running:
         playerList[1] = (mx,my)
     draw.circle(screen, (0,255,0), playerList[1],5)
     for p in otherPlayers:
-        draw.circle(screen, (0,255,0), p[1],5)
+        if p != playerList[0]:
+            draw.circle(screen, (255,255,0), otherPlayers[p][0],5)
     display.flip()
 quit()

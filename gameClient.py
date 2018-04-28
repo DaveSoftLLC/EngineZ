@@ -34,6 +34,6 @@ while running:
         playerList[1] = (mx,my)
     draw.circle(screen, (0,255,0), playerList[1],5)
     for p in otherPlayers:
-        draw.circle(screen, (0,255,0), p[1],5)
+        draw.circle(screen, (0,255,0), otherPlayers[p][0],5)
     display.flip()
 quit()

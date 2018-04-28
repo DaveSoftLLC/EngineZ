@@ -1,7 +1,7 @@
 import MySQLdb
 def mysqlStuff(data):
      db = MySQLdb.connect(host="localhost",    # your host, usually localhost
-                     user="engineZ",         # your username
+                     user="mh4",         # your username
                      passwd="a",  # your password
                      db="engineZ")        # name of the data base
 

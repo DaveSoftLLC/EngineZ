@@ -15,7 +15,7 @@ def entryExists(user):
      cur = db.cursor()
 
           # Use all the SQL you like
-     cur.execute("SELECT * FROM leaderboard")
+     cur.execute("SELECT * FROM leaderboard WHERE playerName='" + user + "'")
           
           # print all the first cell of all the rows
      for row in cur.fetchall():
@@ -65,4 +65,4 @@ def mysqlStuff(insert,user="",score="",data=""):
 
           db.close()
 mysqlStuff("hi");
-entryExists("lol");
+print(entryExists("lol"));

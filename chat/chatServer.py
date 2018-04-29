@@ -1,8 +1,8 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-hostName = "127.0.0.1"
+hostName = "0.0.0.0"
 hostPort = 4443
-lastMessage = {'user': 'startupNULL', 'message': 'startupNULL'}
+lastMessage = {'user': 'startupNULL', 'message': 'startupNULL', 'messID': 0}
 class MyServer(BaseHTTPRequestHandler):
     #   GET is for clients geting the predi
     def do_GET(self):
@@ -30,7 +30,7 @@ class MyServer(BaseHTTPRequestHandler):
         print(receivedDict)
         
         if (receivedDict['command'] == "putChat"):
-            self.wfile.write(bytes(addToChat(str(receivedDict['user']),str(receivedDict['message']), "utf-8"))
+            self.wfile.write(bytes(addToChat(str(receivedDict['user']),str(receivedDict['message'])), "utf-8"))
         elif (receivedDict['command'] == "getChat"):
             self.wfile.write(bytes(returnLatestMessage(), "utf-8"))
             
@@ -43,6 +43,7 @@ def addToChat(user,message):
     global lastMessage
     lastMessage['user'] = user
     lastMessage['message'] = message
+    lastMessage['messID'] = lastMessage['messID'] + 1
 
 def returnLatestMessage():
     global lastMessage
@@ -50,6 +51,7 @@ def returnLatestMessage():
     dic['command'] = 'processResponse'
     dic['user'] = lastMessage['user']
     dic['message'] = lastMessage['message']
+    dic['messID'] = lastMessage['messID']
     returnMessage = json.dumps(dic, ensure_ascii=False)
     print(returnMessage)
     return returnMessage

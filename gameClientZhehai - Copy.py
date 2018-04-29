@@ -132,6 +132,9 @@ while running:
         #i is the name
         None
         #index is the message
+
+    playerList[2]=deg
+    playerList[3]=state
     
     display.flip()
 quit()

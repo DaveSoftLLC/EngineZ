@@ -2,13 +2,14 @@ import socket, threading
 from pygame import *
 from math import*
 from glob import*
-import copy
 
+import copy
+import requests
 
 #TCP_IP = '10.88.214.97'
 TCP_IP = '192.227.178.111'
 TCP_PORT = 5005
-BUFFER_SIZE = 400
+BUFFER_SIZE = 500
 running = True
 screen = display.set_mode((1280,800))
 
@@ -20,23 +21,21 @@ state=0
 
 #Chat image
 chat=image.load("chat/chat.png")
-#Sample Caht data
 jsonthing={"User":["Zhehai","James","Bob"],"Message":["Python","Hello","my name"]}
 scrolllimit=[jsonthing["User"][0],jsonthing["Message"][0]]
-
-
 #Text
 font.init()
 textB="" #Text that will show for typing, saving
 typing=False
 agencyfont=font.SysFont("Agency FB",25)
 health = 100
-playerList = ["James",[1300,900],deg,state,health]
+bullets = []
+playerList = ["Poop",[1300,900],deg,state,health,bullets]
 otherPlayers = {}
 background = image.load('Background/MapFinal.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
-bullets = []
 lbullet = image.load('Weapons/shellBullet.png')
+otherBullets = []
 def getData():
     global BUFFER_SIZE
     global running
@@ -46,9 +45,8 @@ def getData():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((TCP_IP, TCP_PORT))
     while running:
-        s.send((str(playerList)+'['+str(bullets)+']').encode('utf-8'))
-        data2 = s.recv(BUFFER_SIZE).decode('utf-8')
-        print(data2)
+        playerList
+        s.send(str(playerList).encode('utf-8'))
         data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
         try:
             otherPlayers = data
@@ -69,11 +67,11 @@ while running:
                 fire = True
             if e.button==1 and screen.blit(chat,(0,500)).collidepoint(mx,my):
                 typing=True
+                print("rue")
                 textB=""
             elif e.button==1 and typing:
                 typing=False
 
-<<<<<<< HEAD
             elif e.button==4 and typing and (jsonthing["User"][0]!=scrolllimit[0] and jsonthing["Message"][0]!=scrolllimit[1]):#Scroll up: move last index to the start
                 chat1=[]
                 chat1.append(jsonthing["User"][-1])
@@ -99,12 +97,6 @@ while running:
                 chat1.append(jsonthing["Message"][0])
                 print(chat1)
                 jsonthing["Message"]=copy.deepcopy(chat1)
-=======
-            elif e.button==4 and typing:#Scroll up
-                pass
-            elif e.button==5 and typing:#Scroll down
-                pass
->>>>>>> 5ec5edf110cf83229705d6569daa84af5abb6296
         elif e.type==KEYDOWN:
             if typing:
                 keys=key.get_pressed()
@@ -118,8 +110,17 @@ while running:
                         jsonthing["User"].append(playerList[0])
                         print("text")
                         jsonthing["Message"].append(textB)
+                        print(jsonthing)
+                        print("sending to server")
+                        headers = {
+                            'Content-Type': "text/plain",
+                            'Cache-Control': "nocache"
+                        }
+                        jsonstring = '{"command" : "putChat","user" : "' + playerList[0] + '","message" : "' + textB +'"}'
+                        r = requests.request("POST","http://s01.jamesxu.ca:5006",data=jsonstring,headers=headers)
                         textB=""
-                        #Send text via sockets
+                        #Send text via socketss
+                        
                 else:
                     textB+=e.unicode
     
@@ -183,20 +184,19 @@ while running:
                 deg=degrees(atan2((screen.get_width()//2-nx),(screen.get_height()//2-ny)))
                 rotated = transform.rotate(person[otherPlayers[p][2]],otherPlayers[p][1])
                 screen.blit(rotated,(nx,ny))
-        bullets += p[5]
+            otherBullets += otherPlayers[p][4]
 
     #Chat
     
     screen.blit(chat,(0,500))
     if typing==True:
-        
         chatBack=Surface((300,300),SRCALPHA)#Alpha surface
         draw.rect(chatBack,(117,117,117,100),(0,0,300,800))
         screen.blit(chatBack,(0,500))
+        chaty=550
         chatType=agencyfont.render(textB,True,((0,0,0)))
         screen.blit(chatType,(0,750))
-        chaty=550
-        for i in range (len(jsonthing["User"])):
+        for i in range(len(jsonthing["Message"])):
             #i is the name
             if chaty<700:
                 chatText=agencyfont.render(jsonthing["User"][i]+":",True,((0,0,0)))
@@ -216,11 +216,11 @@ while running:
                     screen.blit(chatText,(0,chaty))
                     chaty+=35
             
-            #index is the message
+            #index is the messag=2
     #HealthBar
     draw.rect(screen,(255,0,0),(10,10,300,30),0)
     draw.rect(screen,(0,255,0),(10,10,health*3,30),0)
-    #Shooting
+    #Shooting - 
     if fire:
         for a in range(1,6):
             bullets.append([(screen.get_width()//2,screen.get_height()//2),deg+90-(3-a)*15])
@@ -235,6 +235,17 @@ while running:
             bullets[bullets.index(b)] = [(nx,ny),b[1]]
         else:
             del bullets[bullets.index(b)]
+    for b in otherBullets:
+        if 0<b[0][0]+5*cos(b[1])<screen.get_width() and 0<b[0][1]-5*sin(b[1])<screen.get_height():
+            ox,oy = (int(b[0][0]),int(b[0][1]))
+            lb = transform.rotate(lbullet,deg)
+            nx,ny = (int(b[0][0]+5*cos(radians(b[1]))),int(b[0][1]-5*sin(radians(b[1]))))
+            shot = screen.blit(lb,(nx,ny))
+            if shot.colliderect(playerSprite):
+                health -= 10
+            otherBullets[otherBullets.index(b)] = [(nx,ny),b[1]]
+        else:
+            del otherBullets[otherBullets.index(b)]
     playerList[2]=deg
     playerList[3]=state
     display.flip()

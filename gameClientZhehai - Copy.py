@@ -6,7 +6,7 @@ from glob import*
 #TCP_IP = '10.88.214.97'
 TCP_IP = '192.227.178.111'
 TCP_PORT = 5005
-BUFFER_SIZE = 4096
+BUFFER_SIZE = 500
 running = True
 screen = display.set_mode((1280,800))
 
@@ -31,17 +31,19 @@ otherPlayers = {}
 background = image.load('Background/MapFinal.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
 lbullet = image.load('Weapons/shellBullet.png')
+data2 = ''
 def getData():
     global BUFFER_SIZE
     global running
     global playerList
     global otherPlayers
-    global bullets
+    global bullets, data2
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((TCP_IP, TCP_PORT))
     while running:
         playerList
         s.send(str(playerList).encode('utf-8'))
+        print(1)
         data2 = s.recv(BUFFER_SIZE).decode('utf-8')
         print(data2)
         data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
@@ -144,7 +146,7 @@ while running:
                 deg=degrees(atan2((screen.get_width()//2-nx),(screen.get_height()//2-ny)))
                 rotated = transform.rotate(person[otherPlayers[p][2]],otherPlayers[p][1])
                 screen.blit(rotated,(nx,ny))
-        bullets += otherPlayers[p][4]
+            bullets += otherPlayers[p][4]
 
     #Chat
     

@@ -45,6 +45,13 @@ def addToChat(user,message):
     lastMessage['message'] = message
     lastMessage['messID'] = lastMessage['messID'] + 1
 
+    dic = {}
+    dic['command'] = 'processStatus'
+    dic['status'] = 'success'
+    returnMessage = json.dumps(dic, ensure_ascii=False)
+    print(returnMessage)
+    return returnMessage
+
 def returnLatestMessage():
     global lastMessage
     dic = {}

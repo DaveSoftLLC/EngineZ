@@ -1,5 +1,6 @@
 import socket, threading
 from pygame import *
+from math import*
 #TCP_IP = '10.88.214.97'
 TCP_IP = '192.227.178.111'
 TCP_PORT = 5005
@@ -32,8 +33,6 @@ while running:
         if e.type == QUIT:
             running = False
 
-    #Starting Screen
-
 
 
 
@@ -44,7 +43,7 @@ while running:
     except:
         print(playerList)
     mx,my = mouse.get_pos()
-    m = mouse.get_pressed()
+    mb = mouse.get_pressed()
     keysPressed = key.get_pressed()
     #UP
     if keysPressed[K_w] and 300<playerList[1][1]-5:
@@ -60,8 +59,8 @@ while running:
         playerList[1][0] += 5
 
 
-        
-    screen.blit(person,(365,280))
+    print(playerList[1][0]-mx)
+    screen.blit(transform.rotate(person,(asin(playerList[1][0]-mx))),(365,280))
     for p in otherPlayers:
         if p != playerList[0]:
             draw.circle(screen, (255,255,0), otherPlayers[p][0],5)

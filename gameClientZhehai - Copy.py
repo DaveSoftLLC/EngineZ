@@ -3,12 +3,12 @@ from pygame import *
 from math import*
 from glob import*
 import copy
-
+import requests
 
 #TCP_IP = '10.88.214.97'
 TCP_IP = '192.227.178.111'
 TCP_PORT = 5005
-BUFFER_SIZE = 400
+BUFFER_SIZE = 4096
 running = True
 screen = display.set_mode((1280,800))
 
@@ -31,11 +31,11 @@ textB="" #Text that will show for typing, saving
 typing=False
 agencyfont=font.SysFont("Agency FB",25)
 health = 100
-playerList = ["Zhehai",[1300,900],deg,state,health]
+bullets = []
+playerList = ["Zhehai",[1300,900],deg,state,health,bullets]
 otherPlayers = {}
 background = image.load('Background/MapFinal.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
-bullets = []
 lbullet = image.load('Weapons/shellBullet.png')
 def getData():
     global BUFFER_SIZE
@@ -46,10 +46,11 @@ def getData():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((TCP_IP, TCP_PORT))
     while running:
-        s.send(str(playerList+bullets).encode('utf-8'))
+        s.send(str(playerList).encode('utf-8'))
         data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
         try:
             otherPlayers = data
+            #print(data)
         except:
             pass
     s.close()
@@ -71,7 +72,6 @@ while running:
             elif e.button==1 and typing:
                 typing=False
 
-<<<<<<< HEAD
             elif e.button==4 and typing and (jsonthing["User"][0]!=scrolllimit[0] and jsonthing["Message"][0]!=scrolllimit[1]):#Scroll up: move last index to the start
                 chat1=[]
                 chat1.append(jsonthing["User"][-1])
@@ -97,12 +97,10 @@ while running:
                 chat1.append(jsonthing["Message"][0])
                 print(chat1)
                 jsonthing["Message"]=copy.deepcopy(chat1)
-=======
             elif e.button==4 and typing:#Scroll up
                 pass
             elif e.button==5 and typing:#Scroll down
                 pass
->>>>>>> 5ec5edf110cf83229705d6569daa84af5abb6296
         elif e.type==KEYDOWN:
             if typing:
                 keys=key.get_pressed()
@@ -116,8 +114,17 @@ while running:
                         jsonthing["User"].append(playerList[0])
                         print("text")
                         jsonthing["Message"].append(textB)
-                        textB=""
                         #Send text via sockets
+                        jsonstring = '{"command" : "putChat","user" : "' + playerList[0] + '", "message" : "' + textB + '"}'
+                        print(jsonstring)
+                        headers = {
+                            'Content-Type': "text/plain",
+                            'Cache-Control': "no-cache",
+                        }
+                        r = requests.request("POST","http://s01.jamesxu.ca:4443", data=jsonstring, headers=headers)
+                        if(len(r.text) > 1):
+                            print("success")
+                        textB = ""
                 else:
                     textB+=e.unicode
     
@@ -181,7 +188,7 @@ while running:
                 deg=degrees(atan2((screen.get_width()//2-nx),(screen.get_height()//2-ny)))
                 rotated = transform.rotate(person[otherPlayers[p][2]],otherPlayers[p][1])
                 screen.blit(rotated,(nx,ny))
-        bullets += p[4]
+        bullets += otherPlayers[p][4]
 
     #Chat
     

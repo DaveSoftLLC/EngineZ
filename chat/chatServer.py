@@ -1,6 +1,6 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-hostName = "127.0.0.1"
+hostName = "0.0.0.0"
 hostPort = 4443
 lastMessage = {'user': 'startupNULL', 'message': 'startupNULL', 'messID': 0}
 class MyServer(BaseHTTPRequestHandler):

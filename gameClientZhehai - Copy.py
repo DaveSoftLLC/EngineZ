@@ -30,7 +30,7 @@ typing=False
 agencyfont=font.SysFont("Agency FB",25)
 health = 100
 bullets = []
-playerList = ["James2",[1300,900],deg,state,health,bullets]
+playerList = ["Poop",[1300,900],deg,state,health,bullets]
 otherPlayers = {}
 background = image.load('Background/MapFinal.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
@@ -111,10 +111,16 @@ while running:
                         print("text")
                         jsonthing["Message"].append(textB)
                         print(jsonthing)
+                        print("sending to server")
+                        headers = {
+                            'Content-Type': "text/plain",
+                            'Cache-Control': "nocache"
+                        }
+                        jsonstring = '{"command" : "putChat","user" : "' + playerList[0] + '","message" : "' + textB +'"}'
+                        r = requests.request("POST","http://s01.jamesxu.ca:5006",data=jsonstring,headers=headers)
                         textB=""
                         #Send text via sockets
-                    None
-                    #Send text via sockets
+                        
                 else:
                     textB+=e.unicode
     

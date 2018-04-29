@@ -6,9 +6,10 @@ TCP_PORT = 5005
 BUFFER_SIZE = 100
 running = True
 screen = display.set_mode((800,600))
-playerList = ["Zhehai",[400,300]]
+playerList = [input("Enter your name"),[400,300]]
 otherPlayers = {}
 background = image.load('OutcastMap.png')
+person = image.load("Default Person.png")
 def getData():
     global BUFFER_SIZE
     global running
@@ -24,11 +25,19 @@ def getData():
         except:
             pass
     s.close()
+
 threading.Thread(target=getData).start()
 while running:
     for e in event.get():
         if e.type == QUIT:
             running = False
+
+    #Starting Screen
+
+
+
+
+    #Movement and Blitting    
     try:
         portion = background.subsurface(Rect(playerList[1][0]-screen.get_width()//2,playerList[1][1]-screen.get_height()//2,800,600))
         screen.blit(portion,(0,0))
@@ -37,15 +46,22 @@ while running:
     mx,my = mouse.get_pos()
     m = mouse.get_pressed()
     keysPressed = key.get_pressed()
-    if keysPressed[K_w] and 400<playerList[1][1]-5:
+    #UP
+    if keysPressed[K_w] and 300<playerList[1][1]-5:
         playerList[1][1] -= 5
-    if keysPressed[K_s] and playerList[1][1]+5<background.get_height()-400:
+    #DOWN
+    if keysPressed[K_s] and playerList[1][1]+5<background.get_height()-300:
         playerList[1][1] += 5
-    if keysPressed[K_a] and 300<playerList[1][0]-5:
+    #LEFT
+    if keysPressed[K_a] and 400<playerList[1][0]-5:
         playerList[1][0] -= 5
-    if keysPressed[K_d] and playerList[1][0]+5<background.get_width()-300:
+    #RIGHT
+    if keysPressed[K_d] and playerList[1][0]+5<background.get_width()-400:
         playerList[1][0] += 5
-    draw.circle(screen, (0,255,0),(400,300),5)
+
+
+        
+    screen.blit(person,(365,280))
     for p in otherPlayers:
         if p != playerList[0]:
             draw.circle(screen, (255,255,0), otherPlayers[p][0],5)

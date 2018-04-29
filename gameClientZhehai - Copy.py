@@ -44,18 +44,30 @@ while running:
         if e.type == QUIT:
             running = False
 
+    
+    mx,my = mouse.get_pos()
+    mb = mouse.get_pressed()
+    keysPressed = key.get_pressed()
 
 
-
-    #Movement and Blitting    
+    #Map  
     try:
         portion = background.subsurface(Rect(playerList[1][0]-screen.get_width()//2,playerList[1][1]-screen.get_height()//2,800,600))
         screen.blit(portion,(0,0))
     except:
         print(playerList)
-    mx,my = mouse.get_pos()
-    mb = mouse.get_pressed()
-    keysPressed = key.get_pressed()
+
+
+    #Chat
+    """
+    jsonthing={"Zhehai":"is a cool guy","David":"Python","James":"Cheerios are so amazing trying to make this text rlly long so i can format it"}
+    chatBack=Surface((300,400),SRCALPHA)#Alpha surface
+    draw.rect(chatBack,(117,117,117,80),(0,0,300,400))
+    for i in jsonthing:
+        #i is the name
+        #index is the message
+    """
+    
 
     if keysPressed[K_LSHIFT]:
         speed=10

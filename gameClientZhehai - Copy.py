@@ -6,7 +6,7 @@ from glob import*
 #TCP_IP = '10.88.214.97'
 TCP_IP = '192.227.178.111'
 TCP_PORT = 5005
-BUFFER_SIZE = 200
+BUFFER_SIZE = 400
 running = True
 screen = display.set_mode((1280,800))
 
@@ -16,13 +16,16 @@ deg=0
 speed=5
 state=0
 
+#Chat image
+chat=image.load("chat/chat.png")
+
 #Text
 font.init()
 textB="" #Text that will show for typing, saving
 typing=False
 agencyfont=font.SysFont("Agency FB",40)
 
-playerList = [input("Enter your name"),[1300,900],deg,state]
+playerList = ["Zhehai",[1300,900],deg,state]
 otherPlayers = {}
 background = image.load('Background/MapFinal.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
@@ -48,6 +51,16 @@ while running:
     for e in event.get():
         if e.type == QUIT:
             running = False
+
+        elif e.type==MOUSEBUTTONDOWN:
+            if e.button==1 and screen.blit(chat,(0,500)).collidepoint(mx,my):
+                typing=True
+                print("rue")
+                textB=""
+            elif e.button==1 and typing==True:
+                typing=False
+                
+            
         elif e.type==KEYDOWN:
             if typing:
                 if keys[K_BACKSPACE]==1:
@@ -102,7 +115,7 @@ while running:
     
     
     #Person moving
-    deg=degrees(atan2((screen.get_width()//2-mx),(screen.get_height()//2-my)))
+    deg=int(degrees(atan2((screen.get_width()//2-mx),(screen.get_height()//2-my))))
     rotated = transform.rotate(person[state],deg)
     screen.blit(rotated,(screen.get_width()//2-rotated.get_width()//2,screen.get_height()//2-rotated.get_height()//2))#Around 400,300 but just modified for rotation
     
@@ -122,6 +135,26 @@ while running:
 
 
     #Chat
+<<<<<<< HEAD
+    """
+    screen.blit(chat,(0,500))
+    if typing==True:
+        jsonthing={"Zhehai":"is a cool guy","David":"Python","James":"Cheerios are so amazing trying to make this text rlly long so i can format it"}
+        chatBack=Surface((300,300),SRCALPHA)#Alpha surface
+        draw.rect(chatBack,(117,117,117,100),(0,0,300,800))
+        screen.blit(chatBack,(0,500))
+        
+        for i in jsonthing:
+            #i is the name
+            chatText=agencyfont.render(i,True,((0,0,0)))
+            
+            #index is the message
+    """
+
+
+    playerList[2]=deg
+    playerList[3]=state
+=======
     
     jsonthing={"Zhehai":"is a cool guy","David":"Python","James":"Cheerios are so amazing trying to make this text rlly long so i can format it"}
     chatBack=Surface((300,300),SRCALPHA)#Alpha surface
@@ -132,7 +165,11 @@ while running:
         #i is the name
         None
         #index is the message
+
+    playerList[2]=deg
+    playerList[3]=state
     
+>>>>>>> b48563e27135130b108d36df3ca92e33364588c0
     display.flip()
 quit()
 

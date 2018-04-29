@@ -1,8 +1,8 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-hostName = "0.0.0.0"
+hostName = "127.0.0.1"
 hostPort = 4443
-lastMessage = {'user': 'startupNULL', 'message': 'startupNULL', 'messID': 0}
+lastMessage = {'user': 'startupNULL', 'message': 'startupNULL'}
 class MyServer(BaseHTTPRequestHandler):
     #   GET is for clients geting the predi
     def do_GET(self):
@@ -43,7 +43,6 @@ def addToChat(user,message):
     global lastMessage
     lastMessage['user'] = user
     lastMessage['message'] = message
-    lastMessage['messID'] = lastMessage['messID'] + 1
 
 def returnLatestMessage():
     global lastMessage
@@ -51,7 +50,6 @@ def returnLatestMessage():
     dic['command'] = 'processResponse'
     dic['user'] = lastMessage['user']
     dic['message'] = lastMessage['message']
-    dic['messID'] = lastMessage['messID']
     returnMessage = json.dumps(dic, ensure_ascii=False)
     print(returnMessage)
     return returnMessage

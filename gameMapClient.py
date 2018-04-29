@@ -50,8 +50,8 @@ while running:
             px,py = playerList[1]
             nx,ny = otherPlayers[p][0]
             if px-screen.get_width()//2<nx<px+screen.get_width() and py-screen.get_height()//2<ny<py+screen.get_height()//2:
-                nx = px-nx
-                ny = py-ny
+                nx = nx-px+screen.get_width()//2
+                ny = ny-py+screen.get_height()//2
                 draw.circle(screen, (255,255,0), (nx,ny),5)
     display.flip()
 quit()

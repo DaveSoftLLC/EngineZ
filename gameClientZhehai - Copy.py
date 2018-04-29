@@ -6,7 +6,7 @@ from glob import*
 #TCP_IP = '10.88.214.97'
 TCP_IP = '192.227.178.111'
 TCP_PORT = 5005
-BUFFER_SIZE = 100
+BUFFER_SIZE = 200
 running = True
 screen = display.set_mode((1280,800))
 
@@ -23,10 +23,10 @@ typing=False
 agencyfont=font.SysFont("Agency FB",40)
 
 playerList = [input("Enter your name"),[1300,900],deg,state]
-otherPlayers = []
+otherPlayers = {}
 background = image.load('Background/MapFinal.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
-print(person)
+
 def getData():
     global BUFFER_SIZE
     global running
@@ -36,6 +36,7 @@ def getData():
     s.connect((TCP_IP, TCP_PORT))
     while running:
         s.send(str(playerList).encode('utf-8'))
+        print(data)
         data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
         try:
             otherPlayers = data
@@ -117,15 +118,17 @@ while running:
                 nx = nx-px +screen.get_width()//2 #gets the enemy position in your screen
                 ny = ny-py +screen.get_height()//2
                 deg=degrees(atan2((screen.get_width()//2-nx),(screen.get_height()//2-ny)))
-                rotated = transform.rotate(otherPlayers[p][3],otherPlayers[p][2])
+                rotated = transform.rotate(person[otherPlayers[p][3]],otherPlayers[p][2])
                 screen.blit(rotated,(screen.get_width()//2-rotated.get_width()//2,screen.get_height()//2-rotated.get_height()//2))
 
 
     #Chat
     
     jsonthing={"Zhehai":"is a cool guy","David":"Python","James":"Cheerios are so amazing trying to make this text rlly long so i can format it"}
-    chatBack=Surface((300,400),SRCALPHA)#Alpha surface
-    draw.rect(chatBack,(117,117,117,80),(0,0,300,400))
+    chatBack=Surface((300,300),SRCALPHA)#Alpha surface
+    draw.rect(chatBack,(117,117,117,100),(0,0,300,800))
+    screen.blit(chatBack,(0,500))
+    
     for i in jsonthing:
         #i is the name
         None

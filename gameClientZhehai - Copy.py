@@ -135,6 +135,7 @@ while running:
 
 
     #Chat
+<<<<<<< HEAD
     """
     screen.blit(chat,(0,500))
     if typing==True:
@@ -153,6 +154,22 @@ while running:
 
     playerList[2]=deg
     playerList[3]=state
+=======
+    
+    jsonthing={"Zhehai":"is a cool guy","David":"Python","James":"Cheerios are so amazing trying to make this text rlly long so i can format it"}
+    chatBack=Surface((300,300),SRCALPHA)#Alpha surface
+    draw.rect(chatBack,(117,117,117,100),(0,0,300,800))
+    screen.blit(chatBack,(0,500))
+    
+    for i in jsonthing:
+        #i is the name
+        None
+        #index is the message
+
+    playerList[2]=deg
+    playerList[3]=state
+    
+>>>>>>> b48563e27135130b108d36df3ca92e33364588c0
     display.flip()
 quit()
 

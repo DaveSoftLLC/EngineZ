@@ -16,6 +16,11 @@ deg=0
 speed=5
 state=0
 
+#Text
+font.init()
+textB="" #Text that will show for typing, saving
+typing=False
+agencyfont=font.SysFont("Agency FB",40)
 
 playerList = [input("Enter your name"),[1300,900],deg,state]
 otherPlayers = []
@@ -43,11 +48,20 @@ while running:
     for e in event.get():
         if e.type == QUIT:
             running = False
-
+        elif e.type==KEYDOWN:
+            if typing:
+                if keys[K_BACKSPACE]==1:
+                    textB=textB[:-1]
+                elif keys[K_RETURN]==1:
+                    #Display Text
+                    None
+                    #Send text via sockets
+                else:
+                    textB+=e.unicode
     
     mx,my = mouse.get_pos()
     mb = mouse.get_pressed()
-    keysPressed = key.get_pressed()
+    keys = key.get_pressed()
 
 
     #Map  
@@ -56,41 +70,33 @@ while running:
         screen.blit(portion,(0,0))
     except:
         print(playerList)
-
-
-    #Chat
-    """
-    jsonthing={"Zhehai":"is a cool guy","David":"Python","James":"Cheerios are so amazing trying to make this text rlly long so i can format it"}
-    chatBack=Surface((300,400),SRCALPHA)#Alpha surface
-    draw.rect(chatBack,(117,117,117,80),(0,0,300,400))
-    for i in jsonthing:
-        #i is the name
-        #index is the message
-    """
     
+    #Movement
 
-    if keysPressed[K_LSHIFT]:
+    #Sprint
+    if keys[K_LSHIFT]:
         speed=10
         state=1
     else:
         speed=5
 
+    #If shooting
     if mb[0]==1:
         state=2
         speed=5
-    elif keysPressed[K_LSHIFT]!=True:
+    elif keys[K_LSHIFT]!=True:
         state=0
     #UP
-    if keysPressed[K_w] and screen.get_height()//2<playerList[1][1]-speed:
+    if keys[K_w] and screen.get_height()//2<playerList[1][1]-speed:
         playerList[1][1] -= speed
     #DOWN
-    if keysPressed[K_s] and playerList[1][1]+speed<background.get_height()-screen.get_height()//2:
+    if keys[K_s] and playerList[1][1]+speed<background.get_height()-screen.get_height()//2:
         playerList[1][1] += speed
     #LEFT
-    if keysPressed[K_a] and screen.get_width()//2<playerList[1][0]-speed:
+    if keys[K_a] and screen.get_width()//2<playerList[1][0]-speed:
         playerList[1][0] -= speed
     #RIGHT
-    if keysPressed[K_d] and playerList[1][0]+speed<background.get_width()-screen.get_width()//2:
+    if keys[K_d] and playerList[1][0]+speed<background.get_width()-screen.get_width()//2:
         playerList[1][0] += speed
 
     
@@ -113,6 +119,18 @@ while running:
                 deg=degrees(atan2((screen.get_width()//2-nx),(screen.get_height()//2-ny)))
                 rotated = transform.rotate(otherPlayers[p][3],otherPlayers[p][2])
                 screen.blit(rotated,(screen.get_width()//2-rotated.get_width()//2,screen.get_height()//2-rotated.get_height()//2))
+
+
+    #Chat
+    
+    jsonthing={"Zhehai":"is a cool guy","David":"Python","James":"Cheerios are so amazing trying to make this text rlly long so i can format it"}
+    chatBack=Surface((300,400),SRCALPHA)#Alpha surface
+    draw.rect(chatBack,(117,117,117,80),(0,0,300,400))
+    for i in jsonthing:
+        #i is the name
+        None
+        #index is the message
+    
     display.flip()
 quit()
 

@@ -4,7 +4,7 @@ from math import*
 #TCP_IP = '10.88.214.97'
 TCP_IP = '192.227.178.111'
 TCP_PORT = 5005
-BUFFER_SIZE = 100
+BUFFER_SIZE = 200
 running = True
 screen = display.set_mode((800,600))
 otherPlayers = {}

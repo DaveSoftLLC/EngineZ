@@ -106,20 +106,19 @@ while running:
                 elif keys[K_RETURN]==1:
                     #Display Text
                     if textB!="":
+                        #Reset list4
+                        
+
                         
                         jsonthing["User"].append(playerList[0])
                         print("text")
                         jsonthing["Message"].append(textB)
                         print(jsonthing)
-                        print("sending to server")
-                        headers = {
-                            'Content-Type': "text/plain",
-                            'Cache-Control': "nocache"
-                        }
-                        jsonstring = '{"command" : "putChat","user" : "' + playerList[0] + '","message" : "' + textB +'"}'
-                        r = requests.request("POST","http://s01.jamesxu.ca:5006",data=jsonstring,headers=headers)
                         textB=""
-                        #Send text via sockets
+<<<<<<< HEAD
+                        #Send text via socketss
+=======
+>>>>>>> 80e959bc2492eaca4a3602e70ffe487768a84ad9
                         
                 else:
                     textB+=e.unicode

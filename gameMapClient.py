@@ -38,15 +38,20 @@ while running:
     keysPressed = key.get_pressed()
     if keysPressed[K_w] and 300<playerList[1][1]-5:
         playerList[1][1] -= 5
-    if keysPressed[K_s] and playerList[1][1]+5<background.get_height()-300:
+    if keysPressed[K_s] and playerList[1][1]+5<background.get_height()-screen.get_height()//2:
         playerList[1][1] += 5
     if keysPressed[K_a] and 400<playerList[1][0]-5:
         playerList[1][0] -= 5
-    if keysPressed[K_d] and playerList[1][0]+5<background.get_width()-400:
+    if keysPressed[K_d] and playerList[1][0]+5<background.get_width()-screen.get_width()//2:
         playerList[1][0] += 5
     draw.circle(screen, (0,255,0),(400,300),5)
     for p in otherPlayers:
         if p != playerList[0]:
-            draw.circle(screen, (255,255,0), otherPlayers[p][0],5)
+            px,py = playerList[1]
+            nx,ny = otherPlayers[p][0]
+            if px-screen.get_width()//2<nx<px+screen.get_width() and py-screen.get_height()//2<ny<py+screen.get_height()//2:
+                nx = px-nx
+                ny = py-ny
+                draw.circle(screen, (255,255,0), (nx,ny),5)
     display.flip()
 quit()

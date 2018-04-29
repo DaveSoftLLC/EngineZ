@@ -116,7 +116,10 @@ while running:
                         print(jsonthing)
                         textB=""
 <<<<<<< HEAD
+<<<<<<< HEAD
                         #Send text via socketss
+=======
+>>>>>>> 80e959bc2492eaca4a3602e70ffe487768a84ad9
 =======
 >>>>>>> 80e959bc2492eaca4a3602e70ffe487768a84ad9
                         

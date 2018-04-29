@@ -6,7 +6,7 @@ from glob import*
 #TCP_IP = '10.88.214.97'
 TCP_IP = '192.227.178.111'
 TCP_PORT = 5005
-BUFFER_SIZE = 400
+BUFFER_SIZE = 4096
 running = True
 screen = display.set_mode((1280,800))
 
@@ -144,7 +144,7 @@ while running:
                 deg=degrees(atan2((screen.get_width()//2-nx),(screen.get_height()//2-ny)))
                 rotated = transform.rotate(person[otherPlayers[p][2]],otherPlayers[p][1])
                 screen.blit(rotated,(nx,ny))
-        bullets += p[5]
+        bullets += otherPlayers[p][4]
 
     #Chat
     

@@ -7,7 +7,7 @@ TCP_PORT = 5005
 BUFFER_SIZE = 100
 running = True
 screen = display.set_mode((800,600))
-playerList = [input("Enter your name"),[400,300]]
+playerList = [input("Enter your name"),[400,300],deg]
 otherPlayers = {}
 background = image.load('OutcastMap.png')
 person = image.load("Default Person.png")
@@ -57,9 +57,13 @@ while running:
     #RIGHT
     if keysPressed[K_d] and playerList[1][0]+5<background.get_width()-400:
         playerList[1][0] += 5
-
-    length=(playerList[1][0]-mx)/(((playerList[1][0]-mx)**2+(playerList[1][1]-my)**2)**(1/2))
-    screen.blit(transform.rotate(person,(degrees(acos(length)))),(365,280))
+    
+    length=(400-mx),(300-my)
+    deg = atan2(length[0],length[1])
+    length=degrees(deg)
+    rotated = transform.rotate(person,(length))
+    screen.blit(rotated,(screen.get_width()//2-rotated.get_width()//2,screen.get_height()//2-rotated.get_height()//2))
+    #draw.circle(screen, (255,255,0), playerList[1],5)
     for p in otherPlayers:
         if p != playerList[0]:
             px,py = playerList[1]

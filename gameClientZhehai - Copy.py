@@ -175,7 +175,7 @@ while running:
                     screen.blit(chatText,(0,chaty))
                     chaty+=35
             
-            #index is the message
+            #index is the messag=
     #HealthBar
     draw.rect(screen,(255,0,0),(10,10,300,30),0)
     draw.rect(screen,(0,255,0),(10,10,health*3,30),0)

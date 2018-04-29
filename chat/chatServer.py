@@ -30,7 +30,7 @@ class MyServer(BaseHTTPRequestHandler):
         print(receivedDict)
         
         if (receivedDict['command'] == "putChat"):
-            self.wfile.write(bytes(addToChat(str(receivedDict['user']),str(receivedDict['message'])), "utf-8"))
+            self.wfile.write(bytes(str(addToChat(receivedDict['user'],receivedDict['message'])), "utf-8"))
         elif (receivedDict['command'] == "getChat"):
             self.wfile.write(bytes(returnLatestMessage(), "utf-8"))
             

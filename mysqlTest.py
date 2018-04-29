@@ -1,12 +1,12 @@
 import MySQLdb
+from passlib.hash import pbkdf2_sha256
 class JavaIsBetter:
-     def __init__():
+     def __init__(self):
           self.hosttxt = "s01.jamesxu.ca"
           self.usertxt = "mh4"
           self.passwdtxt = "a"
           self.dbname = "engineZ"
-     def entryExists(user):
-          global self.hosttxt,self.usertxt,self.passwdtxt,self.dbname
+     def entryExists(self,user):
           db = MySQLdb.connect(host=self.hosttxt,    # your host, usually localhost
                           user=self.usertxt,         # your username
                           passwd=self.passwdtxt,  # your password
@@ -25,8 +25,7 @@ class JavaIsBetter:
           else:
                return True
           
-     def mysqlUpdate(user,score=None,data=""):
-          global self.hosttxt,self.usertxt,self.passwdtxt,self.dbname
+     def mysqlUpdate(self,user,score=None,data=""):
           db = MySQLdb.connect(host=self.hosttxt,    # your host, usually localhost
                           user=self.usertxt,         # your username
                           passwd=self.passwdtxt,  # your password
@@ -51,8 +50,7 @@ class JavaIsBetter:
           db.commit()
           db.close()
           
-     def mysqlInsert(user,data,score=None):
-          global self.hosttxt,self.usertxt,self.passwdtxt,self.dbname
+     def mysqlInsert(self,user,data,score=None):
           db = MySQLdb.connect(host=self.hosttxt,    # your host, usually localhost
                           user=self.usertxt,         # your username
                           passwd=self.passwdtxt,  # your password
@@ -71,5 +69,25 @@ class JavaIsBetter:
               
           db.commit()
           db.close()
+
+     def userAuthenticated(self,user,password):
+          db = MySQLdb.connect(host=self.hosttxt,    # your host, usually localhost
+                          user=self.usertxt,         # your username
+                          passwd=self.passwdtxt,  # your password
+                          db=self.dbname)        # name of the data base
+
+          # you must create a Cursor object. It will let
+          #  you execute all the queries you need
+          cur = db.cursor()
           
-     print(entryExists("lol"));
+          # Use all the SQL you like
+          sqlcommand = "SELECT password FROM authentication WHERE playerName='" + user + "'"
+          cur.execute(sqlcommand)
+               
+          # print all the first cell of all the rows
+          if(cur.rowcount < 1):
+               return False
+          else:
+               for row in cur.fetchall():
+                      storedHash = row[0]
+                      return pbkdf2_sha256.verify(givenHash, storedHash);

@@ -30,11 +30,17 @@ typing=False
 agencyfont=font.SysFont("Agency FB",25)
 health = 100
 bullets = []
+playerList = ["James22",[1300,900],deg,state,health,bullets]
 playerList = ["James2",[1300,900],deg,state,health,bullets]
 otherPlayers = {}
 background = image.load('Background/MapFinal.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
 lbullet = image.load('Weapons/shellBullet.png')
+<<<<<<< HEAD
+=======
+otherBullets = []
+data2 = ''
+>>>>>>> 120b8cfaf20abd8baa24f7ed1747916a765b4555
 def getData():
     global BUFFER_SIZE
     global running
@@ -179,7 +185,11 @@ while running:
                 deg=degrees(atan2((screen.get_width()//2-nx),(screen.get_height()//2-ny)))
                 rotated = transform.rotate(person[otherPlayers[p][2]],otherPlayers[p][1])
                 screen.blit(rotated,(nx,ny))
+<<<<<<< HEAD
         bullets += otherPlayers[p][4]
+=======
+            OtherBullets += otherPlayers[p][4]
+>>>>>>> 120b8cfaf20abd8baa24f7ed1747916a765b4555
 
     #Chat
     
@@ -230,6 +240,17 @@ while running:
             bullets[bullets.index(b)] = [(nx,ny),b[1]]
         else:
             del bullets[bullets.index(b)]
+    for b in OtherBullets:
+        if 0<b[0][0]+5*cos(b[1])<screen.get_width() and 0<b[0][1]-5*sin(b[1])<screen.get_height():
+            ox,oy = (int(b[0][0]),int(b[0][1]))
+            lb = transform.rotate(lbullet,deg)
+            nx,ny = (int(b[0][0]+5*cos(radians(b[1]))),int(b[0][1]-5*sin(radians(b[1]))))
+            shot = screen.blit(lb,(nx,ny))
+            if shot.colliderect(playerSprite):
+                health -= 10
+            OtherBullets[OtherBullets.index(b)] = [(nx,ny),b[1]]
+        else:
+            del OtherBullets[OtherBullets.index(b)]  
     playerList[2]=deg
     playerList[3]=state
     display.flip()

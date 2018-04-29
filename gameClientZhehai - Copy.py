@@ -8,7 +8,7 @@ TCP_IP = '192.227.178.111'
 TCP_PORT = 5005
 BUFFER_SIZE = 100
 running = True
-screen = display.set_mode((800,600))
+screen = display.set_mode((1280,800))
 
 #Preliminary variables
 
@@ -17,9 +17,9 @@ speed=5
 state=0
 
 
-playerList = [input("Enter your name"),[400,300],deg,state]
+playerList = [input("Enter your name"),[1300,900],deg,state]
 otherPlayers = []
-background = image.load('OutcastMap.png')
+background = image.load('Background/MapFinal.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
 print(person)
 def getData():
@@ -52,7 +52,7 @@ while running:
 
     #Map  
     try:
-        portion = background.subsurface(Rect(playerList[1][0]-screen.get_width()//2,playerList[1][1]-screen.get_height()//2,800,600))
+        portion = background.subsurface(Rect(playerList[1][0]-screen.get_width()//2,playerList[1][1]-screen.get_height()//2,screen.get_width(),screen.get_height()))
         screen.blit(portion,(0,0))
     except:
         print(playerList)
@@ -81,13 +81,13 @@ while running:
     elif keysPressed[K_LSHIFT]!=True:
         state=0
     #UP
-    if keysPressed[K_w] and 300<playerList[1][1]-speed:
+    if keysPressed[K_w] and screen.get_height()//2<playerList[1][1]-speed:
         playerList[1][1] -= speed
     #DOWN
     if keysPressed[K_s] and playerList[1][1]+speed<background.get_height()-screen.get_height()//2:
         playerList[1][1] += speed
     #LEFT
-    if keysPressed[K_a] and 400<playerList[1][0]-speed:
+    if keysPressed[K_a] and screen.get_width()//2<playerList[1][0]-speed:
         playerList[1][0] -= speed
     #RIGHT
     if keysPressed[K_d] and playerList[1][0]+speed<background.get_width()-screen.get_width()//2:

@@ -36,6 +36,11 @@ while running:
     draw.circle(screen, (0,255,0), playerList[1],5)
     for p in otherPlayers:
         if p != playerList[0]:
-            draw.circle(screen, (255,255,0), otherPlayers[p][0],5)
+            px,py = playerList[1]
+            nx,ny = otherPlayers[p][0]
+            if px-screen.get_width()//2<nx<px+screen.get_width() and py-screen.get_height()//2<ny<py+screen.get_height()//2:
+                nx = nx-px +400
+                ny = ny-py +300
+                draw.circle(screen, (255,255,0), (nx,ny),5)
     display.flip()
 quit()

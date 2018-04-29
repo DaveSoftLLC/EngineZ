@@ -58,12 +58,16 @@ while running:
     if keysPressed[K_d] and playerList[1][0]+5<background.get_width()-400:
         playerList[1][0] += 5
 
-
-    print(playerList[1][0]-mx)
-    screen.blit(transform.rotate(person,(asin(playerList[1][0]-mx))),(365,280))
+    length=(playerList[1][0]-mx)/(((playerList[1][0]-mx)**2+(playerList[1][1]-my)**2)**(1/2))
+    screen.blit(transform.rotate(person,(degrees(acos(length)))),(365,280))
     for p in otherPlayers:
         if p != playerList[0]:
-            draw.circle(screen, (255,255,0), otherPlayers[p][0],5)
+            px,py = playerList[1]
+            nx,ny = otherPlayers[p][0]
+            if px-screen.get_width()//2<nx<px+screen.get_width() and py-screen.get_height()//2<ny<py+screen.get_height()//2:
+                nx = nx-px +400
+                ny = ny-py +300
+                draw.circle(screen, (255,255,0), (nx,ny),5)
     display.flip()
 quit()
 

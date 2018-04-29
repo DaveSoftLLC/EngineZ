@@ -35,6 +35,7 @@ otherPlayers = {}
 background = image.load('Background/MapFinal.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
 lbullet = image.load('Weapons/shellBullet.png')
+otherBullets = []
 def getData():
     global BUFFER_SIZE
     global running
@@ -46,8 +47,6 @@ def getData():
     while running:
         playerList
         s.send(str(playerList).encode('utf-8'))
-        data2 = s.recv(BUFFER_SIZE).decode('utf-8')
-        print(data2)
         data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
         try:
             otherPlayers = data
@@ -179,7 +178,7 @@ while running:
                 deg=degrees(atan2((screen.get_width()//2-nx),(screen.get_height()//2-ny)))
                 rotated = transform.rotate(person[otherPlayers[p][2]],otherPlayers[p][1])
                 screen.blit(rotated,(nx,ny))
-        bullets += otherPlayers[p][4]
+        otherBullets += otherPlayers[p][4]
 
     #Chat
     
@@ -230,6 +229,17 @@ while running:
             bullets[bullets.index(b)] = [(nx,ny),b[1]]
         else:
             del bullets[bullets.index(b)]
+    for b in otherBullets:
+        if 0<b[0][0]+5*cos(b[1])<screen.get_width() and 0<b[0][1]-5*sin(b[1])<screen.get_height():
+            ox,oy = (int(b[0][0]),int(b[0][1]))
+            lb = transform.rotate(lbullet,deg)
+            nx,ny = (int(b[0][0]+5*cos(radians(b[1]))),int(b[0][1]-5*sin(radians(b[1]))))
+            shot = screen.blit(lb,(nx,ny))
+            if shot.colliderect(playerSprite):
+                health -= 10
+            otherBullets[otherBullets.index(b)] = [(nx,ny),b[1]]
+        else:
+            del otherBullets[otherBullets.index(b)]
     playerList[2]=deg
     playerList[3]=state
     display.flip()

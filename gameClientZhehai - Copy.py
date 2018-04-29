@@ -43,9 +43,6 @@ def getData():
     while running:
         playerList
         s.send(str(playerList).encode('utf-8'))
-        print(1)
-        data2 = s.recv(BUFFER_SIZE).decode('utf-8')
-        print(data2)
         data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
         try:
             otherPlayers = data

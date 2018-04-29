@@ -43,7 +43,7 @@ def addToChat(user,message):
     global lastMessage
     lastMessage['user'] = user
     lastMessage['message'] = message
-    lastMessage['messID'] = lastMessage['messID'] +=1
+    lastMessage['messID'] = lastMessage['messID'] + 1
 
 def returnLatestMessage():
     global lastMessage

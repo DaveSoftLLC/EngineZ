@@ -23,7 +23,7 @@ chat=image.load("chat/chat.png")
 font.init()
 textB="" #Text that will show for typing, saving
 typing=False
-agencyfont=font.SysFont("Agency FB",40)
+agencyfont=font.SysFont("Agency FB",25)
 
 playerList = ["Zhehai",[1300,900],deg,state]
 otherPlayers = {}
@@ -57,9 +57,12 @@ while running:
                 typing=True
                 print("rue")
                 textB=""
-            elif e.button==1 and typing==True:
+            elif e.button==1 and typing:
                 typing=False
-                
+
+            elif e.button==4 and typing:#Scroll up
+
+            elif e.button==5 and typing:#Scroll down
             
         elif e.type==KEYDOWN:
             if typing:
@@ -135,41 +138,40 @@ while running:
 
 
     #Chat
-<<<<<<< HEAD
-    """
+    
     screen.blit(chat,(0,500))
     if typing==True:
         jsonthing={"Zhehai":"is a cool guy","David":"Python","James":"Cheerios are so amazing trying to make this text rlly long so i can format it"}
         chatBack=Surface((300,300),SRCALPHA)#Alpha surface
         draw.rect(chatBack,(117,117,117,100),(0,0,300,800))
         screen.blit(chatBack,(0,500))
-        
+        chaty=550
         for i in jsonthing:
             #i is the name
-            chatText=agencyfont.render(i,True,((0,0,0)))
+            if chaty<800:
+                chatText=agencyfont.render(i+":",True,((0,0,0)))
+                screen.blit(chatText,(0,chaty))
+                chaty+=25
+            if chaty<800:#character limit is 71
+                if len(jsonthing[i])>71:
+                    chatText=agencyfont.render(jsonthing[i][:39],True,((0,0,0)))
+                    screen.blit(chatText,(0,chaty))
+                    chaty+=25
+                    if chaty<800:
+                        chatText=agencyfont.render(jsonthing[i][39:],True,((0,0,0)))
+                        screen.blit(chatText,(0,chaty))
+                        chaty+=35
+                else:
+                    chatText=agencyfont.render(jsonthing[i],True,((0,0,0)))
+                    screen.blit(chatText,(0,chaty))
+                    chaty+=35
             
             #index is the message
-    """
+        
 
 
     playerList[2]=deg
     playerList[3]=state
-=======
-    
-    jsonthing={"Zhehai":"is a cool guy","David":"Python","James":"Cheerios are so amazing trying to make this text rlly long so i can format it"}
-    chatBack=Surface((300,300),SRCALPHA)#Alpha surface
-    draw.rect(chatBack,(117,117,117,100),(0,0,300,800))
-    screen.blit(chatBack,(0,500))
-    
-    for i in jsonthing:
-        #i is the name
-        None
-        #index is the message
-
-    playerList[2]=deg
-    playerList[3]=state
-    
->>>>>>> b48563e27135130b108d36df3ca92e33364588c0
     display.flip()
 quit()
 

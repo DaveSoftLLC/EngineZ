@@ -3,10 +3,13 @@ from pygame import *
 from math import*
 from glob import*
 
+import copy
+import requests
+
 #TCP_IP = '10.88.214.97'
 TCP_IP = '192.227.178.111'
 TCP_PORT = 5005
-BUFFER_SIZE = 4096
+BUFFER_SIZE = 500
 running = True
 screen = display.set_mode((1280,800))
 
@@ -18,7 +21,8 @@ state=0
 
 #Chat image
 chat=image.load("chat/chat.png")
-
+jsonthing={"User":["Zhehai","James","Bob"],"Message":["Python","Hello","my name"]}
+scrolllimit=[jsonthing["User"][0],jsonthing["Message"][0]]
 #Text
 font.init()
 textB="" #Text that will show for typing, saving
@@ -26,7 +30,7 @@ typing=False
 agencyfont=font.SysFont("Agency FB",25)
 health = 100
 bullets = []
-playerList = ["James",[1300,900],deg,state,health,bullets]
+playerList = ["James2",[1300,900],deg,state,health,bullets]
 otherPlayers = {}
 background = image.load('Background/MapFinal.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
@@ -69,16 +73,46 @@ while running:
             elif e.button==1 and typing:
                 typing=False
 
-            elif e.button==4 and typing:#Scroll up
-                pass
-            elif e.button==5 and typing:#Scroll down
-                pass
+            elif e.button==4 and typing and (jsonthing["User"][0]!=scrolllimit[0] and jsonthing["Message"][0]!=scrolllimit[1]):#Scroll up: move last index to the start
+                chat1=[]
+                chat1.append(jsonthing["User"][-1])
+                for i in range(len(jsonthing["User"])-1):
+                    chat1.append(jsonthing["User"][i])
+                jsonthing["User"]=copy.deepcopy(chat1)
+
+                chat1=[]
+                chat1.append(jsonthing["Message"][-1])
+                for i in range(len(jsonthing["Message"])-1):
+                    chat1.append(jsonthing["Message"][i])
+                jsonthing["Message"]=copy.deepcopy(chat1)
+            elif e.button==5 and typing and len(jsonthing["User"])!=3 and (jsonthing["Message"][3]==scrolllimit[1] and jsonthing["User"][3]==scrolllimit[0])==False:#Scroll down: move first index to last
+                chat1=[]
+                for i in range(1,len(jsonthing["User"])):
+                    chat1.append(jsonthing["User"][i])
+                chat1.append(jsonthing["User"][0])
+                jsonthing["User"]=copy.deepcopy(chat1)
+
+                chat1=[]
+                for i in range(1,len(jsonthing["Message"])):
+                    chat1.append(jsonthing["Message"][i])
+                chat1.append(jsonthing["Message"][0])
+                print(chat1)
+                jsonthing["Message"]=copy.deepcopy(chat1)
         elif e.type==KEYDOWN:
             if typing:
+                keys=key.get_pressed()
                 if keys[K_BACKSPACE]==1:
                     textB=textB[:-1]
+                    print("hi")
                 elif keys[K_RETURN]==1:
                     #Display Text
+                    if textB!="":
+                        
+                        jsonthing["User"].append(playerList[0])
+                        print("text")
+                        jsonthing["Message"].append(textB)
+                        textB=""
+                        #Send text via sockets
                     None
                     #Send text via sockets
                 else:
@@ -150,28 +184,29 @@ while running:
     
     screen.blit(chat,(0,500))
     if typing==True:
-        jsonthing={"Zhehai":"is a cool guy","David":"Python","James":"Cheerios are so amazing trying to make this text rlly long so i can format it"}
         chatBack=Surface((300,300),SRCALPHA)#Alpha surface
         draw.rect(chatBack,(117,117,117,100),(0,0,300,800))
         screen.blit(chatBack,(0,500))
         chaty=550
-        for i in jsonthing:
+        chatType=agencyfont.render(textB,True,((0,0,0)))
+        screen.blit(chatType,(0,750))
+        for i in range(len(jsonthing["Message"])):
             #i is the name
-            if chaty<800:
-                chatText=agencyfont.render(i+":",True,((0,0,0)))
+            if chaty<700:
+                chatText=agencyfont.render(jsonthing["User"][i]+":",True,((0,0,0)))
                 screen.blit(chatText,(0,chaty))
                 chaty+=25
-            if chaty<800:#character limit is 71
-                if len(jsonthing[i])>71:
-                    chatText=agencyfont.render(jsonthing[i][:39],True,((0,0,0)))
+            if chaty<700:#character limit is 71
+                if len(jsonthing["Message"][i])>71:
+                    chatText=agencyfont.render(jsonthing["Message"][i][:39],True,((0,0,0)))
                     screen.blit(chatText,(0,chaty))
                     chaty+=25
-                    if chaty<800:
-                        chatText=agencyfont.render(jsonthing[i][39:],True,((0,0,0)))
+                    if chaty<700:
+                        chatText=agencyfont.render(jsonthing["Message"][i][39:],True,((0,0,0)))
                         screen.blit(chatText,(0,chaty))
                         chaty+=35
                 else:
-                    chatText=agencyfont.render(jsonthing[i],True,((0,0,0)))
+                    chatText=agencyfont.render(jsonthing["Message"][i],True,((0,0,0)))
                     screen.blit(chatText,(0,chaty))
                     chaty+=35
             

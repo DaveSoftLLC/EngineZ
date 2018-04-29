@@ -178,7 +178,7 @@ while running:
                 deg=degrees(atan2((screen.get_width()//2-nx),(screen.get_height()//2-ny)))
                 rotated = transform.rotate(person[otherPlayers[p][2]],otherPlayers[p][1])
                 screen.blit(rotated,(nx,ny))
-        otherBullets += otherPlayers[p][4]
+            otherBullets += otherPlayers[p][4]
 
     #Chat
     

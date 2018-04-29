@@ -2,11 +2,6 @@ import socket, threading
 from pygame import *
 from math import*
 from glob import*
-<<<<<<< HEAD
-import copy
-import requests
-=======
->>>>>>> 80b09e4769698c19093a79aaa63ed434a5b5622a
 
 #TCP_IP = '10.88.214.97'
 TCP_IP = '192.227.178.111'
@@ -30,17 +25,8 @@ textB="" #Text that will show for typing, saving
 typing=False
 agencyfont=font.SysFont("Agency FB",25)
 health = 100
-<<<<<<< HEAD
-<<<<<<< HEAD
-bullets = []
-playerList = ["Zhehai",[1300,900],deg,state,health,bullets]
-=======
-playerList = ["James",[1300,900],deg,state,health]
->>>>>>> 19ad236425a30dac00d73d561dbafdb4bd426c83
-=======
 bullets = []
 playerList = ["James",[1300,900],deg,state,health,bullets]
->>>>>>> 80b09e4769698c19093a79aaa63ed434a5b5622a
 otherPlayers = {}
 background = image.load('Background/MapFinal.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
@@ -54,22 +40,13 @@ def getData():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((TCP_IP, TCP_PORT))
     while running:
-<<<<<<< HEAD
-<<<<<<< HEAD
-        s.send(str(playerList).encode('utf-8'))
-=======
-        s.send((str(playerList)+'['+str(bullets)+']').encode('utf-8'))
-=======
         playerList
         s.send(str(playerList).encode('utf-8'))
->>>>>>> 80b09e4769698c19093a79aaa63ed434a5b5622a
         data2 = s.recv(BUFFER_SIZE).decode('utf-8')
         print(data2)
->>>>>>> 19ad236425a30dac00d73d561dbafdb4bd426c83
         data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
         try:
             otherPlayers = data
-            #print(data)
         except:
             pass
     s.close()
@@ -92,34 +69,6 @@ while running:
             elif e.button==1 and typing:
                 typing=False
 
-<<<<<<< HEAD
-            elif e.button==4 and typing and (jsonthing["User"][0]!=scrolllimit[0] and jsonthing["Message"][0]!=scrolllimit[1]):#Scroll up: move last index to the start
-                chat1=[]
-                chat1.append(jsonthing["User"][-1])
-                for i in range(len(jsonthing["User"])-1):
-                    chat1.append(jsonthing["User"][i])
-                jsonthing["User"]=copy.deepcopy(chat1)
-
-                chat1=[]
-                chat1.append(jsonthing["Message"][-1])
-                for i in range(len(jsonthing["Message"])-1):
-                    chat1.append(jsonthing["Message"][i])
-                jsonthing["Message"]=copy.deepcopy(chat1)
-            elif e.button==5 and typing and len(jsonthing["User"])!=3 and (jsonthing["Message"][3]==scrolllimit[1] and jsonthing["User"][3]==scrolllimit[0])==False:#Scroll down: move first index to last
-                chat1=[]
-                for i in range(1,len(jsonthing["User"])):
-                    chat1.append(jsonthing["User"][i])
-                chat1.append(jsonthing["User"][0])
-                jsonthing["User"]=copy.deepcopy(chat1)
-
-                chat1=[]
-                for i in range(1,len(jsonthing["Message"])):
-                    chat1.append(jsonthing["Message"][i])
-                chat1.append(jsonthing["Message"][0])
-                print(chat1)
-                jsonthing["Message"]=copy.deepcopy(chat1)
-=======
->>>>>>> 80b09e4769698c19093a79aaa63ed434a5b5622a
             elif e.button==4 and typing:#Scroll up
                 pass
             elif e.button==5 and typing:#Scroll down
@@ -130,27 +79,8 @@ while running:
                     textB=textB[:-1]
                 elif keys[K_RETURN]==1:
                     #Display Text
-<<<<<<< HEAD
-                    if textB!="":
-                        
-                        jsonthing["User"].append(playerList[0])
-                        print("text")
-                        jsonthing["Message"].append(textB)
-                        #Send text via sockets
-                        jsonstring = '{"command" : "putChat","user" : "' + playerList[0] + '", "message" : "' + textB + '"}'
-                        print(jsonstring)
-                        headers = {
-                            'Content-Type': "text/plain",
-                            'Cache-Control': "no-cache",
-                        }
-                        r = requests.request("POST","http://s01.jamesxu.ca:4443", data=jsonstring, headers=headers)
-                        if(len(r.text) > 1):
-                            print("success")
-                        textB = ""
-=======
                     None
                     #Send text via sockets
->>>>>>> 80b09e4769698c19093a79aaa63ed434a5b5622a
                 else:
                     textB+=e.unicode
     
@@ -214,15 +144,7 @@ while running:
                 deg=degrees(atan2((screen.get_width()//2-nx),(screen.get_height()//2-ny)))
                 rotated = transform.rotate(person[otherPlayers[p][2]],otherPlayers[p][1])
                 screen.blit(rotated,(nx,ny))
-<<<<<<< HEAD
-<<<<<<< HEAD
         bullets += otherPlayers[p][4]
-=======
-        bullets += p[5]
->>>>>>> 19ad236425a30dac00d73d561dbafdb4bd426c83
-=======
-        bullets += otherPlayers[p][4]
->>>>>>> 80b09e4769698c19093a79aaa63ed434a5b5622a
 
     #Chat
     
@@ -257,7 +179,7 @@ while running:
     #HealthBar
     draw.rect(screen,(255,0,0),(10,10,300,30),0)
     draw.rect(screen,(0,255,0),(10,10,health*3,30),0)
-    #Shooting
+    #Shooting - 
     if fire:
         for a in range(1,6):
             bullets.append([(screen.get_width()//2,screen.get_height()//2),deg+90-(3-a)*15])

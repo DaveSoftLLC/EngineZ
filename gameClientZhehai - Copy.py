@@ -36,7 +36,6 @@ def getData():
     s.connect((TCP_IP, TCP_PORT))
     while running:
         s.send(str(playerList).encode('utf-8'))
-        print(data)
         data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
         try:
             otherPlayers = data
@@ -118,8 +117,8 @@ while running:
                 nx = nx-px +screen.get_width()//2 #gets the enemy position in your screen
                 ny = ny-py +screen.get_height()//2
                 deg=degrees(atan2((screen.get_width()//2-nx),(screen.get_height()//2-ny)))
-                rotated = transform.rotate(person[otherPlayers[p][3]],otherPlayers[p][2])
-                screen.blit(rotated,(screen.get_width()//2-rotated.get_width()//2,screen.get_height()//2-rotated.get_height()//2))
+                rotated = transform.rotate(person[otherPlayers[p][2]],otherPlayers[p][1])
+                screen.blit(rotated,(nx,ny))
 
 
     #Chat

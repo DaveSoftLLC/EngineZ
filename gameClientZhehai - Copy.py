@@ -31,8 +31,12 @@ textB="" #Text that will show for typing, saving
 typing=False
 agencyfont=font.SysFont("Agency FB",25)
 health = 100
+<<<<<<< HEAD
 bullets = []
 playerList = ["Zhehai",[1300,900],deg,state,health,bullets]
+=======
+playerList = ["James",[1300,900],deg,state,health]
+>>>>>>> 19ad236425a30dac00d73d561dbafdb4bd426c83
 otherPlayers = {}
 background = image.load('Background/MapFinal.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
@@ -46,7 +50,13 @@ def getData():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((TCP_IP, TCP_PORT))
     while running:
+<<<<<<< HEAD
         s.send(str(playerList).encode('utf-8'))
+=======
+        s.send((str(playerList)+'['+str(bullets)+']').encode('utf-8'))
+        data2 = s.recv(BUFFER_SIZE).decode('utf-8')
+        print(data2)
+>>>>>>> 19ad236425a30dac00d73d561dbafdb4bd426c83
         data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
         try:
             otherPlayers = data
@@ -188,7 +198,11 @@ while running:
                 deg=degrees(atan2((screen.get_width()//2-nx),(screen.get_height()//2-ny)))
                 rotated = transform.rotate(person[otherPlayers[p][2]],otherPlayers[p][1])
                 screen.blit(rotated,(nx,ny))
+<<<<<<< HEAD
         bullets += otherPlayers[p][4]
+=======
+        bullets += p[5]
+>>>>>>> 19ad236425a30dac00d73d561dbafdb4bd426c83
 
     #Chat
     

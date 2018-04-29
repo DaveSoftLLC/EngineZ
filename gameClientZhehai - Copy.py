@@ -30,11 +30,8 @@ typing=False
 agencyfont=font.SysFont("Agency FB",25)
 health = 100
 bullets = []
-<<<<<<< HEAD
 playerList = ["James22",[1300,900],deg,state,health,bullets]
-=======
 playerList = ["James2",[1300,900],deg,state,health,bullets]
->>>>>>> f26a8087d56493f7c0d5b965eede24193d6681fd
 otherPlayers = {}
 background = image.load('Background/MapFinal.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]

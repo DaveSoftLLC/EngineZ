@@ -25,9 +25,9 @@ class MyServer(BaseHTTPRequestHandler):
         #self.wfile.write(bytes("", "utf-8"))
 
         receivedJSON = post_data_cleaned[0]
-        print(receivedJSON)
+        #print(receivedJSON)
         receivedDict = json.loads(receivedJSON)
-        print(receivedDict)
+        #print(receivedDict)
         
         if (receivedDict['command'] == "putChat"):
             self.wfile.write(bytes(str(addToChat(receivedDict['user'],receivedDict['message'])), "utf-8"))
@@ -49,7 +49,7 @@ def addToChat(user,message):
     dic['command'] = 'processStatus'
     dic['status'] = 'success'
     returnMessage = json.dumps(dic, ensure_ascii=False)
-    print(returnMessage)
+    #print(returnMessage)
     return returnMessage
 
 def returnLatestMessage():
@@ -60,7 +60,7 @@ def returnLatestMessage():
     dic['message'] = lastMessage['message']
     dic['messID'] = lastMessage['messID']
     returnMessage = json.dumps(dic, ensure_ascii=False)
-    print(returnMessage)
+    #print(returnMessage)
     return returnMessage
     
 myServer = HTTPServer((hostName, hostPort), MyServer)

@@ -106,15 +106,16 @@ while running:
                 elif keys[K_RETURN]==1:
                     #Display Text
                     if textB!="":
+                        #Reset list4
+                        
+
                         
                         jsonthing["User"].append(playerList[0])
                         print("text")
                         jsonthing["Message"].append(textB)
                         print(jsonthing)
                         textB=""
-                        #Send text via sockets
-                    None
-                    #Send text via sockets
+                        
                 else:
                     textB+=e.unicode
     

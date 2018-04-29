@@ -1,6 +1,6 @@
 import MySQLdb
 from passlib.hash import pbkdf2_sha256
-class JavaIsBetter:
+class mySQLrequest:
      def __init__(self):
           self.hosttxt = "s01.jamesxu.ca"
           self.usertxt = "mh4"

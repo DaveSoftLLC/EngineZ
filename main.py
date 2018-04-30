@@ -2,11 +2,9 @@ import socket, threading
 from pygame import *
 from math import*
 from glob import*
-
 import copy
 import requests
 import json
-
 #TCP_IP = '10.88.214.97'
 TCP_IP = '192.227.178.111'
 TCP_PORT = 5005

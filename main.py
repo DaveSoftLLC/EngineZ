@@ -48,10 +48,9 @@ def getData():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((TCP_IP, TCP_PORT))
     while running:
-        playerList
         s.send(str(playerList).encode('utf-8'))
-        data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
         try:
+            data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
             otherPlayers = data
         except:
             pass
@@ -91,24 +90,21 @@ while running:
 
         elif e.type==MOUSEBUTTONDOWN:
             if e.button == 1:
-                #fire = True
+                fire = True
                 None
             if e.button==1 and screen.blit(chat,(0,500)).collidepoint(mx,my):
                 typing=True
-<<<<<<< HEAD
                 print("Typing")
                 textB=""
             elif e.button==1 and typing:
                 typing=False
             elif e.button==4 and typing and chatf+10<700:
-=======
                 
                 textB=""
             elif e.button==1 and typing:
                 typing=False
 
             elif e.button==4 and typing and chatf+10<800:
->>>>>>> f7a9b3e360483ae69382f07e4f3a240515bb7ae4
                 chatf+=10
                 """
                 chat1=[]
@@ -299,9 +295,8 @@ while running:
                 if playerSprite.collidepoint(i):
                     health -= 10
         else:
-            del bullets[bullets.index(b)]
-    playerList[2]=deg
-    playerList[3]=state
+            del otherBullets[otherBullets.index(b)]
+    playerList = ["Demo",playerList[1],deg,state,health,bullets]
     display.flip()
 quit()
 

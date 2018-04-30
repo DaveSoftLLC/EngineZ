@@ -91,8 +91,8 @@ while running:
 
         elif e.type==MOUSEBUTTONDOWN:
             if e.button == 1:
-                #fire = True
-                None
+                fire = True
+                
             if e.button==1 and screen.blit(chat,(0,500)).collidepoint(mx,my):
                 typing=True
 

@@ -91,11 +91,10 @@ while running:
                 fire = True
             if e.button==1 and screen.blit(chat,(0,500)).collidepoint(mx,my):
                 typing=True
-                print("rue")
+                print("Typing")
                 textB=""
             elif e.button==1 and typing:
                 typing=False
-
             elif e.button==4 and typing and chatf+10<700:
                 chatf+=10
                 """
@@ -256,17 +255,21 @@ while running:
     screen.set_clip(None)
     
     #HealthBar
+    if health<0:
+        health = 0
     draw.rect(screen,(255,0,0),(10,10,300,30),0)
     draw.rect(screen,(0,255,0),(10,10,health*3,30),0)
     #Shooting - 
     if fire:
         for a in range(1,6):
-            bullets.append([(screen.get_width()//2,screen.get_height()//2),deg+90-(3-a)*15])
+            bullets.append([(playerList[1][0],playerList[1][1]),deg+90-(3-a)*15])
     for b in bullets:
-        if 0<b[0][0]+5*cos(b[1])<screen.get_width() and 0<b[0][1]-5*sin(b[1])<screen.get_height():
-            ox,oy = (int(b[0][0]),int(b[0][1]))
+        px,py = playerList[1]
+        nx = b[0][0]-px + screen.get_width()//2 + 10*cos(radians(b[1]))
+        ny = b[0][1]-py + screen.get_height()//2 + 10*sin(radians(b[1]))
+        if 0<nx<screen.get_width() and 0<ny<screen.get_height():
             lb = transform.rotate(lbullet,deg)
-            nx,ny = (int(b[0][0]+5*cos(radians(b[1]))),int(b[0][1]-5*sin(radians(b[1]))))
+##            nx,ny = (int(b[0][0]+5*cos(radians(b[1]))),int(b[0][1]-5*sin(radians(b[1]))))
             shot = screen.blit(lb,(nx,ny))
             if shot.colliderect(playerSprite):
                 health -= 10

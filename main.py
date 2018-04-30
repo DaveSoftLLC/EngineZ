@@ -13,14 +13,17 @@ running = True
 screen = display.set_mode((1280,800))
 
 #Preliminary variables
-
+mixer.init()
+currentMusic=mixer.music.load("Outcast.wav")
+mixer.music.set_volume(0.5)
+mixer.music.play()
 deg=0
 speed=5
 state=0
 chatf=550
 #Chat image
 chat=image.load("chat/chat.png")
-jsonthing={"User":["Zhehai","James","Bob","jok","poi"],"Message":["Python","Hello","my name","hi","nooo"]}
+jsonthing={"User":["Welcome!"],"Message":["Type anything to chat"]}
 lastID = 0
 scrolllimit=[jsonthing["User"][0],jsonthing["Message"][0]]
 #Text
@@ -30,7 +33,7 @@ typing=False
 agencyfont=font.SysFont("Agency FB",25)
 health = 100
 bullets = []
-playerList = ["Poop",[1300,900],deg,state,health,bullets]
+playerList = ["Demo",[1300,900],deg,state,health,bullets]
 otherPlayers = {}
 background = image.load('Background/MapFinal.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
@@ -66,10 +69,10 @@ def getChat():
         jsonstring = '{"command" : "getChat"}'
         r = requests.request("POST","http://s01.jamesxu.ca:5006",data=jsonstring,headers=headers)
         recvJSON = r.text
-        print(recvJSON)
+        
         dicJSON = json.loads(r.text)
         remoteMessID = dicJSON['messID']
-        print(dicJSON)
+        
         if(remoteMessID > lastID):
             remoteUser = dicJSON['user']
             remoteMessage = dicJSON['message']
@@ -88,14 +91,24 @@ while running:
 
         elif e.type==MOUSEBUTTONDOWN:
             if e.button == 1:
-                fire = True
+                #fire = True
+                None
             if e.button==1 and screen.blit(chat,(0,500)).collidepoint(mx,my):
                 typing=True
+<<<<<<< HEAD
                 print("Typing")
                 textB=""
             elif e.button==1 and typing:
                 typing=False
             elif e.button==4 and typing and chatf+10<700:
+=======
+                
+                textB=""
+            elif e.button==1 and typing:
+                typing=False
+
+            elif e.button==4 and typing and chatf+10<800:
+>>>>>>> f7a9b3e360483ae69382f07e4f3a240515bb7ae4
                 chatf+=10
                 """
                 chat1=[]
@@ -110,7 +123,7 @@ while running:
                     chat1.append(jsonthing["Message"][i])
                 jsonthing["Message"]=copy.deepcopy(chat1)
                 """
-            elif e.button==5 and typing and chatf-10>200:#Scroll down: move first index to last
+            elif e.button==5 and typing and chatf-10>100:#Scroll down: move first index to last
                 """
                 chat1=[]
                 for i in range(1,len(jsonthing["User"])):
@@ -131,16 +144,12 @@ while running:
                 keys=key.get_pressed()
                 if keys[K_BACKSPACE]==1:
                     textB=textB[:-1]
-                    print("hi")
                 elif keys[K_RETURN]==1:
                     #Display Text
                     if textB!="":
                         
                         jsonthing["User"].append(playerList[0])
-                        print("text")
                         jsonthing["Message"].append(textB)
-                        print(jsonthing)
-                        print("sending to server")
                         headers = {
                             'Content-Type': "text/plain",
                             'Cache-Control': "nocache"

@@ -95,20 +95,20 @@ while running:
                 None
             if e.button==1 and screen.blit(chat,(0,500)).collidepoint(mx,my):
                 typing=True
-<<<<<<< HEAD
+
                 print("Typing")
                 textB=""
             elif e.button==1 and typing:
                 typing=False
             elif e.button==4 and typing and chatf+10<700:
-=======
+
                 
                 textB=""
             elif e.button==1 and typing:
                 typing=False
 
             elif e.button==4 and typing and chatf+10<800:
->>>>>>> f7a9b3e360483ae69382f07e4f3a240515bb7ae4
+
                 chatf+=10
                 """
                 chat1=[]

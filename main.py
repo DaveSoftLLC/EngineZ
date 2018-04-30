@@ -261,32 +261,36 @@ while running:
     draw.rect(screen,(0,255,0),(10,10,health*3,30),0)
     #Shooting - 
     if fire:
+        px,py = playerList[1]
         for a in range(1,6):
-            bullets.append([(playerList[1][0],playerList[1][1]),deg+90-(3-a)*15])
+            spread = deg+90-(3-a)*6
+            bullets.append([(px+5*cos(radians(spread)),py-5*sin(radians(spread))),spread])
     for b in bullets:
         px,py = playerList[1]
-        nx = b[0][0]-px + screen.get_width()//2 + 10*cos(radians(b[1]))
-        ny = b[0][1]-py + screen.get_height()//2 + 10*sin(radians(b[1]))
-        if 0<nx<screen.get_width() and 0<ny<screen.get_height():
-            lb = transform.rotate(lbullet,deg)
-##            nx,ny = (int(b[0][0]+5*cos(radians(b[1]))),int(b[0][1]-5*sin(radians(b[1]))))
-            shot = screen.blit(lb,(nx,ny))
-            if shot.colliderect(playerSprite):
-                health -= 10
+        nx = b[0][0] + 10*cos(radians(b[1]))
+        ny = b[0][1] - 10*sin(radians(b[1]))
+        lx,ly = (nx-px + screen.get_width()//2,ny-py + screen.get_height()//2)
+        if 0<lx<screen.get_width() and 0<ly<screen.get_height():
+            lb = transform.rotate(lbullet,b[1])
+            shot = screen.blit(lb,(lx,ly))
             bullets[bullets.index(b)] = [(nx,ny),b[1]]
         else:
             del bullets[bullets.index(b)]
     for b in otherBullets:
-        if 0<b[0][0]+5*cos(b[1])<screen.get_width() and 0<b[0][1]-5*sin(b[1])<screen.get_height():
-            ox,oy = (int(b[0][0]),int(b[0][1]))
-            lb = transform.rotate(lbullet,deg)
-            nx,ny = (int(b[0][0]+5*cos(radians(b[1]))),int(b[0][1]-5*sin(radians(b[1]))))
-            shot = screen.blit(lb,(nx,ny))
-            if shot.colliderect(playerSprite):
-                health -= 10
-            otherBullets[otherBullets.index(b)] = [(nx,ny),b[1]]
+        px,py = playerList[1]
+        nx = b[0][0] + 10*cos(radians(b[1]))
+        ny = b[0][1] - 10*sin(radians(b[1]))
+        lx,ly = (nx-px + screen.get_width()//2,ny-py + screen.get_height()//2)
+        if 0<lx<screen.get_width() and 0<ly<screen.get_height():
+            lb = transform.rotate(lbullet,b[1])
+            shot = screen.blit(lb,(lx,ly))
+            bullets[bullets.index(b)] = [(nx,ny),b[1]]
+            interpolate = [(b[0][0]+i*cos(radians(b[1])),b[0][1]+i*sin(radians(b[1]))) for i in range(10)]
+            for i in interpolate:
+                if playerSprite.collidepoint(i):
+                    health -= 10
         else:
-            del otherBullets[otherBullets.index(b)]
+            del bullets[bullets.index(b)]
     playerList[2]=deg
     playerList[3]=state
     display.flip()

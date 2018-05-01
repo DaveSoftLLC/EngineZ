@@ -6,8 +6,8 @@ import copy
 import requests
 import json
 #TCP_IP = '10.88.214.97'
-TCP_IP = '192.227.178.111'
-TCP_PORT = 5005
+TCP_IP = '159.203.163.149'
+TCP_PORT = 8080
 BUFFER_SIZE = 500
 running = True
 screen = display.set_mode((1280,800))

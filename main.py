@@ -36,6 +36,7 @@ bullets = []
 playerList = ["Demo",[1300,900],deg,state,health,bullets]
 otherPlayers = {}
 background = image.load('Background/MapFinal.png')
+collision = image.load('Background/rocks+hole.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
 lbullet = image.load('Weapons/shellBullet.png')
 otherBullets = []
@@ -200,7 +201,6 @@ while running:
         playerList[1][0] += speed
 
     
-    
     #Person moving
     deg=int(degrees(atan2((screen.get_width()//2-mx),(screen.get_height()//2-my))))
     rotated = transform.rotate(person[state],deg)
@@ -271,14 +271,20 @@ while running:
             spread = deg+90-(3-a)*6
             bullets.append([(px+5*cos(radians(spread)),py-5*sin(radians(spread))),spread])
     for b in bullets:
+        noCol = True
         px,py = playerList[1]
         nx = b[0][0] + 10*cos(radians(b[1]))
         ny = b[0][1] - 10*sin(radians(b[1]))
         lx,ly = (nx-px + screen.get_width()//2,ny-py + screen.get_height()//2)
+        interpolate = [(b[0][0]+i*cos(radians(b[1])),b[0][1]+i*sin(radians(b[1]))) for i in range(10)]
         if 0<lx<screen.get_width() and 0<ly<screen.get_height():
-            lb = transform.rotate(lbullet,b[1])
-            shot = screen.blit(lb,(lx,ly))
-            bullets[bullets.index(b)] = [(nx,ny),b[1]]
+            for cx,cy in interpolate:
+                if collision.get_at((int(cx),int(cy)))[3] != 0:
+                    noCol = False
+            if noCol:
+                lb = transform.rotate(lbullet,b[1])
+                shot = screen.blit(lb,(lx,ly))
+                bullets[bullets.index(b)] = [(nx,ny),b[1]]
         else:
             del bullets[bullets.index(b)]
     for b in otherBullets:

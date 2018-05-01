@@ -7,8 +7,10 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((TCP_IP, TCP_PORT))
 s.listen(1)
 playerDict = {}
+running = True
 def listen():
-     while True:
+     global running
+     while running:
           lis = ''
           print("Before looking")
           conn, addr = s.accept()
@@ -18,9 +20,10 @@ def listen():
 def listenClient(conn,addr):
      global BUFFER_SIZE
      global playerDict
+     global running
      print('thread')
      curPlayer = ''
-     while True:
+     while running:
           try:
                data = conn.recv(BUFFER_SIZE)
                if data:

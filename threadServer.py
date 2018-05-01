@@ -25,6 +25,7 @@ def listenClient(conn,addr):
                data = conn.recv(BUFFER_SIZE)
                if data:
                     decoded = data.decode('utf-8')
+                    print('decoded')
                     try:
                          playerList = eval(decoded)
                          playerDict[playerList[0]] = playerList[1:]

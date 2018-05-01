@@ -1,7 +1,7 @@
 import socket
 import os, threading
-TCP_IP = '192.227.178.111'
-TCP_PORT = 5005
+TCP_IP = ''
+TCP_PORT = 8080
 BUFFER_SIZE = 200  # Normally 1024, but we want fast response
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((TCP_IP, TCP_PORT))

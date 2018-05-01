@@ -1,8 +1,8 @@
 import socket
 import os, threading
-TCP_IP = '192.227.178.111'
-TCP_PORT = 5005
-BUFFER_SIZE = 200  # Normally 1024, but we want fast response
+TCP_IP = '159.203.163.149'
+TCP_PORT = 8080
+BUFFER_SIZE = 500  # Normally 1024, but we want fast response
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((TCP_IP, TCP_PORT))
 s.listen(1)
@@ -27,23 +27,19 @@ def listenClient(conn,addr):
           try:
                data = conn.recv(BUFFER_SIZE)
                if data:
-                    decoded = data.decode('utf-8')
-                    if decoded == 'quit':
-                         conn.send('quitting'.encode('utf-8'))
-                         print('quitting')
-                         break
                     try:
+                         decoded = data.decode('utf-8')
                          playerList = eval(decoded)
                          playerDict[playerList[0]] = playerList[1:]
                          curPlayer = playerList[0]
+                         conn.send(str(playerDict).encode('utf-8'))
                     except:
                          pass
-                    conn.send(str(playerDict).encode('utf-8'))
                else:
                     pass
-          except:
+          except Exception as E:
                del playerDict[curPlayer]
-               print('Connection Broken')
+               print('Connection Broken:',E)
                break
      conn.close()
 listen()

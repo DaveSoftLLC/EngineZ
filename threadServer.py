@@ -30,7 +30,7 @@ def listenClient(conn,addr):
                          playerDict[playerList[0]] = playerList[1:]
                          curPlayer = playerList[0]
                     except:
-                         pass
+                         print('Data Error from %s' %addr)
                     conn.send(str(playerDict).encode('utf-8'))
                else:
                     pass

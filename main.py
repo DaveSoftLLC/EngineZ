@@ -283,9 +283,9 @@ while running:
         lx,ly = (nx-px + screen.get_width()//2,ny-py + screen.get_height()//2)
         interpolate = [(b[0][0]+i*cos(radians(b[1])),b[0][1]+i*sin(radians(b[1]))) for i in range(10)]
         if 0<lx<screen.get_width() and 0<ly<screen.get_height():
-            for cx,cy in interpolate:
-                if collision.get_at((int(cx),int(cy)))[3] != 0:
-                    noCol = False
+##            for cx,cy in interpolate:
+##                if collision.get_at((int(cx),int(cy)))[3] != 0:
+##                    noCol = False
             if noCol:
                 lb = transform.rotate(lbullet,b[1])
                 shot = screen.blit(lb,(lx,ly))

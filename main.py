@@ -140,6 +140,7 @@ while running:
                 jsonthing["Message"]=copy.deepcopy(chat1)
                 """
                 chatf-=10
+        #
         elif e.type==KEYDOWN:
             if typing:
                 keys=key.get_pressed()

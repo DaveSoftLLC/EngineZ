@@ -93,7 +93,7 @@ def renderBullets(Game,player,gunType):
                     noCol = False
             if noCol:
                 lb = transform.rotate(gunType.bulletsprite,b[1])
-                shot = Game.screen.blit(lb,(lx,ly))
+                Game.screen.blit(lb,(lx,ly))
                 player.bullets[player.bullets.index(b)] = [(nx,ny),b[1]]
         else:
             del player.bullets[player.bullets.index(b)]

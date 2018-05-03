@@ -11,6 +11,6 @@ class Client:
             binary = pickle.dumps(self.player)
             self.s.send(binary)
             data = pickle.loads(self.s.recv(500))
-            
+
 
 

@@ -16,12 +16,13 @@ class GameMode:
         self.textFont = font.SysFont("Arial",25)
         self.players = {}
         self.background = image.load('Background/MapFinal.png')
+        self.screen = display.set_mode(self.resolution)
     def drawScreen(self,player):
         try:
             px,py = player.get_pos()
-            portion = background.subsurface(Rect(px-screen.get_width()//2,
-                                                 py-screen.get_height()//2,
-                                                 screen.get_width(),screen.get_height()))
+            portion = background.subsurface(Rect(px-self.screen.get_width()//2,
+                                                 py-self.screen.get_height()//2,
+                                                 self.screen.get_width(),self.screen.get_height()))
             screen.blit(portion,(0,0))
         except:
             print(px,py)
@@ -29,5 +30,6 @@ class GameMode:
 class Actor:
     def __init__(self,name,pos,spriteFiles):
         self.sprites = spriteFiles
-        self.actorList = [name,pos,]
+        self.pos = pos
+        self.
         

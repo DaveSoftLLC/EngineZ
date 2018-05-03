@@ -18,6 +18,7 @@ class GameMode:
         self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
         self.screen = display.set_mode(self.resolution)
+        self.running = True
     def drawScreen(self,player):
         try:
             px,py = player.get_pos()
@@ -30,6 +31,7 @@ class GameMode:
 
 class Player:
     def __init__(self,game,name,pos,spritefiles,speed):
+        self.name = name
         self.sprites = spritefiles
         self.pos = pos
         self.rotation = 0

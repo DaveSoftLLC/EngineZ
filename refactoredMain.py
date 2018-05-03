@@ -1,10 +1,9 @@
-import socket, threading
 from pygame import *
 from math import *
-from glob import *
-import copy
-import requests
-import json
+from math import *
+
+from pygame import *
+
 TCP_IP = '159.203.163.149'
 TCP_PORT = 8080
 BUFFER_SIZE = 500
@@ -78,7 +77,7 @@ class Player:
             angle = self.rotation+90-(3-a)*6
             self.bullets.append([(px+5*cos(radians(angle)),py-5*sin(radians(angle))),angle])
     def renderPlayer(self):
-        self.rect = Game.screen.blit(self.sprites[self.state],self.pos)
+        self.rect = self.game.screen.blit(self.sprites[self.state],self.pos)
 def renderBullets(Game,player,gunType):
     for b in player.bullets:
         noCol = True

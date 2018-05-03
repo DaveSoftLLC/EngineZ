@@ -20,16 +20,19 @@ class GameMode:
     def drawScreen(self,player):
         try:
             px,py = player.get_pos()
-            portion = background.subsurface(Rect(px-self.screen.get_width()//2,
+            portion = self.background.subsurface(Rect(px-self.screen.get_width()//2,
                                                  py-self.screen.get_height()//2,
                                                  self.screen.get_width(),self.screen.get_height()))
-            screen.blit(portion,(0,0))
+            self.screen.blit(portion,(0,0))
         except:
             print(px,py)
 
-class Actor:
+class Player:
     def __init__(self,name,pos,spriteFiles):
         self.sprites = spriteFiles
         self.pos = pos
-        self.
+        self.rotation = 0
+        self.state = 0
+        self.health = 100
+
         

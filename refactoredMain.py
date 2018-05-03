@@ -1,10 +1,9 @@
-import socket, threading
 from pygame import *
 from math import *
-from glob import *
-import copy
-import requests
-import json
+from math import *
+
+from pygame import *
+
 TCP_IP = '159.203.163.149'
 TCP_PORT = 8080
 BUFFER_SIZE = 500
@@ -37,6 +36,7 @@ class GameMode:
         self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
         self.screen = display.set_mode(self.resolution)
+        self.running = True
     def drawScreen(self,player):
         try:
             px,py = player.get_pos()
@@ -49,6 +49,7 @@ class GameMode:
 
 class Player:
     def __init__(self,game,name,pos,spritefiles,speed):
+        self.name = name
         self.sprites = spritefiles
         self.pos = pos
         self.rotation = 0
@@ -95,7 +96,7 @@ class Player:
             angle = self.rotation+90-(3-a)*6
             self.bullets.append([(px+5*cos(radians(angle)),py-5*sin(radians(angle))),angle])
     def renderPlayer(self):
-        self.rect = Game.screen.blit(self.sprites[self.state],self.pos)
+        self.rect = self.game.screen.blit(self.sprites[self.state],self.pos)
 def renderBullets(Game,player,gunType):
     for b in player.bullets:
         noCol = True
@@ -110,7 +111,7 @@ def renderBullets(Game,player,gunType):
                     noCol = False
             if noCol:
                 lb = transform.rotate(gunType.bulletsprite,b[1])
-                shot = Game.screen.blit(lb,(lx,ly))
+                Game.screen.blit(lb,(lx,ly))
                 player.bullets[player.bullets.index(b)] = [(nx,ny),b[1]]
         else:
             del player.bullets[player.bullets.index(b)]

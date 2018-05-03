@@ -27,5 +27,7 @@ class GameMode:
             print(px,py)
 
 class Actor:
-    def __init__(self,spriteFile):
+    def __init__(self,name,pos,spriteFiles):
+        self.sprites = spriteFiles
+        self.actorList = [name,pos,]
         

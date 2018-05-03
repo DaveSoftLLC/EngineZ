@@ -102,8 +102,6 @@ while running:
             elif e.button==1 and typing:
                 typing=False
             elif e.button==4 and typing and chatf+10<700:
-
-                
                 textB=""
             elif e.button==1 and typing:
                 typing=False

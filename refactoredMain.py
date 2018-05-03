@@ -1,7 +1,7 @@
 import socket, threading
 from pygame import *
-from math import*
-from glob import*
+from math import *
+from glob import *
 import copy
 import requests
 import json

@@ -1,5 +1,3 @@
-from pygame import *
-from math import *
 from math import *
 
 from pygame import *
@@ -11,20 +9,9 @@ mixer.init()
 font.init()
 
 
-#TO DO:
-
-#1. Put in all the variables we had in MAIN.py:
-    #Speed - Shift runs faster, shooting slows person down
-    #Rotation -
-    """deg=int(degrees(atan2((screen.get_width()//2-mx),(screen.get_height()//2-my))))
-    rotated = transform.rotate(person[state],deg)
-    playerSprite = screen.blit(rotated,(screen.get_width()//2-rotated.get_width()//2,screen.get_height()//2-rotated.get_height()//2))"""
-    #playerList - name, bullets, rotation, state(running shooting)
-
-#2. SERVER CLIENT CONNECTION
     
 
-
+otherPlayerDict = {}
 
 
 class GameMode:
@@ -137,12 +124,11 @@ def renderEnemyBullets(Game,userplayer,players,gunType):
             else:
                 del player.bullets[player.bullets.index(b)]
 
-class gunType:
-    def bulletsprite(self,name):
-        if name == 
-
-    def damage(self):
-        None
+class Gun:
+    def __init__(self,name,bulletSprite,damage):
+        self.name = name
+        self.bulletSprite = bulletSprite
+        self.damage = damage
 
 
 

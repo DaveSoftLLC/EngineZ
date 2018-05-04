@@ -139,7 +139,8 @@ def renderEnemyBullets(Game,userplayer,players,gunType):
 
 class gunType:
     def bulletsprite(self,name):
-        if name == 
+        if name == "shotgun":
+            
 
     def damage(self):
         None

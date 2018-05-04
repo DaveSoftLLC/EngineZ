@@ -1,14 +1,32 @@
-import socket, threading
 from pygame import *
 from math import *
-from glob import *
-import copy
-import requests
-import json
+from math import *
+
+from pygame import *
+
 TCP_IP = '159.203.163.149'
 TCP_PORT = 8080
 BUFFER_SIZE = 500
 mixer.init()
+font.init()
+
+
+#TO DO:
+
+#1. Put in all the variables we had in MAIN.py:
+    #Speed - Shift runs faster, shooting slows person down
+    #Rotation -
+    """deg=int(degrees(atan2((screen.get_width()//2-mx),(screen.get_height()//2-my))))
+    rotated = transform.rotate(person[state],deg)
+    playerSprite = screen.blit(rotated,(screen.get_width()//2-rotated.get_width()//2,screen.get_height()//2-rotated.get_height()//2))"""
+    #playerList - name, bullets, rotation, state(running shooting)
+
+#2. SERVER CLIENT CONNECTION
+    
+
+
+
+
 class GameMode:
     def __init__(self):
         self.resolution = (1280,800)
@@ -78,7 +96,7 @@ class Player:
             angle = self.rotation+90-(3-a)*6
             self.bullets.append([(px+5*cos(radians(angle)),py-5*sin(radians(angle))),angle])
     def renderPlayer(self):
-        self.rect = Game.screen.blit(self.sprites[self.state],self.pos)
+        self.rect = self.game.screen.blit(self.sprites[self.state],self.pos)
 def renderBullets(Game,player,gunType):
     for b in player.bullets:
         noCol = True
@@ -118,4 +136,17 @@ def renderEnemyBullets(Game,userplayer,players,gunType):
                         userplayer.takeDamage(gunType.damage)
             else:
                 del player.bullets[player.bullets.index(b)]
+
+class gunType:
+    def bulletsprite(self,name):
+        if name == "shotgun":
+            
+
+    def damage(self):
+        None
+
+
+
+
+
 

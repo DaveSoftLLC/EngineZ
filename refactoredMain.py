@@ -10,7 +10,7 @@ BUFFER_SIZE = 500
 mixer.init()
 font.init()
 
-<<<<<<< HEAD
+
 
 #TO DO:
 
@@ -27,7 +27,7 @@ font.init()
 
 
 
-=======
+
 otherPlayerDict = {}
 
 class Client:
@@ -48,7 +48,7 @@ class Client:
             data = pickle.loads(self.s.recv(500))
             otherPlayerDict = data
         self.s.close()
->>>>>>> 4998de398eabec6b43b1d930f3c8e0d9adb4828a
+
 
 
 
@@ -64,14 +64,12 @@ class GameMode:
             self.screen = display.set_mode(self.resolution)
         self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
-<<<<<<< HEAD
+
         self.screen = display.set_mode(self.resolution)
         #Weapons:
         self.shotgun = image.load("Weapons/shotgun.png")
         self.slot = 0 #axe
         self.inventory = {1:"",2:"",3:"",4:"",5:"",6:""}
-=======
->>>>>>> 4998de398eabec6b43b1d930f3c8e0d9adb4828a
         self.running = True
 
 
@@ -188,7 +186,7 @@ def renderEnemyBullets(Game,userplayer,players,gunType):
             else:
                 del player.bullets[player.bullets.index(b)]
 
-<<<<<<< HEAD
+
 class gunType:
     def bulletsprite(self,name):
         
@@ -197,13 +195,13 @@ class gunType:
 
     def damage(self,slot):
         None
-=======
+
 class Gun:
     def __init__(self,name,bulletSprite,damage):
         self.name = name
         self.bulletSprite = bulletSprite
         self.damage = damage
->>>>>>> 4998de398eabec6b43b1d930f3c8e0d9adb4828a
+
 
 
 

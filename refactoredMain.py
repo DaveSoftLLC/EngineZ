@@ -16,13 +16,17 @@ font.init()
 #1. Put in all the variables we had in MAIN.py:
     #Speed - Shift runs faster, shooting slows person down
     #Rotation -
-    """deg=int(degrees(atan2((screen.get_width()//2-mx),(screen.get_height()//2-my))))
-    rotated = transform.rotate(person[state],deg)
-    playerSprite = screen.blit(rotated,(screen.get_width()//2-rotated.get_width()//2,screen.get_height()//2-rotated.get_height()//2))"""
+    #deg=int(degrees(atan2((screen.get_width()//2-mx),(screen.get_height()//2-my))))
+    #rotated = transform.rotate(person[state],deg)
+    #playerSprite = screen.blit(rotated,(screen.get_width()//2-rotated.get_width()//2,screen.get_height()//2-rotated.get_height()//2))
     #playerList - name, bullets, rotation, state(running shooting)
 
 #2. SERVER CLIENT CONNECTION
     
+
+
+
+
 
 
 
@@ -36,7 +40,26 @@ class GameMode:
         self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
         self.screen = display.set_mode(self.resolution)
+        #Weapons:
+        self.shotgun = image.load("Weapons/shotgun.png")
+        self.slot = 0 #axe
+        self.inventory = {1:"",2:"",3:"",4:"",5:"",6:""}
         self.running = True
+
+
+    def gameLoop(self):
+        mx,my = mouse.get_pos()
+        for e in event.get():
+            if e.type == QUIT:
+                self.running = False
+            if e.type==MOUSEBUTTONDOWN:
+                None
+            mb = mouse.get_pressed()
+            self.screen.blit(self.back,(0,0))
+            self.checkstate(self.state)
+            if mb[0]==1:
+                None 
+            display.flip()
     def drawScreen(self,player):
         try:
             px,py = player.get_pos()
@@ -139,10 +162,11 @@ def renderEnemyBullets(Game,userplayer,players,gunType):
 
 class gunType:
     def bulletsprite(self,name):
+        
         if name == "shotgun":
-            
+            return shotgun
 
-    def damage(self):
+    def damage(self,slot):
         None
 
 

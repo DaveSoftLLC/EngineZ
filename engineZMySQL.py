@@ -6,7 +6,8 @@ class mySQLrequest:
           self.usertxt = "mh4"
           self.passwdtxt = "a"
           self.dbname = "engineZ"
-     def entryExists(self,user):
+
+     def entryExists(self,user,table):
           db = MySQLdb.connect(host=self.hosttxt,    # your host, usually localhost
                           user=self.usertxt,         # your username
                           passwd=self.passwdtxt,  # your password
@@ -17,7 +18,7 @@ class mySQLrequest:
           cur = db.cursor()
 
           # Use all the SQL you like
-          cur.execute("SELECT * FROM leaderboard WHERE playerName='" + user + "'")
+          cur.execute("SELECT * FROM " + table + " WHERE playerName='" + user + "'")
                
           # print all the first cell of all the rows
           if(cur.rowcount < 1):
@@ -70,7 +71,7 @@ class mySQLrequest:
           db.commit()
           db.close()
 
-     def userAuthenticated(self,user,password):
+     def userAuthenticated(self,user,givenHash):
           db = MySQLdb.connect(host=self.hosttxt,    # your host, usually localhost
                           user=self.usertxt,         # your username
                           passwd=self.passwdtxt,  # your password

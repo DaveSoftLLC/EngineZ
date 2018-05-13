@@ -1,5 +1,5 @@
-from pygame import *
-from math import *
+import pickle
+import socket
 from math import *
 
 from pygame import *
@@ -10,6 +10,7 @@ BUFFER_SIZE = 500
 mixer.init()
 font.init()
 
+<<<<<<< HEAD
 
 #TO DO:
 
@@ -26,24 +27,51 @@ font.init()
 
 
 
+=======
+otherPlayerDict = {}
+
+class Client:
+    def __init__(self,player,TCP_IP,TCP_PORT):
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.player = player
+        self.ip = TCP_IP
+        self.port = TCP_PORT
+
+    def getData(self,running):
+        global otherPlayerDict
+        self.s.connect((self.TCP_IP,self.TCP_PORT))
+        while running:
+            p = self.player
+            playerList = [p.name,p.pos,p.rotation,p.state,p.health,p.bullets,p.speed]
+            binary = pickle.dumps(playerList)
+            self.s.send(binary)
+            data = pickle.loads(self.s.recv(500))
+            otherPlayerDict = data
+        self.s.close()
+>>>>>>> 4998de398eabec6b43b1d930f3c8e0d9adb4828a
 
 
 
 
 
 class GameMode:
-    def __init__(self):
+    def __init__(self,server=False):
         self.resolution = (1280,800)
-        self.music = mixer.music.load("Outcast.wav")
-        self.textFont = font.SysFont("Arial",25)
         self.players = {}
+        if not server:
+            self.music = mixer.music.load("Outcast.wav")
+            self.textFont = font.SysFont("Arial",25)
+            self.screen = display.set_mode(self.resolution)
         self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
+<<<<<<< HEAD
         self.screen = display.set_mode(self.resolution)
         #Weapons:
         self.shotgun = image.load("Weapons/shotgun.png")
         self.slot = 0 #axe
         self.inventory = {1:"",2:"",3:"",4:"",5:"",6:""}
+=======
+>>>>>>> 4998de398eabec6b43b1d930f3c8e0d9adb4828a
         self.running = True
 
 
@@ -81,7 +109,7 @@ class Player:
         self.speed = speed
         self.bullets = []
         self.game = game
-        self.rect = self.game.screen.blit(self.sprites[self.state],self.pos)
+        self.rect = self.game.screen.blit(self.sprites[self.state],(game.screen.get_width()//2,game.screen.get_height()//2))
     def move(self,direction,map,collisionmap,speed=None):
         if speed is None:
             speed = self.speed
@@ -160,6 +188,7 @@ def renderEnemyBullets(Game,userplayer,players,gunType):
             else:
                 del player.bullets[player.bullets.index(b)]
 
+<<<<<<< HEAD
 class gunType:
     def bulletsprite(self,name):
         
@@ -168,6 +197,13 @@ class gunType:
 
     def damage(self,slot):
         None
+=======
+class Gun:
+    def __init__(self,name,bulletSprite,damage):
+        self.name = name
+        self.bulletSprite = bulletSprite
+        self.damage = damage
+>>>>>>> 4998de398eabec6b43b1d930f3c8e0d9adb4828a
 
 
 

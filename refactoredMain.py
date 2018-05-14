@@ -14,19 +14,19 @@ otherPlayerDict = {}
 
 
 class Client:
-    def __init__(self,player,TCP_IP,TCP_PORT):
+    def __init__(self, player, TCP_IP, TCP_PORT):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.player = player
         self.ip = TCP_IP
         self.port = TCP_PORT
 
-    def getData(self,running,player):
+    def get_data(self, running, player):
         global otherPlayerDict
         self.s.connect((self.TCP_IP,self.TCP_PORT))
         while running:
             p = self.player
             binary = pickle.dumps(player)
-            self.s.send([player.name,player])
+            self.s.send(binary)
             data = data.decode('utf-8')
             otherPlayerDict = data
         self.s.close()
@@ -49,16 +49,16 @@ class GameMode:
             px,py = player.get_pos()
             portion = self.background.subsurface(Rect(px-self.screen.get_width()//2,
                                                  py-self.screen.get_height()//2,
-                                                 self.screen.get_width(),self.screen.get_height()))
+                                                 self.screen.get_width(), self.screen.get_height()))
             self.screen.blit(portion,(0,0))
-        except:
-            print("Error")
+        except Exception as E:
+            print("Error:", E)
 
 
 class Player:
-    def __init__(self,game,name,pos,spritefiles,speed):
+    def __init__(self, game, name, pos, sprite_files, speed, collision_map):
         self.name = name
-        self.sprites = spritefiles
+        self.sprites = sprite_files
         self.pos = pos
         self.rotation = 0
         self.state = 0
@@ -71,23 +71,23 @@ class Player:
         if speed is None:
             speed = self.speed
         if direction == 'UP':
-            nx,ny = (self.pos[0],self.pos[1] - speed < map.get_height())
-            if 0<nx :
+            nx,ny = (self.pos[0],self.pos[1] - speed)
+            if 0 < ny :
                 if collisionmap.get_at((nx,ny))[3] == 0:
                     self.pos = (nx,ny)
         elif direction == 'DOWN':
-            nx, ny = (self.pos[0], self.pos[1] + speed < map.get_height())
-            if 0 < nx:
+            nx, ny = (self.pos[0], self.pos[1] + speed)
+            if ny < self.game.background.get_height():
                 if collisionmap.get_at((nx, ny))[3] == 0:
                     self.pos = (nx,ny)
         elif direction == 'LEFT':
-            nx, ny = (self.pos[0] - speed < map.get_height(), self.pos[1])
+            nx, ny = (self.pos[0] - speed, self.pos[1])
             if 0 < nx:
                 if collisionmap.get_at((nx, ny))[3] == 0:
                     self.pos = (nx,ny)
-        elif direction == 'UP':
-            nx, ny = (self.pos[0] + speed < map.get_height(), self.pos[1])
-            if 0 < nx:
+        elif direction == 'RIGHT':
+            nx, ny = (self.pos[0] + speed, self.pos[1])
+            if nx < self.game.background.get_width():
                 if collisionmap.get_at((nx, ny))[3] == 0:
                     self.pos = (nx,ny)
     def takeDamage(self,amount):
@@ -104,7 +104,12 @@ class Player:
             angle = self.rotation+90-(3-a)*6
             self.bullets.append([(px+5*cos(radians(angle)),py-5*sin(radians(angle))),angle])
     def renderPlayer(self):
-        self.rect = self.game.screen.blit(self.sprites[self.state],self.pos)
+        sprite = transform.rotate(self.sprites[self.state], self.rotation)
+        self.rect = self.game.screen.blit(sprite, (640-sprite.get_width()//2, 400-sprite.get_height()//2))
+    def get_rect(self):
+        return self.rect
+    def get_pos(self):
+        return self.pos
 def renderBullets(Game,player,gunType):
     for b in player.bullets:
         noCol = True
@@ -141,7 +146,7 @@ def renderEnemyBullets(Game,userplayer,players,gunType):
                     shot = Game.screen.blit(lb, (lx, ly))
                     player.bullets[player.bullets.index(b)] = [(nx, ny), b[1]]
                     if shot.colliderect(userplayer.rect):
-                        userplayer.takeDamage(gunType.damage)
+                        userplayer.take_damage(gunType.damage)
             else:
                 del player.bullets[player.bullets.index(b)]
 
@@ -152,6 +157,36 @@ class Gun:
         self.damage = damage
 
 
+sprites = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
+collision = image.load('Background/rocks+hole.png')
+g = GameMode()
+p = Player(g, 'james', (1200, 1200), sprites, 10, collision)
+while g.running:
+    for e in event.get():
+        if e.type == QUIT:
+            g.running = False
+    mx, my = mouse.get_pos()
+    p.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
+    px, py = p.get_pos()
+    keys = key.get_pressed()
+    #UP
+    if keys[K_w] and g.screen.get_height()//2<py-p.speed:
+        p.move('UP', g.background, g.collisionmap)
+    #DOWN
+    if keys[K_s] and py+p.speed<g.background.get_height()-g.screen.get_height()//2:
+        p.move('DOWN', g.background, g.collisionmap)
+    #LEFT
+    if keys[K_a] and g.screen.get_width()//2<px-p.speed:
+        p.move('LEFT', g.background, g.collisionmap)
+    #RIGHT
+    if keys[K_d] and px+p.speed<g.background.get_width()-g.screen.get_width()//2:
+        p.move('RIGHT', g.background, g.collisionmap)
+    
+    g.draw_screen(p)
+    p.renderPlayer()
+    draw.rect(g.screen, (0,255,0), p.get_rect(), 5)
+    display.flip()
+quit()
 
 
 

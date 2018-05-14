@@ -12,6 +12,7 @@ font.init()
 
 otherPlayerDict = {}
 
+
 class Client:
     def __init__(self,player,TCP_IP,TCP_PORT):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -19,17 +20,17 @@ class Client:
         self.ip = TCP_IP
         self.port = TCP_PORT
 
-    def getData(self,running):
+    def getData(self,running,player):
         global otherPlayerDict
         self.s.connect((self.TCP_IP,self.TCP_PORT))
         while running:
             p = self.player
-            playerList = [p.name,p.pos,p.rotation,p.state,p.health,p.bullets,p.speed]
-            binary = pickle.dumps(playerList)
-            self.s.send(binary)
-            data = pickle.loads(self.s.recv(500))
+            binary = pickle.dumps(player)
+            self.s.send([player.name,player])
+            data = data.decode('utf-8')
             otherPlayerDict = data
         self.s.close()
+
 
 class GameMode:
     def __init__(self,server=False):
@@ -42,7 +43,8 @@ class GameMode:
         self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
         self.running = True
-    def drawScreen(self,player):
+
+    def draw_screen(self, player):
         try:
             px,py = player.get_pos()
             portion = self.background.subsurface(Rect(px-self.screen.get_width()//2,
@@ -51,6 +53,7 @@ class GameMode:
             self.screen.blit(portion,(0,0))
         except:
             print("Error")
+
 
 class Player:
     def __init__(self,game,name,pos,spritefiles,speed):

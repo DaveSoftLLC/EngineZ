@@ -1,3 +1,4 @@
+import pickle
 import socket
 import threading
 from math import *
@@ -34,12 +35,13 @@ def renderEnemyBullets(Game,userplayer,players,gunType):
             else:
                 del player.bullets[player.bullets.index(b)]
 
+
 class PlayerInstance:
     def __init__(self, player, game):
         self.player = player
         self.game = game
 
-    def checkDamage(self,bullets):
+    def check_damage(self, bullets):
         Game = self.game
         player = self.player
         for b in bullets:
@@ -51,7 +53,7 @@ class PlayerInstance:
             for ix,iy in interpolate:
                 if player.rect.collidepoint((ix,iy)):
                     player.takeDamage(10)
-    def takeDamage(self,amount):
+    def takeDamage(self, amount):
         player = self.player
         player.health -= amount
 
@@ -68,6 +70,7 @@ class Server:
         self.playerDict = {}
         self.running = True
         self.instance = GameMode(server=True)
+        self.send_dict = dict()
 
     def listen(self):
          while self.running:
@@ -75,7 +78,7 @@ class Server:
               conn, addr = self.s.accept()
               print("After looking")
               conn.settimeout(10)
-              threading.Thread(target = self.listenClient,args=(conn,addr)).start()
+              threading.Thread(target=self.listenClient, args=(conn,addr)).start()
 
     def listenClient(self,conn,addr):
          print('thread')
@@ -85,21 +88,23 @@ class Server:
                    data = conn.recv(self.BUFFER_SIZE)
                    if data:
                         try:
-                             decoded = data.decode('utf-8')
-                             playerList = eval(decoded)
-                             self.playerDict[playerList[0]] = playerList[1:]
-                             curPlayer = playerList[0]
+                             decoded = pickle.loads(data)
+                             self.playerDict[decoded[0]] = decoded[1]
+                             curPlayer = decoded[0]
+
                              conn.send(str(self.playerDict).encode('utf-8'))
-                             bullets[curPlayer] = self.playerDict[curPlayer][4]
+                             bullets[curPlayer] = self.playerDict[curPlayer].bullets
                         except:
-                             pass
+                             print("Error")
                    else:
                         pass
               except Exception as E:
                    del self.playerDict[curPlayer]
-                   print('Connection Broken:',E)
+                   print('Connection Broken:', E)
                    break
          conn.close()
 
 juniper = Server()
 threading.Thread(target=juniper.listen).start()
+while juniper.running:
+    pass

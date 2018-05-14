@@ -37,9 +37,13 @@ class GameMode:
         self.resolution = (1280,800)
         self.players = {}
         if not server:
-            self.music = mixer.music.load("Outcast.wav")
-            self.textFont = font.SysFont("Arial",25)
             self.screen = display.set_mode(self.resolution)
+            self.screen.fill((255,255,255))
+            self.textFont = font.SysFont("Arial", 25)
+            self.screen.blit(transform.smoothscale(image.load('TitleLogo.png'), (1280, 800)), (0, 0))
+            self.screen.blit(self.textFont.render('Loading Assets...', True, (0,0,0)), (590, 700))
+            display.flip()
+            self.music = mixer.music.load("Outcast.wav")
         self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
         self.running = True
@@ -56,7 +60,7 @@ class GameMode:
 
 
 class Player:
-    def __init__(self, game, name, pos, sprite_files, speed, collision_map):
+    def __init__(self, game, name, pos, sprite_files, speed):
         self.name = name
         self.sprites = sprite_files
         self.pos = pos
@@ -66,7 +70,9 @@ class Player:
         self.speed = speed
         self.bullets = []
         self.game = game
-        self.rect = self.game.screen.blit(self.sprites[self.state],(game.screen.get_width()//2,game.screen.get_height()//2))
+        self.rect = self.game.screen.blit(self.sprites[self.state], (game.screen.get_width()//2,
+                                                                     game.screen.get_height()//2))
+
     def move(self,direction,map,collisionmap,speed=None):
         if speed is None:
             speed = self.speed
@@ -114,8 +120,8 @@ def renderBullets(Game,player,gunType):
     for b in player.bullets:
         noCol = True
         px,py = player.pos
-        nx = b[0][0] + 10*cos(radians(b[1]))
-        ny = b[0][1] - 10*sin(radians(b[1]))
+        nx = b[0][0] + 20*cos(radians(b[1]))
+        ny = b[0][1] - 20*sin(radians(b[1]))
         lx,ly = (nx-px + Game.screen.get_width()//2,ny-py + Game.screen.get_height()//2)
         interpolate = [(b[0][0]+i*cos(radians(b[1])),b[0][1]+i*sin(radians(b[1]))) for i in range(10)]
         if 0<lx<Game.screen.get_width() and 0<ly<Game.screen.get_height():
@@ -123,7 +129,7 @@ def renderBullets(Game,player,gunType):
                 if Game.collisionmap.get_at((int(cx),int(cy)))[3] != 0:
                     noCol = False
             if noCol:
-                lb = transform.rotate(gunType.bulletsprite,b[1])
+                lb = transform.rotate(gunType.bulletSprite,b[1])
                 Game.screen.blit(lb,(lx,ly))
                 player.bullets[player.bullets.index(b)] = [(nx,ny),b[1]]
         else:
@@ -133,8 +139,8 @@ def renderEnemyBullets(Game,userplayer,players,gunType):
         for b in player.bullets:
             noCol = True
             px, py = player.pos
-            nx = b[0][0] + 10 * cos(radians(b[1]))
-            ny = b[0][1] - 10 * sin(radians(b[1]))
+            nx = b[0][0] + 20 * cos(radians(b[1]))
+            ny = b[0][1] - 20 * sin(radians(b[1]))
             lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)
             interpolate = [(b[0][0] + i * cos(radians(b[1])), b[0][1] + i * sin(radians(b[1]))) for i in range(10)]
             if 0 < lx < Game.screen.get_width() and 0 < ly < Game.screen.get_height():
@@ -150,21 +156,31 @@ def renderEnemyBullets(Game,userplayer,players,gunType):
             else:
                 del player.bullets[player.bullets.index(b)]
 
+
 class Gun:
-    def __init__(self,name,bulletSprite,damage):
+    def __init__(self,name,bulletSprite,damage,spread=None):
         self.name = name
         self.bulletSprite = bulletSprite
         self.damage = damage
+        self.spread = spread
 
 
-sprites = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
+guns = []
+shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6)
+guns.append(shotgun)
+sprites = [image.load('Sprites/sprite1.png'), image.load('Sprites/sprite2.png'), image.load('Sprites/sprite3.png')]
 collision = image.load('Background/rocks+hole.png')
 g = GameMode()
-p = Player(g, 'james', (1200, 1200), sprites, 10, collision)
+p = Player(g, 'james', (1200, 1200), sprites, 10)
+current_gun = guns[0]
 while g.running:
+    left_click = False
     for e in event.get():
         if e.type == QUIT:
             g.running = False
+        if e.type == MOUSEBUTTONDOWN and e.button == 1:
+            left_click = True
+
     mx, my = mouse.get_pos()
     p.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
     px, py = p.get_pos()
@@ -181,9 +197,13 @@ while g.running:
     #RIGHT
     if keys[K_d] and px+p.speed<g.background.get_width()-g.screen.get_width()//2:
         p.move('RIGHT', g.background, g.collisionmap)
-    
+    if left_click:
+        for a in range(1,current_gun.spread):
+            spread = p.rotation+90-(3-a)*6
+            p.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
     g.draw_screen(p)
     p.renderPlayer()
+    renderBullets(g, p, current_gun)
     draw.rect(g.screen, (0,255,0), p.get_rect(), 5)
     display.flip()
 quit()

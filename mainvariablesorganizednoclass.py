@@ -5,55 +5,68 @@ from glob import*
 import copy
 import requests
 import json
-#TCP_IP = '10.88.214.97'
-TCP_IP = '159.203.163.149'
-TCP_PORT = 8080
-BUFFER_SIZE = 500
+
 running = True
 screen = display.set_mode((1280,800))
 
-#Preliminary variables
+#Music
 mixer.init()
 currentMusic=mixer.music.load("Outcast.wav")
 mixer.music.set_volume(0.5)
 mixer.music.play()
+
+
+#Player Variables
 deg=0
 speed=5
 state=0
 chatf=550
+health = 100
+bullets = []
+playerList = ["Demo",[1300,900],deg,state,health,bullets]
+Players = {}
+otherBullets = []
+
 #Chat image
 chat=image.load("chat/chat.png")
 jsonthing={"User":["Welcome!"],"Message":["Type anything to chat"]}
 lastID = 0
 scrolllimit=[jsonthing["User"][0],jsonthing["Message"][0]]
+
+
 #Text
 font.init()
 textB="" #Text that will show for typing, saving
 typing=False
 agencyfont=font.SysFont("Agency FB",25)
-health = 100
-bullets = []
-playerList = ["Demo",[1300,900],deg,state,health,bullets]
-otherPlayers = {}
+
+
+#The Map
 background = image.load('Background/MapFinal.png')
 collision = image.load('Background/rocks+hole.png')
 person = [image.load('Sprites/sprite1.png'),image.load('Sprites/sprite2.png'),image.load('Sprites/sprite3.png')]
 lbullet = image.load('Weapons/shellBullet.png')
-otherBullets = []
+
+
+#GET DATA FROM SERVER
+#TCP_IP = '10.88.214.97'
+TCP_IP = '159.203.163.149'
+TCP_PORT = 8080
+BUFFER_SIZE = 500
 def getData():
     global BUFFER_SIZE
     global running
     global playerList
-    global otherPlayers
+    global Players
     global bullets
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((TCP_IP, TCP_PORT))
     while running:
-        playerList
+        #playerList
         s.send(str(playerList).encode('utf-8'))
         data = eval(s.recv(BUFFER_SIZE).decode('utf-8'))
         try:
-            otherPlayers = data
+            Players = data
         except:
             pass
     s.close()
@@ -102,6 +115,8 @@ while running:
             elif e.button==1 and typing:
                 typing=False
             elif e.button==4 and typing and chatf+10<700:
+
+                
                 textB=""
             elif e.button==1 and typing:
                 typing=False

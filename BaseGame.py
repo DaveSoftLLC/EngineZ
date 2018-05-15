@@ -116,6 +116,7 @@ class Player:
 
     def renderPlayer(self):
         sprite = transform.rotate(self.sprites[self.state][self.gif_counter // 5], self.rotation + 90)
+        print(self.gif_counter, len(self.sprites[self.state]))
         sprite = transform.smoothscale(sprite, (sprite.get_width() // 3, sprite.get_height() // 3))
         self.rect = self.game.screen.blit(sprite, (640-sprite.get_width()//2, 400-sprite.get_height()//2))
 
@@ -128,7 +129,8 @@ class Player:
     def update_gif(self):
         if self.gif_counter == 5 * len(self.sprites[self.state]) - 1:
             self.gif_counter = 0
-        self.gif_counter += 1
+        else:
+            self.gif_counter += 1
 
 def renderBullets(Game,player,gunType):
     for b in player.bullets:

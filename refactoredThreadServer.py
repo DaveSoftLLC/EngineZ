@@ -1,11 +1,6 @@
-import pickle
-import socket
 import threading
-from math import *
 
-from pygame import *
-
-from refactoredMain import GameMode
+from BaseGame import *
 
 bullets = dict()
 
@@ -93,7 +88,7 @@ class Server:
                              self.playerDict[decoded.name] = decoded
                              curPlayer = decoded.name
                              conn.send(pickle.loads(self.playerDict))
-                             bullets[curPlayer] = self.decoded.bullets
+                             bullets[curPlayer] = decoded.bullets
                         except:
                              print("Error")
                    else:

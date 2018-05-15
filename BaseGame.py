@@ -119,19 +119,22 @@ class Player:
 def renderBullets(Game,player,gunType):
     for b in player.bullets:
         noCol = True
-        px,py = player.pos
+        px, py = player.pos
         nx = b[0][0] + 20*cos(radians(b[1]))
         ny = b[0][1] - 20*sin(radians(b[1]))
-        lx,ly = (nx-px + Game.screen.get_width()//2,ny-py + Game.screen.get_height()//2)
-        interpolate = [(b[0][0]+i*cos(radians(b[1])),b[0][1]+i*sin(radians(b[1]))) for i in range(10)]
+        lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)
+        interpolate = [(b[0][0] + i * cos(radians(b[1])), b[0][1] + i * sin(radians(b[1]))) for i in range(20)]
         if 0<lx<Game.screen.get_width() and 0<ly<Game.screen.get_height():
-            for cx,cy in interpolate:
-                if Game.collisionmap.get_at((int(cx),int(cy)))[3] != 0:
+            for cx, cy in interpolate:
+                if Game.collisionmap.get_at((int(cx), int(cy)))[3] != 0:
                     noCol = False
+
             if noCol:
                 lb = transform.rotate(gunType.bulletSprite,b[1])
                 Game.screen.blit(lb,(lx,ly))
                 player.bullets[player.bullets.index(b)] = [(nx,ny),b[1]]
+            else:
+                del player.bullets[player.bullets.index(b)]
         else:
             del player.bullets[player.bullets.index(b)]
 def renderEnemyBullets(Game,userplayer,players,gunType):
@@ -142,7 +145,7 @@ def renderEnemyBullets(Game,userplayer,players,gunType):
             nx = b[0][0] + 20 * cos(radians(b[1]))
             ny = b[0][1] - 20 * sin(radians(b[1]))
             lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)
-            interpolate = [(b[0][0] + i * cos(radians(b[1])), b[0][1] + i * sin(radians(b[1]))) for i in range(10)]
+            interpolate = [(b[0][0] + i * cos(radians(b[1])), b[0][1] + i * sin(radians(b[1]))) for i in range(20)]
             if 0 < lx < Game.screen.get_width() and 0 < ly < Game.screen.get_height():
                 for cx, cy in interpolate:
                     if Game.collisionmap.get_at((int(cx), int(cy)))[3] != 0:

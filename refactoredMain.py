@@ -27,7 +27,6 @@ while g.running:
     p.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
     px, py = p.get_pos()
     keys = key.get_pressed()
-    p.update_gif()
     #SPRINT
     if keys[K_LSHIFT] and mb[0] == 1:
         p.speed = 5
@@ -38,6 +37,7 @@ while g.running:
     else:
         p.speed = 10
         p.state = 0
+    p.update_gif()
     #UP
     if keys[K_w] and g.screen.get_height()//2<py-p.speed:
         p.move('UP', g.background, g.collisionmap)

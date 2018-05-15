@@ -115,7 +115,7 @@ class Player:
             self.bullets.append([(px+5*cos(radians(angle)),py-5*sin(radians(angle))),angle])
 
     def renderPlayer(self):
-        sprite = transform.rotate(self.sprites[self.state][self.gif_counter // 5], self.rotation + 90)
+        sprite = transform.rotate(self.sprites[self.state][self.gif_counter // 10], self.rotation + 90)
         sprite = transform.smoothscale(sprite, (sprite.get_width() // 3, sprite.get_height() // 3))
         self.rect = self.game.screen.blit(sprite, (640-sprite.get_width()//2, 400-sprite.get_height()//2))
 
@@ -126,7 +126,7 @@ class Player:
         return self.pos
 
     def update_gif(self):
-        if self.gif_counter >= 5 * len(self.sprites[self.state]) - 1:
+        if self.gif_counter >= 10 * len(self.sprites[self.state]) - 1:
             self.gif_counter = 0
         else:
             self.gif_counter += 1

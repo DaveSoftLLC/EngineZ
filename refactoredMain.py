@@ -22,13 +22,13 @@ while g.running:
         if e.type == MOUSEBUTTONDOWN:
             if e.button == 1:
                 left_click = True
-    mb = mouse.get_pressed()
+    m = mouse.get_pressed()
     mx, my = mouse.get_pos()
     p.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
     px, py = p.get_pos()
     keys = key.get_pressed()
     #SPRINT
-    if keys[K_LSHIFT] and mb[0] == 1:
+    if keys[K_LSHIFT] and m[0] == 1:
         p.speed = 5
         p.state = 2
     elif keys[K_LSHIFT]:
@@ -37,7 +37,7 @@ while g.running:
     else:
         p.speed = 10
         p.state = 0
-    p.update_gif()
+
     #UP
     if keys[K_w] and g.screen.get_height()//2<py-p.speed:
         p.move('UP', g.background, g.collisionmap)
@@ -50,11 +50,13 @@ while g.running:
     #RIGHT
     if keys[K_d] and px+p.speed<g.background.get_width()-g.screen.get_width()//2:
         p.move('RIGHT', g.background, g.collisionmap)
-    
-    if left_click:
+
+    if left_click or (m[0] == 1 and p.gif_counter % 30 == 0):
+        p.state = 2
         for a in range(1,current_gun.spread):
             spread = p.rotation+90-(3-a)*6
             p.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
+    p.update_gif()
     g.draw_screen(p)
     p.renderPlayer()
     renderBullets(g, p, current_gun)

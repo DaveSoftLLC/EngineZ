@@ -12,13 +12,24 @@ while g.running:
     for e in event.get():
         if e.type == QUIT:
             g.running = False
-        if e.type == MOUSEBUTTONDOWN and e.button == 1:
-            left_click = True
-
+        if e.type == MOUSEBUTTONDOWN:
+            if e.button == 1:
+                left_click = True
+    mb = mouse.get_pressed()
     mx, my = mouse.get_pos()
     p.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
     px, py = p.get_pos()
     keys = key.get_pressed()
+    #SPRINT
+    if keys[K_LSHIFT] and mb[0] == 1:
+        p.speed = 5
+        p.state = 2
+    elif keys[K_LSHIFT]:
+        p.speed = 15
+        p.state = 1
+    else:
+        p.speed = 10
+        p.state = 0
     #UP
     if keys[K_w] and g.screen.get_height()//2<py-p.speed:
         p.move('UP', g.background, g.collisionmap)
@@ -31,6 +42,7 @@ while g.running:
     #RIGHT
     if keys[K_d] and px+p.speed<g.background.get_width()-g.screen.get_width()//2:
         p.move('RIGHT', g.background, g.collisionmap)
+    
     if left_click:
         for a in range(1,current_gun.spread):
             spread = p.rotation+90-(3-a)*6

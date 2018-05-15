@@ -1,3 +1,5 @@
+import glob
+
 from BaseGame import *
 
 guns = []
@@ -5,7 +7,12 @@ shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6)
 guns.append(shotgun)
 collision = image.load('Background/rocks+hole.png')
 g = GameMode()
-p = Player(g, 'james', (1200, 1200), sprites, 10)
+sprites = [image.load('Sprites/sprite1.png'), image.load('Sprites/sprite2.png'), image.load('Sprites/sprite3.png')]
+newSprites = [[image.load(file) for file in glob.glob('newSprites/shotgun/idle/*.png')],
+              [image.load(file) for file in glob.glob('newSprites/shotgun/move/*.png')],
+              [image.load(file) for file in glob.glob('newSprites/shotgun/shoot/*.png')]]
+print(newSprites)
+p = Player(g, 'james', (1200, 1200), newSprites, 10)
 current_gun = guns[0]
 while g.running:
     left_click = False
@@ -20,6 +27,7 @@ while g.running:
     p.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
     px, py = p.get_pos()
     keys = key.get_pressed()
+    p.update_gif()
     #SPRINT
     if keys[K_LSHIFT] and mb[0] == 1:
         p.speed = 5

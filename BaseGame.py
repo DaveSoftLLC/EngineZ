@@ -64,14 +64,15 @@ class Player:
         self.name = name
         self.sprites = sprite_files
         self.pos = pos
-        self.rotation = 0
+        self.rotation = 90
         self.state = 0
         self.health = 100
         self.speed = speed
         self.bullets = []
         self.game = game
-        self.rect = self.game.screen.blit(self.sprites[self.state], (game.screen.get_width()//2,
-                                                                     game.screen.get_height()//2))
+        self.rect = self.game.screen.blit(self.sprites[self.state][0], (game.screen.get_width() // 2,
+                                                                        game.screen.get_height() // 2))
+        self.gif_counter = 0
 
     def move(self,direction,map,collisionmap,speed=None):
         if speed is None:
@@ -96,26 +97,41 @@ class Player:
             if nx < self.game.background.get_width():
                 if collisionmap.get_at((nx, ny))[3] == 0:
                     self.pos = (nx,ny)
+
     def takeDamage(self,amount):
         if self.health-amount > 0:
             self.health -= amount
         else:
             self.die()
+
     def die(self):
         print("dead")
         pass
+
     def fire(self):
         px,py = self.pos
         for a in range(1,6):
             angle = self.rotation+90-(3-a)*6
             self.bullets.append([(px+5*cos(radians(angle)),py-5*sin(radians(angle))),angle])
+
     def renderPlayer(self):
-        sprite = transform.rotate(self.sprites[self.state], self.rotation)
+        sprite = transform.rotate(self.sprites[self.state][self.gif_counter // 5], self.rotation + 90)
+        print(self.gif_counter, len(self.sprites[self.state]))
+        sprite = transform.smoothscale(sprite, (sprite.get_width() // 3, sprite.get_height() // 3))
         self.rect = self.game.screen.blit(sprite, (640-sprite.get_width()//2, 400-sprite.get_height()//2))
+
     def get_rect(self):
         return self.rect
+
     def get_pos(self):
         return self.pos
+
+    def update_gif(self):
+        if self.gif_counter == 5 * len(self.sprites[self.state]) - 1:
+            self.gif_counter = 0
+        else:
+            self.gif_counter += 1
+
 def renderBullets(Game,player,gunType):
     for b in player.bullets:
         noCol = True

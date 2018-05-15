@@ -3,7 +3,6 @@ from BaseGame import *
 guns = []
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6)
 guns.append(shotgun)
-sprites = [image.load('Sprites/sprite1.png'), image.load('Sprites/sprite2.png'), image.load('Sprites/sprite3.png')]
 collision = image.load('Background/rocks+hole.png')
 g = GameMode()
 p = Player(g, 'james', (1200, 1200), sprites, 10)

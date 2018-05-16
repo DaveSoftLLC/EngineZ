@@ -13,6 +13,8 @@ newSprites = [[image.load(file) for file in glob.glob('newSprites/shotgun/idle/*
               [image.load(file) for file in glob.glob('newSprites/shotgun/shoot/*.png')]]
 print(newSprites)
 p = Player(g, 'james', (1200, 1200), newSprites, 10)
+client = Client(p, g, '127.0.0.1', 4545)
+threading.Thread(target=client.get_data()).start()
 current_gun = guns[0]
 while g.running:
     left_click = False
@@ -32,7 +34,7 @@ while g.running:
         p.speed = 5
         p.state = 2
     elif keys[K_LSHIFT]:
-        p.speed = 15
+        p.speed = 13
         p.state = 1
     else:
         p.speed = 10

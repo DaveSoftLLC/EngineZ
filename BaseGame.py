@@ -7,29 +7,45 @@ from pygame import *
 TCP_IP = '159.203.163.149'
 TCP_PORT = 8080
 BUFFER_SIZE = 500
-mixer.init()
-font.init()
 
 otherPlayerDict = {}
 
 
 class Client:
-    def __init__(self, player, TCP_IP, TCP_PORT):
+    def __init__(self, player, game, TCP_IP, TCP_PORT):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.player = player
-        self.ip = TCP_IP
-        self.port = TCP_PORT
+        self.TCP_IP = TCP_IP
+        self.TCP_PORT = TCP_PORT
+        self.game = game
 
-    def get_data(self, running, player):
+    def get_data(self):
         global otherPlayerDict
         self.s.connect((self.TCP_IP,self.TCP_PORT))
-        while running:
+        while self.game.running:
             p = self.player
-            binary = pickle.dumps(player)
+            binary = pickle.dumps(p)
             self.s.send(binary)
-            data = data.decode('utf-8')
+            data = s.recv(BUFFER_SIZE)
+            data = pickle.loads(data)
             otherPlayerDict = data
+            p.health = otherPlayerDict[p.name].health
         self.s.close()
+
+    def render_other_players(self):
+        p = self.player
+        g = self.game
+        for o in otherPlayerDict:
+            if o.name != p.name:
+                px, py = p.get_pos()
+                ox, oy = p.get_pos()
+                if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2:
+                    nx = ox - px + g.screen.get_width() // 2  # gets the enemy position in your screen
+                    ny = oy - py + g.screen.get_height() // 2
+                    other_sprite = transform.rotate(p.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
+                    other_sprite = transform.smoothscale(other_sprite, (
+                    other_sprite.get_width() // 3, other_sprite.get_height() // 3))
+                    g.screen.blit(sprite, (nx, ny))
 
 
 class GameMode:
@@ -37,6 +53,8 @@ class GameMode:
         self.resolution = (1280,800)
         self.players = {}
         if not server:
+            mixer.init()
+            font.init()
             self.screen = display.set_mode(self.resolution)
             self.screen.fill((255,255,255))
             self.textFont = font.SysFont("Arial", 25)

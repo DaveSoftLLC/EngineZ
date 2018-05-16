@@ -1,10 +1,11 @@
-import socket, threading
-from pygame import *
-from math import*
-from glob import*
-import copy
-import requests
 import json
+import socket
+import threading
+from math import *
+
+import requests
+from pygame import *
+
 #TCP_IP = '10.88.214.97'
 TCP_IP = '159.203.163.149'
 TCP_PORT = 8080
@@ -219,7 +220,7 @@ while running:
             if px-screen.get_width()//2<nx<px+screen.get_width() and py-screen.get_height()//2<ny<py+screen.get_height()//2: #If the enemy is within your screen
                 nx = nx-px +screen.get_width()//2 #gets the enemy position in your screen
                 ny = ny-py +screen.get_height()//2
-                deg=degrees(atan2((screen.get_width()//2-nx),(screen.get_height()//2-ny)))
+                deg = degrees(atan2((screen.get_width() // 2 - nx), (screen.get_height() // 2 - ny)))
                 rotated = transform.rotate(person[otherPlayers[p][2]],otherPlayers[p][1])
                 screen.blit(rotated,(nx,ny))
             otherBullets += otherPlayers[p][4]

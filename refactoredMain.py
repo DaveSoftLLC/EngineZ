@@ -11,9 +11,13 @@ sprites = [image.load('Sprites/sprite1.png'), image.load('Sprites/sprite2.png'),
 newSprites = [[image.load(file) for file in glob.glob('newSprites/shotgun/idle/*.png')],
               [image.load(file) for file in glob.glob('newSprites/shotgun/move/*.png')],
               [image.load(file) for file in glob.glob('newSprites/shotgun/shoot/*.png')]]
-p = Player(g, 'james', (1200, 1200), newSprites, 10)
-# client = Client(p, g, TCP_IP, TCP_PORT)
-# threading.Thread(target=client.get_data())
+
+print(newSprites)
+p = Player(g, 'joe', (1200, 1200), 10)
+client = Client(p, g, '127.0.0.1', 4545, newSprites)
+print('finished connecting')
+threading.Thread(target=client.get_data).start()
+print('beginning main loop')
 current_gun = guns[0]
 while g.running:
     left_click = False
@@ -57,9 +61,11 @@ while g.running:
         for a in range(1,current_gun.spread):
             spread = p.rotation+90-(3-a)*6
             p.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
-    p.update_gif()
+    client.update_player(p)
+    p.update_gif(newSprites)
     g.draw_screen(p)
-    p.renderPlayer()
+    p.render_player(newSprites, g)
+    client.render_other_players()
     renderBullets(g, p, current_gun)
     draw.rect(g.screen, (0,255,0), p.get_rect(), 5)
     display.flip()

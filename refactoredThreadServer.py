@@ -31,10 +31,10 @@ class PlayerInstance:
 
 class Server:
 
-    def __init__(self):
+    def __init__(self, BUFFER_SIZE):
         self.TCP_IP = ''  # ''159.203.163.149'
         self.TCP_PORT = 4545
-        self.BUFFER_SIZE = 500  # Normally 1024, but we want fast response
+        self.BUFFER_SIZE = BUFFER_SIZE  # Normally 1024, but we want fast response
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.bind((self.TCP_IP, self.TCP_PORT))
         self.s.listen(1)
@@ -64,8 +64,8 @@ class Server:
                              curPlayer = decoded.name
                              conn.send(pickle.dumps(self.playerDict))
                              bullets[curPlayer] = decoded.bullets
-                        except:
-                             print("Error")
+                        except Exception as E:
+                            print("Error:", E)
                    else:
                         pass
               except Exception as E:
@@ -75,5 +75,5 @@ class Server:
          conn.close()
 
 
-juniper = Server()
+juniper = Server(BUFFER_SIZE)
 threading.Thread(target=juniper.listen).start()

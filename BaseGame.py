@@ -23,7 +23,6 @@ class Client:
         self.player = player
 
     def get_data(self):
-        global otherPlayerDict
         self.s.connect((self.TCP_IP,self.TCP_PORT))
         print('beginning transfer')
         while self.game.running:
@@ -49,12 +48,11 @@ class Client:
                     other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
                     other_sprite = transform.smoothscale(other_sprite, (
                     other_sprite.get_width() // 3, other_sprite.get_height() // 3))
-                    g.screen.blit(other_sprite, (nx, ny))
 
     def render_enemy_bullets(self, gun):
         p = self.player
         g = self.game
-        for o in otherPlayerDict:
+        for o in self.other_player_dict.values():
             if o.name != p.name:
                 px, py = p.get_pos()
                 for b in o.bullets:
@@ -62,7 +60,7 @@ class Client:
                     by = b[0][1] - 20 * sin(radians(b[1]))
                     lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
                     lb = transform.rotate(gun.bulletSprite, b[1])
-                    g.screen.blit(lb)
+                    g.screen.blit(lb, (lx, ly))
 
 
 class GameMode:

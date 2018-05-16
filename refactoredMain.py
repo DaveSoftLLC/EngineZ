@@ -1,4 +1,5 @@
 import glob
+from random import randint
 
 from BaseGame import *
 
@@ -13,7 +14,7 @@ newSprites = [[image.load(file) for file in glob.glob('newSprites/shotgun/idle/*
               [image.load(file) for file in glob.glob('newSprites/shotgun/shoot/*.png')]]
 
 print(newSprites)
-p = Player(g, 'joe', (1200, 1200), 10)
+p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10)
 client = Client(p, g, '127.0.0.1', 4545, newSprites)
 print('finished connecting')
 threading.Thread(target=client.get_data).start()
@@ -67,6 +68,7 @@ while g.running:
     p.render_player(newSprites, g)
     client.render_other_players()
     renderBullets(g, p, current_gun)
+    client.render_enemy_bullets(current_gun)
     draw.rect(g.screen, (0,255,0), p.get_rect(), 5)
     display.flip()
 quit()

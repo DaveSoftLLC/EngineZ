@@ -1,5 +1,3 @@
-import threading
-
 from BaseGame import *
 
 bullets = dict()

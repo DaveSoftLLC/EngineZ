@@ -1,5 +1,4 @@
 import glob
-import threading
 
 from BaseGame import *
 
@@ -12,6 +11,7 @@ sprites = [image.load('Sprites/sprite1.png'), image.load('Sprites/sprite2.png'),
 newSprites = [[image.load(file) for file in glob.glob('newSprites/shotgun/idle/*.png')],
               [image.load(file) for file in glob.glob('newSprites/shotgun/move/*.png')],
               [image.load(file) for file in glob.glob('newSprites/shotgun/shoot/*.png')]]
+
 print(newSprites)
 p = Player(g, 'joe', (1200, 1200), 10)
 client = Client(p, g, '127.0.0.1', 4545, newSprites)

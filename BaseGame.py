@@ -26,7 +26,7 @@ class Client:
             p = self.player
             binary = pickle.dumps(p)
             self.s.send(binary)
-            data = s.recv(BUFFER_SIZE)
+            data = self.s.recv(BUFFER_SIZE)
             data = pickle.loads(data)
             otherPlayerDict = data
             p.health = otherPlayerDict[p.name].health
@@ -46,6 +46,19 @@ class Client:
                     other_sprite = transform.smoothscale(other_sprite, (
                     other_sprite.get_width() // 3, other_sprite.get_height() // 3))
                     g.screen.blit(sprite, (nx, ny))
+
+    def render_enemy_bullets(self, gun):
+        p = self.player
+        g = self.game
+        for o in otherPlayerDict:
+            if o.name != p.name:
+                px, py = p.get_pos()
+                for b in o.bullets:
+                    bx = b[0][0] + 20 * cos(radians(b[1]))
+                    by = b[0][1] - 20 * sin(radians(b[1]))
+                    lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
+                    lb = transform.rotate(gun.bulletSprite, b[1])
+                    g.screen.blit(lb)
 
 
 class GameMode:

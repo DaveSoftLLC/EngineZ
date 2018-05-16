@@ -6,46 +6,50 @@ from pygame import *
 
 TCP_IP = '159.203.163.149'
 TCP_PORT = 8080
-BUFFER_SIZE = 500
-
-otherPlayerDict = {}
+BUFFER_SIZE = 5000
 
 
 class Client:
-    def __init__(self, player, game, TCP_IP, TCP_PORT):
+    def __init__(self, player, game, TCP_IP, TCP_PORT, sprites):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.player = player
         self.TCP_IP = TCP_IP
         self.TCP_PORT = TCP_PORT
         self.game = game
+        self.other_player_dict = dict()
+        self.sprites = sprites
+
+    def update_player(self, player):
+        self.player = player
 
     def get_data(self):
         global otherPlayerDict
         self.s.connect((self.TCP_IP,self.TCP_PORT))
+        print('beginning transfer')
         while self.game.running:
             p = self.player
             binary = pickle.dumps(p)
             self.s.send(binary)
-            data = s.recv(BUFFER_SIZE)
+            data = self.s.recv(BUFFER_SIZE)
             data = pickle.loads(data)
-            otherPlayerDict = data
-            p.health = otherPlayerDict[p.name].health
+            self.other_player_dict = data
+            p.health = self.other_player_dict[p.name].health
         self.s.close()
 
     def render_other_players(self):
         p = self.player
         g = self.game
-        for o in otherPlayerDict:
+        for o in self.other_player_dict.values():
             if o.name != p.name:
                 px, py = p.get_pos()
-                ox, oy = p.get_pos()
+                ox, oy = o.get_pos()
                 if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2:
                     nx = ox - px + g.screen.get_width() // 2  # gets the enemy position in your screen
                     ny = oy - py + g.screen.get_height() // 2
-                    other_sprite = transform.rotate(p.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
+                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
                     other_sprite = transform.smoothscale(other_sprite, (
                     other_sprite.get_width() // 3, other_sprite.get_height() // 3))
-                    g.screen.blit(sprite, (nx, ny))
+                    g.screen.blit(other_sprite, (nx, ny))
 
 
 class GameMode:
@@ -78,21 +82,18 @@ class GameMode:
 
 
 class Player:
-    def __init__(self, game, name, pos, sprite_files, speed):
+    def __init__(self, game, name, pos, speed):
         self.name = name
-        self.sprites = sprite_files
         self.pos = pos
         self.rotation = 90
         self.state = 0
         self.health = 100
         self.speed = speed
         self.bullets = []
-        self.game = game
-        self.rect = self.game.screen.blit(self.sprites[self.state][0], (game.screen.get_width() // 2,
-                                                                        game.screen.get_height() // 2))
+        self.rect = None
         self.gif_counter = 0
 
-    def move(self,direction,map,collisionmap,speed=None):
+    def move(self, direction, background, collisionmap, speed=None):
         if speed is None:
             speed = self.speed
         if direction == 'UP':
@@ -102,7 +103,7 @@ class Player:
                     self.pos = (nx,ny)
         elif direction == 'DOWN':
             nx, ny = (self.pos[0], self.pos[1] + speed)
-            if ny < self.game.background.get_height():
+            if ny < background.get_height():
                 if collisionmap.get_at((nx, ny))[3] == 0:
                     self.pos = (nx,ny)
         elif direction == 'LEFT':
@@ -112,11 +113,11 @@ class Player:
                     self.pos = (nx,ny)
         elif direction == 'RIGHT':
             nx, ny = (self.pos[0] + speed, self.pos[1])
-            if nx < self.game.background.get_width():
+            if nx < background.get_width():
                 if collisionmap.get_at((nx, ny))[3] == 0:
                     self.pos = (nx,ny)
 
-    def takeDamage(self,amount):
+    def take_damage(self, amount):
         if self.health-amount > 0:
             self.health -= amount
         else:
@@ -132,10 +133,10 @@ class Player:
             angle = self.rotation+90-(3-a)*6
             self.bullets.append([(px+5*cos(radians(angle)),py-5*sin(radians(angle))),angle])
 
-    def renderPlayer(self):
-        sprite = transform.rotate(self.sprites[self.state][self.gif_counter // 10], self.rotation + 90)
+    def render_player(self, sprites, game):
+        sprite = transform.rotate(sprites[self.state][self.gif_counter // 10], self.rotation + 90)
         sprite = transform.smoothscale(sprite, (sprite.get_width() // 3, sprite.get_height() // 3))
-        self.rect = self.game.screen.blit(sprite, (640-sprite.get_width()//2, 400-sprite.get_height()//2))
+        self.rect = game.screen.blit(sprite, (640 - sprite.get_width() // 2, 400 - sprite.get_height() // 2))
 
     def get_rect(self):
         return self.rect
@@ -143,8 +144,8 @@ class Player:
     def get_pos(self):
         return self.pos
 
-    def update_gif(self):
-        if self.gif_counter >= 10 * len(self.sprites[self.state]) - 1:
+    def update_gif(self, sprites):
+        if self.gif_counter >= 10 * len(sprites[self.state]) - 1:
             self.gif_counter = 0
         else:
             self.gif_counter += 1

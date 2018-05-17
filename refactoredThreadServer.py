@@ -21,6 +21,7 @@ class PlayerInstance:
             for ix, iy in interpolate:
                 if player.rect.collidepoint((ix, iy)):
                     player.take_damage(10)
+                    break
 
     def take_damage(self, amount):
         player = self.player

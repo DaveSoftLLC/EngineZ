@@ -240,12 +240,14 @@ class Inventory:
     def draw_inventory(self,Game):
         for i in range(6):
             if i!=self.state:
+                Game.blit(self.inventoryP[i].inventory_image,(850+i*69,700))
                 draw.rect(Game,(0),(850+i*69,700,70,70),2)
+        Game.blit(self.inventoryP[self.state].inventory_image,(850+self.state*69,695))
         draw.rect(Game,(0,0,255),(850+self.state*69,695,70,70),2)
 class Gun:
-    def __init__(self,name,bulletSprite,damage,spread=None):
+    def __init__(self,name,bulletSprite,damage,inventory_image,spread=None):
         self.name = name
         self.bulletSprite = bulletSprite
         self.damage = damage
         self.spread = spread
-                
+        self.inventory_image = inventory_image        

@@ -2,10 +2,11 @@ import glob
 from random import randint
 
 from BaseGame import *
-
-guns = []
+inventory =[]
+start = InventoryW(0,0,0,0,0)
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6)
-guns.append(shotgun)
+inventory.append(shotgun)
+
 collision = image.load('Background/rocks+hole.png')
 g = GameMode()
 sprites = [image.load('Sprites/sprite1.png'), image.load('Sprites/sprite2.png'), image.load('Sprites/sprite3.png')]
@@ -17,9 +18,9 @@ print(newSprites)
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10)
 client = Client(p, g, '127.0.0.1', 4545, newSprites)
 print('finished connecting')
-threading.Thread(target=client.get_data).start()
+#threading.Thread(target=client.get_data).start()
 print('beginning main loop')
-current_gun = guns[0]
+current_gun = inventory[0]
 while g.running:
     left_click = False
     for e in event.get():
@@ -28,6 +29,10 @@ while g.running:
         if e.type == MOUSEBUTTONDOWN:
             if e.button == 1:
                 left_click = True
+            elif e.button == 4: #scroll to move right
+                start.minventory("RIGHT")
+            elif e.button == 5:#scroll to move left
+                start.minventory("LEFT")
     m = mouse.get_pressed()
     mx, my = mouse.get_pos()
     p.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))

@@ -1,12 +1,10 @@
 import pickle
 import socket
-import threading
 from math import *
-
 from pygame import *
 
-TCP_IP = '159.203.147.141'
-TCP_PORT = 4545
+TCP_IP = '159.203.163.149'
+TCP_PORT = 8080
 BUFFER_SIZE = 5000
 
 
@@ -49,7 +47,6 @@ class Client:
                     other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
                     other_sprite = transform.smoothscale(other_sprite, (
                     other_sprite.get_width() // 3, other_sprite.get_height() // 3))
-                    g.screen.blit(other_sprite, (nx,ny))
 
     def render_enemy_bullets(self, gun):
         p = self.player
@@ -90,6 +87,15 @@ class GameMode:
                                                  py-self.screen.get_height()//2,
                                                  self.screen.get_width(), self.screen.get_height()))
             self.screen.blit(portion,(0,0))
+            
+            if player.health>80:
+                healthc = (0,255,0)
+            elif player.health>40:
+                healthc = (255,255,0)
+            else:
+                healthc = (255,0,0)
+            draw.rect(self.screen,(healthc),(20,20,player.health/100*300,40))
+            draw.rect(self.screen,(0),(20,20,300,40),2)
         except Exception as E:
             print("Error:", E)
 
@@ -135,7 +141,7 @@ class Player:
             self.health -= amount
         else:
             self.die()
-
+            
     def die(self):
         print("dead")
         pass
@@ -207,11 +213,11 @@ def renderEnemyBullets(Game,userplayer,players,gunType):
                 del player.bullets[player.bullets.index(b)]
 
 class Inventory:
-    def __init__(self,i1,i2,i3,i4,i5):
-        self.inventoryP = [Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6),i1,i2,i3,i4,i5]
+    def __init__(self,i0,i1,i2,i3,i4,i5):
+        self.inventoryP = [i0,i1,i2,i3,i4,i5]
         self.state = 0
 
-    def addS(self,item):
+    def add_item(self,item):
         if 0 in self.inventoryP:
             self.inventoryP[self.inventoryP.index(0)] = item
         else:

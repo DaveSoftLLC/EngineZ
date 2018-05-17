@@ -2,10 +2,11 @@ import glob
 from random import randint
 
 from BaseGame import *
-inventory = Inventory(Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6),Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6),Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6),Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6),Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6))
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6)
+inventory = Inventory(shotgun,shotgun,shotgun,shotgun,shotgun,shotgun)
+
 #inventory.append(shotgun)
-inventory.addS(shotgun)
+inventory.add_item(shotgun)
 collision = image.load('Background/rocks+hole.png')
 g = GameMode()
 sprites = [image.load('Sprites/sprite1.png'), image.load('Sprites/sprite2.png'), image.load('Sprites/sprite3.png')]
@@ -15,7 +16,7 @@ newSprites = [[image.load(file) for file in glob.glob('newSprites/shotgun/idle/*
 
 print(newSprites)
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10)
-client = Client(p, g, TCP_IP, TCP_PORT, newSprites)
+client = Client(p, g, '127.0.0.1', 4545, newSprites)
 print('finished connecting')
 #threading.Thread(target=client.get_data).start()
 print('beginning main loop')

@@ -204,13 +204,21 @@ def renderEnemyBullets(Game,userplayer,players,gunType):
             else:
                 del player.bullets[player.bullets.index(b)]
 
-class InventoryW:
+class Inventory:
     def __init__(self,i1,i2,i3,i4,i5):
-        self.inventory = ["axe",i1,i2,i3,i4,i5]
+        self.inventoryP = [Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6),i1,i2,i3,i4,i5]
         self.state = 0
-    def minventory(self,scroll):
+
+    def addS(self,item):
+        if 0 in self.inventoryP:
+            self.inventoryP[self.inventoryP.index(0)] = item
+        else:
+            self.inventoryP[self.state] = item
+        #Visually remove or add object needs to be done
+    
+    def switch(self,scroll):
         if scroll == "RIGHT":
-            if len(self.inventory) == self.state:
+            if len(self.inventoryP) == self.state:
                 self.state = 0
             else:
                 self.state+=1

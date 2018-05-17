@@ -75,6 +75,7 @@ while g.running:
     renderBullets(g, p, inventory.inventoryP[inventory.state])
     client.render_enemy_bullets(inventory.inventoryP[inventory.state])
     draw.rect(g.screen, (0,255,0), p.get_rect(), 5)
+    inventory.draw_inventory(g.screen)
     display.flip()
 quit()
 

@@ -2,11 +2,10 @@ import glob
 from random import randint
 
 from BaseGame import *
-inventory =[]
-start = InventoryW(0,0,0,0,0)
+inventory = Inventory(Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6),Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6),Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6),Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6),Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6))
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10, 6)
-inventory.append(shotgun)
-
+#inventory.append(shotgun)
+inventory.addS(shotgun)
 collision = image.load('Background/rocks+hole.png')
 g = GameMode()
 sprites = [image.load('Sprites/sprite1.png'), image.load('Sprites/sprite2.png'), image.load('Sprites/sprite3.png')]
@@ -20,7 +19,7 @@ client = Client(p, g, TCP_IP, TCP_PORT, newSprites)
 print('finished connecting')
 #threading.Thread(target=client.get_data).start()
 print('beginning main loop')
-current_gun = inventory[0]
+#current_gun = inventory[0]
 while g.running:
     left_click = False
     for e in event.get():
@@ -29,10 +28,10 @@ while g.running:
         if e.type == MOUSEBUTTONDOWN:
             if e.button == 1:
                 left_click = True
-            elif e.button == 4: #scroll to move right
-                start.minventory("RIGHT")
-            elif e.button == 5:#scroll to move left
-                start.minventory("LEFT")
+            elif e.button == 5: #scroll to move right
+                inventory.switch("RIGHT")
+            elif e.button == 4:#scroll to move left
+                inventory.switch("LEFT")
     m = mouse.get_pressed()
     mx, my = mouse.get_pos()
     p.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
@@ -64,7 +63,7 @@ while g.running:
 
     if left_click or (m[0] == 1 and p.gif_counter % 30 == 0):
         p.state = 2
-        for a in range(1,current_gun.spread):
+        for a in range(1,inventory.inventoryP[inventory.state].spread):
             spread = p.rotation+90-(3-a)*6
             p.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
     client.update_player(p)
@@ -72,8 +71,8 @@ while g.running:
     g.draw_screen(p)
     p.render_player(newSprites, g)
     client.render_other_players()
-    renderBullets(g, p, current_gun)
-    client.render_enemy_bullets(current_gun)
+    renderBullets(g, p, inventory.inventoryP[inventory.state])
+    client.render_enemy_bullets(inventory.inventoryP[inventory.state])
     draw.rect(g.screen, (0,255,0), p.get_rect(), 5)
     display.flip()
 quit()

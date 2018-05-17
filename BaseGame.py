@@ -62,7 +62,7 @@ class Client:
                     by = b[0][1] - 20 * sin(radians(b[1]))
                     lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
                     lb = transform.rotate(gun.bulletSprite, b[1])
-                    g.screen.blit(lb)
+                    g.screen.blit(lb, (lx, ly))
 
 
 class GameMode:

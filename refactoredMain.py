@@ -15,7 +15,7 @@ newSprites = [[image.load(file) for file in glob.glob('newSprites/shotgun/idle/*
 
 print(newSprites)
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10)
-client = Client(p, g, '127.0.0.1', 4545, newSprites)
+client = Client(p, g, TCP_IP, TCP_PORT, newSprites)
 print('finished connecting')
 #threading.Thread(target=client.get_data).start()
 print('beginning main loop')

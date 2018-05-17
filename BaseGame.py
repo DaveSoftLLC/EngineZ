@@ -1,11 +1,12 @@
 import pickle
 import socket
+import threading
 from math import *
 
 from pygame import *
 
-TCP_IP = '159.203.163.149'
-TCP_PORT = 8080
+TCP_IP = '159.203.147.141'
+TCP_PORT = 4545
 BUFFER_SIZE = 5000
 
 
@@ -48,6 +49,7 @@ class Client:
                     other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
                     other_sprite = transform.smoothscale(other_sprite, (
                     other_sprite.get_width() // 3, other_sprite.get_height() // 3))
+                    g.screen.blit(other_sprite, (nx,ny))
 
     def render_enemy_bullets(self, gun):
         p = self.player

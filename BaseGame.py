@@ -227,7 +227,7 @@ class Inventory:
     
     def switch(self,scroll):
         if scroll == "RIGHT":
-            if len(self.inventoryP) == self.state:
+            if len(self.inventoryP) == self.state+1:
                 self.state = 0
             else:
                 self.state+=1
@@ -237,6 +237,10 @@ class Inventory:
             else:
                 self.state-=1
         print(self.state)
+    def draw_inventory(self,Game):
+        for i in range(6):
+            draw.rect(Game,(0),(850+i*69,700,70,70),2)
+        draw.rect(Game,(0,0,255),(850+self.state*69,700,70,70),2)
 class Gun:
     def __init__(self,name,bulletSprite,damage,spread=None):
         self.name = name

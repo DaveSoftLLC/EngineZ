@@ -239,8 +239,9 @@ class Inventory:
         print(self.state)
     def draw_inventory(self,Game):
         for i in range(6):
-            draw.rect(Game,(0),(850+i*69,700,70,70),2)
-        draw.rect(Game,(0,0,255),(850+self.state*69,700,70,70),2)
+            if i!=self.state:
+                draw.rect(Game,(0),(850+i*69,700,70,70),2)
+        draw.rect(Game,(0,0,255),(850+self.state*69,695,70,70),2)
 class Gun:
     def __init__(self,name,bulletSprite,damage,spread=None):
         self.name = name

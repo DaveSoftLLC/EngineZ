@@ -206,10 +206,26 @@ def renderEnemyBullets(Game,userplayer,players,gunType):
             else:
                 del player.bullets[player.bullets.index(b)]
 
-
+class InventoryW:
+    def __init__(self,i1,i2,i3,i4,i5):
+        self.inventory = ["axe",i1,i2,i3,i4,i5]
+        self.state = 0
+    def minventory(self,scroll):
+        if scroll == "RIGHT":
+            if len(self.inventory) == self.state:
+                self.state = 0
+            else:
+                self.state+=1
+        else:
+            if 0 == self.state:
+                self.state = 5
+            else:
+                self.state-=1
+        print(self.state)
 class Gun:
     def __init__(self,name,bulletSprite,damage,spread=None):
         self.name = name
         self.bulletSprite = bulletSprite
         self.damage = damage
         self.spread = spread
+                

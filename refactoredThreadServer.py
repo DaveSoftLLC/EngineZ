@@ -35,7 +35,7 @@ class Server:
         self.TCP_PORT = 4545
         self.BUFFER_SIZE = BUFFER_SIZE  # Normally 1024, but we want fast response
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.setsockopt(socket.SO_REUSEADDR)
+        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((self.TCP_IP, self.TCP_PORT))
         self.s.listen(1)
         self.playerDict = {}

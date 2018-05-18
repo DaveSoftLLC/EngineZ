@@ -116,7 +116,7 @@ while g.running:
         drone.update_gif(droneSprite)
         g.draw_screen(drone)
         drone.render_player(droneSprite, g)
-        client.render_other_players()
+        client.render_other_players(newSprites)
         client.render_enemy_bullets(inventory.inventoryP[inventory.state])
         draw.rect(g.screen, (0,255,0), drone.get_rect(), 5)
     display.flip()

@@ -41,43 +41,29 @@ class Client:
         p = self.player
         g = self.game
         d = self.drone
-        if d == 0:
-            for o in self.other_player_dict.values():
-                if o.name != p.name:
-                    px, py = p.get_pos()
-                    ox, oy = o.get_pos()
-                    if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() \
-                            and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2:
-                        other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
-                        other_sprite = transform.smoothscale(other_sprite, (
-                            other_sprite.get_width() // 3,
-                            other_sprite.get_height() // 3))
-                        nx = ox - px + g.screen.get_width() // 2 \
-                             - other_sprite.get_width() // 2
-                        ny = oy - py + g.screen.get_height() // 2 \
-                             - other_sprite.get_height() // 2
-                        other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
-                        other_sprite = transform.smoothscale(other_sprite, (
-                            other_sprite.get_width() // 3,
-                            other_sprite.get_height() // 3))
-                        g.screen.blit(other_sprite, (nx,ny))
-        else:
-            for o in self.other_player_dict.values():
-                if o.name != d.name:
-                    dx, dy = d.get_pos()
-                    ox, oy = o.get_pos()
-                    if dx - g.screen.get_width() // 2 < ox < dx + g.screen.get_width() //2 \
-                            and dy - g.screen.get_height() // 2 < oy < dy + g.screen.get_height() // 2:
-                        other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
-                        other_sprite = transform.smoothscale(other_sprite, (
-                            other_sprite.get_width() // 3,
-                            other_sprite.get_height() // 3))
-                        nx = ox - dx + g.screen.get_width() // 2 \
-                             - other_sprite.get_width() // 2
-                        ny = oy - dy + g.screen.get_height() // 2 \
-                             - other_sprite.get_height() // 2
-
-                        g.screen.blit(other_sprite, (nx,ny))
+        current = p
+        if d != 0:
+            current = d
+        for o in self.other_player_dict.values():
+            if o.name != current.name:
+                px, py = current.get_pos()
+                ox, oy = o.get_pos()
+                if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() \
+                        and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2:
+                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
+                    other_sprite = transform.smoothscale(other_sprite, (
+                        other_sprite.get_width() // 3,
+                        other_sprite.get_height() // 3))
+                    nx = ox - px + g.screen.get_width() // 2 \
+                         - other_sprite.get_width() // 2
+                    ny = oy - py + g.screen.get_height() // 2 \
+                         - other_sprite.get_height() // 2
+                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
+                    other_sprite = transform.smoothscale(other_sprite, (
+                        other_sprite.get_width() // 3,
+                        other_sprite.get_height() // 3))
+                    g.screen.blit(other_sprite, (nx,ny))
+        if d != 0:
             px, py = p.get_pos()
             dx,dy = d.get_pos()
             if dx - g.screen.get_width() // 2 < px < dx + g.screen.get_width() //2 \
@@ -90,7 +76,6 @@ class Client:
                              - your_Player.get_width() // 2
                         ny = py - dy + g.screen.get_height() // 2 \
                              - your_Player.get_height() // 2
-
                         g.screen.blit(your_Player, (nx,ny))
 
     def render_enemy_bullets(self, gun):

@@ -161,6 +161,7 @@ class Player:
         self.bullets = []
         self.rect = None
         self.gif_counter = 0
+        self.local_bullets = []
 
     def move(self, direction, background, collisionmap, speed=None):
         if speed is None:
@@ -196,10 +197,12 @@ class Player:
         print("dead")
         pass
 
-    def fire(self):
+    def fire(self, inventory):
         px, py = self.pos
-        self.bullets.append(
-            [(px + 5 * cos(radians(self.rotation)), py - 5 * sin(radians(self.rotation))), self.rotation])
+        self.bullets.append([(px, py), self.rotation])
+        for a in range(1,inventory.inventoryP[inventory.state].spread):
+            spread = self.rotation+90-(3-a)*6
+            self.local_bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
 
     def render_player(self, sprites, game):
         sprite = transform.rotate(sprites[self.state][self.gif_counter // 10], self.rotation + 90)
@@ -223,7 +226,7 @@ class Drone(Player):
         print("I don't know what extra functions to put in yet")
 
 def render_bullets(Game, player, gunType):
-    for b in player.bullets:
+    for b in player.local_bullets:
         no_collision = True
         px, py = player.pos
         nx = b[0][0] + 20*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
@@ -237,16 +240,32 @@ def render_bullets(Game, player, gunType):
                     break
 
             if no_collision:
-                for a in range(1, 6):
-                    angle = b[1] + 90 - (3 - a) * 6
-                    lb = transform.rotate(gunType.bulletSprite, angle)
-                    Game.screen.blit(lb, (lx, ly))
+                lb = transform.rotate(gunType.bulletSprite, b[1])
+                Game.screen.blit(lb, (lx, ly))
+                player.local_bullets[player.local_bullets.index(b)] = [(nx, ny), b[1]]
+            else:
+                del player.local_bullets[player.local_bullets.index(b)]
+        else:
+            del player.local_bullets[player.local_bullets.index(b)]
+    for b in player.bullets:
+        no_collision = True
+        px, py = player.pos
+        nx = b[0][0] + 20*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
+        ny = b[0][1] - 20*sin(radians(b[1]))
+        lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)
+        interpolate = [(b[0][0] - i * cos(radians(b[1])), b[0][1] + i * sin(radians(b[1]))) for i in range(20)]
+        if 0 < lx < Game.screen.get_width() and 0 < ly < Game.screen.get_height():
+            for cx, cy in interpolate:
+                if Game.collisionmap.get_at((int(cx), int(cy)))[3] != 0:
+                    no_collision = False
+                    break
+
+            if no_collision:
                 player.bullets[player.bullets.index(b)] = [(nx, ny), b[1]]
             else:
-                del player.bullets[player.bullets.index(b)]
+                player.bullets.remove(b)
         else:
-            del player.bullets[player.bullets.index(b)]
-
+            player.bullets.remove(b)
 
 def render_enemy_bullets(Game, userplayer, players, gunType):
     for player in players:

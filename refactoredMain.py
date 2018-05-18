@@ -22,7 +22,7 @@ droneB = False
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10)
 client = Client(p,0,g, '127.0.0.1', 4545, newSprites)
 print('finished connecting')
-threading.Thread(target=client.get_data).start()
+#threading.Thread(target=client.get_data).start()
 print('beginning main loop')
 #current_gun = inventory[0]
 while g.running:
@@ -119,6 +119,7 @@ while g.running:
         client.render_other_players(newSprites)
         client.render_enemy_bullets(inventory.inventoryP[inventory.state])
         draw.rect(g.screen, (0,255,0), drone.get_rect(), 5)
+
     display.flip()
 quit()
 

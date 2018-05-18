@@ -17,9 +17,9 @@ newSprites = [[image.load(file) for file in glob.glob('newSprites/shotgun/idle/*
 
 print(newSprites)
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10)
-client = Client(p, g, '127.0.0.1', 4545, newSprites)
+#client = Client(p, g, '127.0.0.1', 4545, newSprites)
 print('finished connecting')
-threading.Thread(target=client.get_data).start()
+#threading.Thread(target=client.get_data).start()
 print('beginning main loop')
 #current_gun = inventory[0]
 while g.running:
@@ -65,16 +65,14 @@ while g.running:
 
     if left_click or (m[0] == 1 and p.gif_counter % 30 == 0):
         p.state = 2
-        for a in range(1,inventory.inventoryP[inventory.state].spread):
-            spread = p.rotation+90-(3-a)*6
-            p.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
-    client.update_player(p)
+        p.fire(inventory)
+##    client.update_player(p)
     p.update_gif(newSprites)
     g.draw_screen(p)
     p.render_player(newSprites, g)
-    client.render_other_players()
+##    client.render_other_players()
     render_bullets(g, p, inventory.inventoryP[inventory.state])
-    client.render_enemy_bullets(inventory.inventoryP[inventory.state])
+##    client.render_enemy_bullets(inventory.inventoryP[inventory.state])
     draw.rect(g.screen, (0,255,0), p.get_rect(), 5)
     inventory.draw_inventory(g.screen)
     display.flip()

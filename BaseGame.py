@@ -1,7 +1,7 @@
 import pickle
 import socket
+import threading
 from math import *
-
 from pygame import *
 
 TCP_IP = '127.0.0.1'

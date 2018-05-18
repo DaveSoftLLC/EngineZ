@@ -2,6 +2,7 @@ import glob
 from random import randint
 
 from BaseGame import *
+
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10,image.load('Weapons/shotgun.png'), 6)
 inventory = Inventory(shotgun,shotgun,shotgun,shotgun,shotgun,shotgun)
 
@@ -72,7 +73,7 @@ while g.running:
     g.draw_screen(p)
     p.render_player(newSprites, g)
     client.render_other_players()
-    renderBullets(g, p, inventory.inventoryP[inventory.state])
+    render_bullets(g, p, inventory.inventoryP[inventory.state])
     client.render_enemy_bullets(inventory.inventoryP[inventory.state])
     draw.rect(g.screen, (0,255,0), p.get_rect(), 5)
     inventory.draw_inventory(g.screen)

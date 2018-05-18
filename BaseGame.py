@@ -10,7 +10,7 @@ BUFFER_SIZE = 5000
 
 
 class Client:
-    def __init__(self, player, game, TCP_IP, TCP_PORT, sprites):
+    def __init__(self, player,drone, game, TCP_IP, TCP_PORT, sprites):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.player = player
         self.TCP_IP = TCP_IP
@@ -18,10 +18,12 @@ class Client:
         self.game = game
         self.other_player_dict = dict()
         self.sprites = sprites
+        self.drone = drone
 
     def update_player(self, player):
         self.player = player
-
+    def update_drone(self, drone):
+        self.drone = drone
     def get_data(self):
         self.s.connect((self.TCP_IP,self.TCP_PORT))
         print('beginning transfer')
@@ -38,37 +40,68 @@ class Client:
     def render_other_players(self):
         p = self.player
         g = self.game
-        for o in self.other_player_dict.values():
-            if o.name != p.name:
-                px, py = p.get_pos()
-                ox, oy = o.get_pos()
-                if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() \
-                        and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2:
-                    nx = ox - px + g.screen.get_width() // 2 \
-                         + self.sprites[o.state][o.gif_counter // 10].get_width() // 2
-                    ny = oy - py + g.screen.get_height() // 2 \
-                         + self.sprites[o.state][o.gif_counter // 10].get_height() // 2
-                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
-                    other_sprite = transform.smoothscale(other_sprite, (
-                        other_sprite.get_width() // 3,
-                        other_sprite.get_height() // 3))
-                    g.screen.blit(other_sprite, (nx,ny))
+        d = self.drone
+        if d == 0:
+            for o in self.other_player_dict.values():
+                if o.name != p.name:
+                    px, py = p.get_pos()
+                    ox, oy = o.get_pos()
+                    if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() \
+                            and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2:
+                        nx = ox - px + g.screen.get_width() // 2 \
+                             + self.sprites[o.state][o.gif_counter // 10].get_width() // 2
+                        ny = oy - py + g.screen.get_height() // 2 \
+                             + self.sprites[o.state][o.gif_counter // 10].get_height() // 2
+                        other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
+                        other_sprite = transform.smoothscale(other_sprite, (
+                            other_sprite.get_width() // 3,
+                            other_sprite.get_height() // 3))
+                        g.screen.blit(other_sprite, (nx,ny))
+        else:
+            for o in self.other_player_dict.values():
+                if o.name != d.name:
+                    px, py = d.get_pos()
+                    ox, oy = o.get_pos()
+                    if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() \
+                            and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2:
+                        nx = ox - px + g.screen.get_width() // 2 \
+                             + self.sprites[o.state][o.gif_counter // 10].get_width() // 2
+                        ny = oy - py + g.screen.get_height() // 2 \
+                             + self.sprites[o.state][o.gif_counter // 10].get_height() // 2
+                        other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
+                        other_sprite = transform.smoothscale(other_sprite, (
+                            other_sprite.get_width() // 3,
+                            other_sprite.get_height() // 3))
+                        g.screen.blit(other_sprite, (nx,ny))
 
     def render_enemy_bullets(self, gun):
         p = self.player
         g = self.game
-        for o in self.other_player_dict.values():
-            if o.name != p.name:
-                px, py = p.get_pos()
-                for b in o.bullets:
-                    bx = b[0][0]
-                    by = b[0][1]
-                    for a in range(1, 6):
-                        angle = b[1] + 90 - (3 - a) * 6
-                        lb = transform.rotate(gun.bulletSprite, angle)
-                        lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
-                        g.screen.blit(lb, (lx, ly))
-
+        d = self.drone
+        if d == 0:
+            for o in self.other_player_dict.values():
+                if o.name != p.name:
+                    px, py = p.get_pos()
+                    for b in o.bullets:
+                        bx = b[0][0]
+                        by = b[0][1]
+                        for a in range(1, 6):
+                            angle = b[1] + 90 - (3 - a) * 6
+                            lb = transform.rotate(gun.bulletSprite, angle)
+                            lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
+                            g.screen.blit(lb, (lx, ly))
+        else:
+            for o in self.other_player_dict.values():
+                if o.name != d.name:
+                    px, py = d.get_pos()
+                    for b in o.bullets:
+                        bx = b[0][0]
+                        by = b[0][1]
+                        for a in range(1, 6):
+                            angle = b[1] + 90 - (3 - a) * 6
+                            lb = transform.rotate(gun.bulletSprite, angle)
+                            lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
+                            g.screen.blit(lb, (lx, ly))
 
 class GameMode:
     def __init__(self,server=False):
@@ -96,24 +129,14 @@ class GameMode:
                                                  self.screen.get_width(), self.screen.get_height()))
             self.screen.blit(portion, (0, 0))
 
-            if player.name !="Drone":
-                if player.health > 80:
-                    health_color = (0, 255, 0)
-                elif player.health > 40:
-                    health_color = (255, 255, 0)
-                else:
-                    health_color = (255, 0, 0)
-                draw.rect(self.screen, 0, (20, 20, 300, 40), 2)
-                draw.rect(self.screen, health_color, (20, 20, player.health / 100 * 300, 40))
+            if player.health > 80:
+                health_color = (0, 255, 0)
+            elif player.health > 40:
+                health_color = (255, 255, 0)
             else:
-                if player.health > 80:
-                    health_color = (0, 255, 0)
-                elif player.health > 40:
-                    health_color = (255, 255, 0)
-                else:
-                    health_color = (255, 0, 0)
-                draw.rect(self.screen, 0, (20, 20, 300, 40), 2)
-                draw.rect(self.screen, health_color, (20, 20, player.health / 100 * 300, 40))
+                health_color = (255, 0, 0)
+            draw.rect(self.screen, 0, (20, 20, 300, 40), 2)
+            draw.rect(self.screen, health_color, (20, 20, player.health / 100 * 300, 40))
         except Exception as E:
             print("Error:", E)
 
@@ -186,56 +209,9 @@ class Player:
         else:
             self.gif_counter += 1
 
-class Drone:
-    def __init__(self, game, pos):
-        self.name = name
-        self.pos = pos
-        self.rotation = 90
-        self.state = 0
-        self.rect = None
-        self.gif_counter = 0
-
-    def move(self, direction, background):
-
-        if direction == 'UP':
-            nx,ny = (self.pos[0],self.pos[1] - 10)
-            if 0 < ny :
-                self.pos = (nx,ny)
-        elif direction == 'DOWN':
-            nx, ny = (self.pos[0], self.pos[1] + 10)
-            if ny < background.get_height():
-                self.pos = (nx,ny)
-        elif direction == 'LEFT':
-            nx, ny = (self.pos[0] - 10, self.pos[1])
-            if 0 < nx:
-                self.pos = (nx,ny)
-        elif direction == 'RIGHT':
-            nx, ny = (self.pos[0] + 10, self.pos[1])
-            if nx < background.get_width():
-                self.pos = (nx,ny)
-            
-    def die(self):
-        print("dead")
-        pass
-
-    def render_player(self, sprites, game):
-        sprite = transform.rotate(sprites[self.state][self.gif_counter // 10], self.rotation + 90)
-        sprite = transform.smoothscale(sprite, (sprite.get_width() // 3, sprite.get_height() // 3))
-        self.rect = game.screen.blit(sprite, (640 - sprite.get_width() // 2, 400 - sprite.get_height() // 2))
-
-    def get_rect(self):
-        return self.rect
-
-    def get_pos(self):
-        return self.pos
-
-    def update_gif(self, sprites):
-        if self.gif_counter >= 10 * len(sprites[self.state]) - 1:
-            self.gif_counter = 0
-        else:
-            self.gif_counter += 1
-
-
+class Drone(Player):
+    def printdrone():
+        print("I don't know what extra functions to put in yet")
 
 def render_bullets(Game, player, gunType):
     for b in player.bullets:

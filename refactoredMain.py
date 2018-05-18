@@ -20,7 +20,7 @@ droneSprite = [[image.load(file) for file in glob.glob('newSprites/drone/*.png')
 droneB = False
 
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10)
-client = Client(p, g, '127.0.0.1', 4545, newSprites)
+client = Client(p,0,g, '127.0.0.1', 4545, newSprites)
 print('finished connecting')
 threading.Thread(target=client.get_data).start()
 print('beginning main loop')
@@ -43,10 +43,11 @@ while g.running:
             if keys[K_z]:
                 if droneB == False:
                     #drone = Drone(g.screen,p.pos)
-                    drone = Player(g, '%s' % ("Drone"), (p.pos), 10)
-                    drone_Client = Client(drone, g, '127.0.0.1', 4545, newSprites)
+                    drone = Drone(g, '%s' % ("Drone"), (p.pos), 10)
+                    client.drone = drone
                     droneB = True
                 else:
+                    client.drone = 0
                     droneB = False
     m = mouse.get_pressed()
     mx, my = mouse.get_pos()
@@ -111,12 +112,13 @@ while g.running:
         if keys[K_d] and px+drone.speed<g.background.get_width()-g.screen.get_width()//2:
             drone.move('RIGHT', g.background, g.collisionmap)
             
-        drone_Client.update_player(drone)
+        client.update_drone(drone)
         drone.update_gif(droneSprite)
         g.draw_screen(drone)
         drone.render_player(droneSprite, g)
-        drone_Client.render_other_players()
-        draw.rect(g.screen, (0,255,0), p.get_rect(), 5)
+        client.render_other_players()
+        client.render_enemy_bullets(inventory.inventoryP[inventory.state])
+        draw.rect(g.screen, (0,255,0), drone.get_rect(), 5)
     display.flip()
 quit()
 

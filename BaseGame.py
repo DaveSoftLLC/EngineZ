@@ -96,14 +96,24 @@ class GameMode:
                                                  self.screen.get_width(), self.screen.get_height()))
             self.screen.blit(portion, (0, 0))
 
-            if player.health > 80:
-                health_color = (0, 255, 0)
-            elif player.health > 40:
-                health_color = (255, 255, 0)
+            if player.name !="Drone":
+                if player.health > 80:
+                    health_color = (0, 255, 0)
+                elif player.health > 40:
+                    health_color = (255, 255, 0)
+                else:
+                    health_color = (255, 0, 0)
+                draw.rect(self.screen, 0, (20, 20, 300, 40), 2)
+                draw.rect(self.screen, health_color, (20, 20, player.health / 100 * 300, 40))
             else:
-                health_color = (255, 0, 0)
-            draw.rect(self.screen, 0, (20, 20, 300, 40), 2)
-            draw.rect(self.screen, health_color, (20, 20, player.health / 100 * 300, 40))
+                if player.health > 80:
+                    health_color = (0, 255, 0)
+                elif player.health > 40:
+                    health_color = (255, 255, 0)
+                else:
+                    health_color = (255, 0, 0)
+                draw.rect(self.screen, 0, (20, 20, 300, 40), 2)
+                draw.rect(self.screen, health_color, (20, 20, player.health / 100 * 300, 40))
         except Exception as E:
             print("Error:", E)
 
@@ -175,6 +185,56 @@ class Player:
             self.gif_counter = 0
         else:
             self.gif_counter += 1
+
+class Drone:
+    def __init__(self, game, pos):
+        self.name = name
+        self.pos = pos
+        self.rotation = 90
+        self.state = 0
+        self.rect = None
+        self.gif_counter = 0
+
+    def move(self, direction, background):
+
+        if direction == 'UP':
+            nx,ny = (self.pos[0],self.pos[1] - 10)
+            if 0 < ny :
+                self.pos = (nx,ny)
+        elif direction == 'DOWN':
+            nx, ny = (self.pos[0], self.pos[1] + 10)
+            if ny < background.get_height():
+                self.pos = (nx,ny)
+        elif direction == 'LEFT':
+            nx, ny = (self.pos[0] - 10, self.pos[1])
+            if 0 < nx:
+                self.pos = (nx,ny)
+        elif direction == 'RIGHT':
+            nx, ny = (self.pos[0] + 10, self.pos[1])
+            if nx < background.get_width():
+                self.pos = (nx,ny)
+            
+    def die(self):
+        print("dead")
+        pass
+
+    def render_player(self, sprites, game):
+        sprite = transform.rotate(sprites[self.state][self.gif_counter // 10], self.rotation + 90)
+        sprite = transform.smoothscale(sprite, (sprite.get_width() // 3, sprite.get_height() // 3))
+        self.rect = game.screen.blit(sprite, (640 - sprite.get_width() // 2, 400 - sprite.get_height() // 2))
+
+    def get_rect(self):
+        return self.rect
+
+    def get_pos(self):
+        return self.pos
+
+    def update_gif(self, sprites):
+        if self.gif_counter >= 10 * len(sprites[self.state]) - 1:
+            self.gif_counter = 0
+        else:
+            self.gif_counter += 1
+
 
 
 def render_bullets(Game, player, gunType):

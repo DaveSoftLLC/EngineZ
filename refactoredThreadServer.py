@@ -77,14 +77,16 @@ class Server:
     def check_damage(self, game, all_bullets):
         g = game
         for b in all_bullets:
-            for p in self.player_dict:
+            for p in self.player_dict.values():
                 px, py = p.pos
                 nx = b[0][0]
                 ny = b[0][1]
-                lx, ly = (nx - px + g.screen.get_width() // 2, ny - py + g.screen.get_height() // 2)
+                lx, ly = (nx - px + g.background.get_width() // 2, ny - py
+                          + g.background.get_height() // 2)
                 for a in range(1, 6):
                     angle = b[1] + 90 - (3 - a) * 6
-                    interpolate = [(lx - i * cos(radians(angle)), ly + i * sin(radians(angle))) for i in range(20)]
+                    interpolate = [(lx - i * cos(radians(angle)),
+                                    ly + i * sin(radians(angle))) for i in range(20)]
                     for ix, iy in interpolate:
                         if p.rect.collidepoint((ix, iy)):
                             p.take_damage(10)
@@ -98,8 +100,8 @@ threading.Thread(target=juniper.listen).start()
 while juniper.running:
     try:
         bullet_list = []
-        for p in juniper.player_dict:
+        for p in juniper.player_dict.values():
             bullet_list += p.bullets
         juniper.check_damage(g, bullet_list)
     except Exception as E:
-        print('Error:', E)
+        print('Error Checking Bullets:', E)

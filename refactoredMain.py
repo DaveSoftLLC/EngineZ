@@ -19,7 +19,7 @@ print(newSprites)
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10)
 client = Client(p, g, '127.0.0.1', 4545, newSprites)
 print('finished connecting')
-#threading.Thread(target=client.get_data).start()
+threading.Thread(target=client.get_data).start()
 print('beginning main loop')
 #current_gun = inventory[0]
 while g.running:

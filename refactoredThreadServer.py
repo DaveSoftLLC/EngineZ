@@ -29,7 +29,6 @@ class PlayerInstance:
         player = self.player
         player.health -= amount
 
-
 class Server:
 
     def __init__(self, BUFFER_SIZE):
@@ -71,9 +70,8 @@ class Server:
                    else:
                         pass
               except Exception as E:
-                  del self.player_dict[current_player]
-                   print('Connection Broken:', E)
-                   break
+                  print(E)
+
          conn.close()
 
     def check_damage(self, game, all_bullets):
@@ -93,8 +91,7 @@ class Server:
                             break
 
     def take_damage(self, amount):
-        player = self.player
-        player.health -= amount
+        self.player.health -= amount
 
 juniper = Server(BUFFER_SIZE)
 threading.Thread(target=juniper.listen).start()

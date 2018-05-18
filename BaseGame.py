@@ -36,7 +36,7 @@ class Client:
             self.other_player_dict = data
             p.health = self.other_player_dict[p.name].health
         self.s.close()
-
+    #will be compressed later
     def render_other_players(self,Psprite=None):
         p = self.player
         g = self.game
@@ -91,30 +91,20 @@ class Client:
         p = self.player
         g = self.game
         d = self.drone
-        if d == 0:
-            for o in self.other_player_dict.values():
-                if o.name != p.name:
-                    px, py = p.get_pos()
-                    for b in o.bullets:
-                        bx = b[0][0]
-                        by = b[0][1]
-                        for a in range(1, 6):
-                            angle = b[1] + 90 - (3 - a) * 6
-                            lb = transform.rotate(gun.bulletSprite, angle)
-                            lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
-                            g.screen.blit(lb, (lx, ly))
-        else:
-            for o in self.other_player_dict.values():
-                if o.name != d.name:
-                    px, py = d.get_pos()
-                    for b in o.bullets:
-                        bx = b[0][0]
-                        by = b[0][1]
-                        for a in range(1, 6):
-                            angle = b[1] + 90 - (3 - a) * 6
-                            lb = transform.rotate(gun.bulletSprite, angle)
-                            lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
-                            g.screen.blit(lb, (lx, ly))
+        current = p
+        if d != 0:
+            current = d
+        for o in self.other_player_dict.values():
+            if o.name != current.name:
+                px, py = current.get_pos()
+                for b in o.bullets:
+                    bx = b[0][0]
+                    by = b[0][1]
+                    for a in range(1, 6):
+                        angle = b[1] + 90 - (3 - a) * 6
+                        lb = transform.rotate(gun.bulletSprite, angle)
+                        lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
+                        g.screen.blit(lb, (lx, ly))
 
 class GameMode:
     def __init__(self,server=False):

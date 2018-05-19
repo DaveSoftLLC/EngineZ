@@ -5,7 +5,8 @@ from BaseGame import *
 import time
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10,image.load('Weapons/shotgun.png'), 6)
 inventory = Inventory(shotgun,shotgun,shotgun,shotgun,shotgun,shotgun)
-dronebutton = image.load("Background/dronebutton.png")
+dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
+dronebutton = dronebuttonlist[0]
 #inventory.append(shotgun)
 inventory.add_item(shotgun)
 collision = image.load('Background/rocks+hole.png')
@@ -20,7 +21,7 @@ droneB = False
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10, 'player')
 client = Client(p,0,g, '127.0.0.1', 4545, newSprites)
 #threading.Thread(target=client.get_data).start()
-
+drone_start = 31 #Drone can be used first
 current_actor = p
 while g.running:
     left_click = False
@@ -38,13 +39,15 @@ while g.running:
         elif e.type == KEYDOWN:
             keys = key.get_pressed()
             if keys[K_z]:
-                if droneB == False:
+                if droneB == False and time.time()-drone_start >30:#If the cooldown is down, run
                     drone = Drone(g, '%s' % ("ID"), (p.pos), 6, 'drone')
                     current_actor = drone
                     client.drone = drone
                     droneB = True
-                    time_start=time.time()
+                    dronebutton = dronebuttonlist[1]
+                    drone_start=time.time()
                 else:
+                    drone_start=time.time()
                     client.drone = 0
                     current_actor = p
                     droneB = False
@@ -99,17 +102,26 @@ while g.running:
             client.update_drone(drone)
             drone.update_gif(droneSprite)
             drone.render_player(droneSprite, g)
-            
-            if time.time()-time_start >10:
+            #If time runs out
+            if time.time()-drone_start >10:
                     client.drone = 0
                     current_actor = p
-                    time_start = 0
+                    drone_start = time.time()
                     droneB = False
                     
         render_bullets(g, p, inventory.inventoryP[inventory.state])
         client.render_enemy_bullets(inventory.inventoryP[inventory.state])
         inventory.draw_inventory(g.screen)
-        Drone.draw_drone(g.screen,dronebutton)
+        if time.time()-drone_start>30 and droneB == False:#Highlighting cooldown
+            dronebutton = dronebuttonlist[0]
+            Drone.draw_drone(g.screen,dronebutton)
+        elif droneB == False and time.time()-drone_start<30:
+            Drone.draw_drone(g.screen,dronebutton,round(time.time()-drone_start,2))
+        elif droneB == True:
+            Drone.draw_drone(g.screen,dronebutton,round(time.time()-drone_start,2))
+        else:
+            Drone.draw_drone(g.screen,dronebutton)
+        
     display.flip()
 quit()
 

@@ -211,8 +211,11 @@ class Player:
 class Drone(Player):
     def printdrone():
         print("I don't know what extra functions to put in yet")
-    def draw_drone(Game,pic):
+    def draw_drone(Game,pic,timer = None):
         Game.blit(pic,(20,700))
+        textFont = font.SysFont("Arial", 18)
+        if timer:
+            Game.blit(textFont.render(str(timer), True, (255,255,255)), (20, 700))
     ##########
     #To put in:
     #Drone time

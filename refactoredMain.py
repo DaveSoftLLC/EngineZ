@@ -2,7 +2,7 @@ import glob
 from random import randint
 
 from BaseGame import *
-
+import time
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10,image.load('Weapons/shotgun.png'), 6)
 inventory = Inventory(shotgun,shotgun,shotgun,shotgun,shotgun,shotgun)
 dronebutton = image.load("Background/dronebutton.png")
@@ -43,6 +43,7 @@ while g.running:
                     current_actor = drone
                     client.drone = drone
                     droneB = True
+                    time_start=time.time()
                 else:
                     client.drone = 0
                     current_actor = p
@@ -98,6 +99,13 @@ while g.running:
             client.update_drone(drone)
             drone.update_gif(droneSprite)
             drone.render_player(droneSprite, g)
+            
+            if time.time()-time_start >10:
+                    client.drone = 0
+                    current_actor = p
+                    time_start = 0
+                    droneB = False
+                    
         render_bullets(g, p, inventory.inventoryP[inventory.state])
         client.render_enemy_bullets(inventory.inventoryP[inventory.state])
         inventory.draw_inventory(g.screen)

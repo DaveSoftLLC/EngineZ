@@ -146,9 +146,7 @@ class Player:
         self.gif_counter = 0
         self.local_bullets = []
         self.type = mode
-        if self.type == 'drone':
-            self.timer = 20 #seconds
-            self.cooldown = 60 #seconds
+        
 
     def move(self, direction, background, collisionmap, speed=None):
         if speed is None:

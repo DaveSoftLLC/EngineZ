@@ -211,15 +211,24 @@ class Player:
 class Drone(Player):
     def printdrone():
         print("I don't know what extra functions to put in yet")
-    def draw_drone(Game,pic,timer = None):
-        Game.blit(pic,(20,700))
+    def draw_drone(Game,droneB,piclist,timer):
         textFont = font.SysFont("Arial", 18)
-        if timer:
-            Game.blit(textFont.render(str(round(timer,2)), True, (255,255,255)), (35, 770))
+        if timer>30 and droneB == False:#When cooldown is done
+            dronebutton = piclist[0]
+            #Game.blit(textFont.render(str(round(timer,2)), True, (255,255,255)), (35, 770))
+        elif droneB == False and timer<30:#Cooldown till you can use it again
+            dronebutton = piclist[1]
+            Game.blit(textFont.render(str(round(30-timer,2)), True, (255,255,255)), (35, 770))
+        elif droneB == True: #Timer for while using drone
+            dronebutton = piclist[1]
+            Game.blit(textFont.render(str(round(10-timer,2)), True, (255,255,255)), (35, 770))
+
+        Game.blit(dronebutton,(20,700))
+        
+        
     ##########
     #To put in:
-    #Drone time
-    #Drone usage cooldown
+    
     
 
 def render_bullets(Game, player, gunType, drone=False):

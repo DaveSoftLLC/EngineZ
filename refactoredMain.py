@@ -3,10 +3,9 @@ from random import randint
 
 from BaseGame import *
 import time
-shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10,image.load('Weapons/shotgun.png'), 6)
+shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10,image.load('Weapons/shotgunb.png'), 6)
 inventory = Inventory(shotgun,shotgun,shotgun,shotgun,shotgun,shotgun)
 dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
-dronebutton = dronebuttonlist[0]
 #inventory.append(shotgun)
 inventory.add_item(shotgun)
 collision = image.load('Background/rocks+hole.png')
@@ -44,8 +43,9 @@ while g.running:
                     current_actor = drone
                     client.drone = drone
                     droneB = True
-                    dronebutton = dronebuttonlist[1]
                     drone_start=time.time()
+                elif droneB == False and time.time()-drone_start <30:
+                    pass
                 else:
                     drone_start=time.time()
                     client.drone = 0
@@ -112,15 +112,7 @@ while g.running:
         render_bullets(g, p, inventory.inventoryP[inventory.state])
         client.render_enemy_bullets(inventory.inventoryP[inventory.state])
         inventory.draw_inventory(g.screen)
-        if time.time()-drone_start>30 and droneB == False:#Highlighting cooldown
-            dronebutton = dronebuttonlist[0]
-            Drone.draw_drone(g.screen,dronebutton)
-        elif droneB == False and time.time()-drone_start<30:#Cooldown till you can use it again
-            Drone.draw_drone(g.screen,dronebutton,30-(time.time()-drone_start))
-        elif droneB == True: #Timer for while using drone
-            Drone.draw_drone(g.screen,dronebutton,10-(time.time()-drone_start))
-        else:
-            Drone.draw_drone(g.screen,dronebutton)
+        Drone.draw_drone(g.screen,droneB,dronebuttonlist,(time.time()-drone_start))
         
     display.flip()
 quit()

@@ -42,7 +42,7 @@ class Client:
         g = self.game
         d = self.drone
         current = p
-        if d != 0:
+        if Psprite:
             current = d
         for o in self.other_player_dict.values():
             if o.name != current.name:
@@ -63,21 +63,20 @@ class Client:
                         other_sprite.get_width() // 3,
                         other_sprite.get_height() // 3))
                     g.screen.blit(other_sprite, (nx,ny))
-        if d != 0:
+        if Psprite:
             px, py = p.get_pos()
             dx,dy = d.get_pos()
             if dx - g.screen.get_width() // 2 < px < dx + g.screen.get_width() //2 \
-                            and dy - g.screen.get_height() // 2 < py < dy + g.screen.get_height() // 2:
-                        your_Player = transform.rotate(Psprite[p.state][p.gif_counter // 10], p.rotation + 90)
-                        your_Player = transform.smoothscale(your_Player, (
-                            your_Player.get_width() // 3,
-                            your_Player.get_height() // 3))
-                        nx = px - dx + g.screen.get_width() // 2 \
-                             - your_Player.get_width() // 2
-                        ny = py - dy + g.screen.get_height() // 2 \
-                             - your_Player.get_height() // 2
-                        g.screen.blit(your_Player, (nx,ny))
-
+                        and dy - g.screen.get_height() // 2 < py < dy + g.screen.get_height() // 2:
+                    your_Player = transform.rotate(Psprite[p.state][p.gif_counter // 10], p.rotation + 90)
+                    your_Player = transform.smoothscale(your_Player, (
+                        your_Player.get_width() // 3,
+                        your_Player.get_height() // 3))
+                    nx = px - dx + g.screen.get_width() // 2 \
+                         - your_Player.get_width() // 2
+                    ny = py - dy + g.screen.get_height() // 2 \
+                         - your_Player.get_height() // 2
+                    g.screen.blit(your_Player, (nx,ny))
     def render_enemy_bullets(self, gun):
         p = self.player
         g = self.game
@@ -136,7 +135,7 @@ class GameMode:
 
 
 class Player:
-    def __init__(self, game, name, pos, speed):
+    def __init__(self, game, name, pos, speed, mode):
         self.name = name
         self.pos = pos
         self.rotation = 90
@@ -147,6 +146,7 @@ class Player:
         self.rect = None
         self.gif_counter = 0
         self.local_bullets = []
+        self.type = mode
 
     def move(self, direction, background, collisionmap, speed=None):
         if speed is None:
@@ -210,10 +210,13 @@ class Drone(Player):
     def printdrone():
         print("I don't know what extra functions to put in yet")
 
-def render_bullets(Game, player, gunType):
+def render_bullets(Game, player, gunType, drone=False):
     for b in player.local_bullets:
         no_collision = True
-        px, py = player.pos
+        if drone:
+            px, py = drone.get_pos()
+        else:
+            px, py = player.pos
         nx = b[0][0] + 20*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
         ny = b[0][1] - 20*sin(radians(b[1]))
         lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)#Position on screen
@@ -251,29 +254,6 @@ def render_bullets(Game, player, gunType):
                 player.bullets.remove(b)
         else:
             player.bullets.remove(b)
-
-def render_enemy_bullets(Game, userplayer, players, gunType):
-    for player in players:
-        for b in player.bullets:
-            noCol = True
-            px, py = player.pos
-            nx = b[0][0] + 20 * cos(radians(b[1]))
-            ny = b[0][1] - 20 * sin(radians(b[1]))
-            lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)
-            interpolate = [(b[0][0] + i * cos(radians(b[1])), b[0][1] + i * sin(radians(b[1]))) for i in range(20)]
-            if 0 < lx < Game.screen.get_width() and 0 < ly < Game.screen.get_height():
-                for cx, cy in interpolate:
-                    if Game.collisionmap.get_at((int(cx), int(cy)))[3] != 0:
-                        noCol = False
-                if noCol:
-                    for a in range(1, 6):
-                        angle = b[1] + 90 - (3 - a) * 6
-                        lb = transform.rotate(gunType.bulletSprite, angle)
-                        Game.screen.blit(lb, (lx, ly))
-                    player.bullets[player.bullets.index(b)] = [(nx, ny), b[1]]  # append changes
-            else:
-                del player.bullets[player.bullets.index(b)]
-
 
 class Inventory:
     def __init__(self, i0, i1, i2, i3, i4, i5):

@@ -63,7 +63,7 @@ class Client:
                         other_sprite.get_width() // 3,
                         other_sprite.get_height() // 3))
                     g.screen.blit(other_sprite, (nx,ny))
-        if Psprite:
+        if Psprite: #displaying player
             px, py = p.get_pos()
             dx,dy = d.get_pos()
             if dx - g.screen.get_width() // 2 < px < dx + g.screen.get_width() //2 \
@@ -209,6 +209,12 @@ class Player:
 class Drone(Player):
     def printdrone():
         print("I don't know what extra functions to put in yet")
+
+    ##########
+    #To put in:
+    #Drone time
+    #Drone usage cooldown
+    
 
 def render_bullets(Game, player, gunType, drone=False):
     for b in player.local_bullets:

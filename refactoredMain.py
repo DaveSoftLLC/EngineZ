@@ -39,7 +39,7 @@ while g.running:
             keys = key.get_pressed()
             if keys[K_z]:
                 if droneB == False:
-                    drone = Drone(g, '%s' % ("Drone"), (p.pos), 10, 'drone')
+                    drone = Drone(g, '%s' % ("Drone"), (p.pos), 6, 'drone')
                     current_actor = drone
                     client.drone = drone
                     droneB = True
@@ -55,7 +55,7 @@ while g.running:
     if 1:
         current_actor.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
         px, py = current_actor.get_pos()
-        #SPRINT
+        #SPRINT only for player
         if keys[K_LSHIFT] and m[0] == 1:
             p.speed = 5
             p.state = 2
@@ -92,10 +92,10 @@ while g.running:
             client.render_other_players()
             client.update_player(p)
         else:
-            drone.update_gif(droneSprite)
-            drone.render_player(droneSprite, g)
             client.render_other_players(newSprites)
             client.update_drone(drone)
+            drone.update_gif(droneSprite)
+            drone.render_player(droneSprite, g)
         render_bullets(g, p, inventory.inventoryP[inventory.state])
         client.render_enemy_bullets(inventory.inventoryP[inventory.state])
         inventory.draw_inventory(g.screen)

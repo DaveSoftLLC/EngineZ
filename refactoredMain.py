@@ -99,30 +99,6 @@ while g.running:
         render_bullets(g, p, inventory.inventoryP[inventory.state])
         client.render_enemy_bullets(inventory.inventoryP[inventory.state])
         inventory.draw_inventory(g.screen)
-        
-##    elif droneB == True:
-##        drone.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
-##        px, py = drone.get_pos()
-##        #UP
-##        if keys[K_w] and g.screen.get_height()//2<py-drone.speed:
-##            drone.move('UP', g.background, g.collisionmap)
-##        #DOWN
-##        if keys[K_s] and py+drone.speed<g.background.get_height()-g.screen.get_height()//2:
-##            drone.move('DOWN', g.background, g.collisionmap)
-##        #LEFT
-##        if keys[K_a] and g.screen.get_width()//2<px-drone.speed:
-##            drone.move('LEFT', g.background, g.collisionmap)
-##        #RIGHT
-##        if keys[K_d] and px+drone.speed<g.background.get_width()-g.screen.get_width()//2:
-##            drone.move('RIGHT', g.background, g.collisionmap)
-##            
-##        client.update_drone(drone)
-##        drone.update_gif(droneSprite)
-##        g.draw_screen(drone)
-##        drone.render_player(droneSprite, g)
-##        client.render_other_players(newSprites)
-##        render_bullets(g, p, inventory.inventoryP[inventory.state], drone)
-##        client.render_enemy_bullets(inventory.inventoryP[inventory.state])
     display.flip()
 quit()
 

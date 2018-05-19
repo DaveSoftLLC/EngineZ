@@ -215,7 +215,7 @@ class Drone(Player):
         Game.blit(pic,(20,700))
         textFont = font.SysFont("Arial", 18)
         if timer:
-            Game.blit(textFont.render(str(timer), True, (255,255,255)), (20, 700))
+            Game.blit(textFont.render(str(round(timer,2)), True, (255,255,255)), (35, 770))
     ##########
     #To put in:
     #Drone time

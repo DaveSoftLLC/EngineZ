@@ -115,10 +115,10 @@ while g.running:
         if time.time()-drone_start>30 and droneB == False:#Highlighting cooldown
             dronebutton = dronebuttonlist[0]
             Drone.draw_drone(g.screen,dronebutton)
-        elif droneB == False and time.time()-drone_start<30:
-            Drone.draw_drone(g.screen,dronebutton,round(time.time()-drone_start,2))
-        elif droneB == True:
-            Drone.draw_drone(g.screen,dronebutton,round(time.time()-drone_start,2))
+        elif droneB == False and time.time()-drone_start<30:#Cooldown till you can use it again
+            Drone.draw_drone(g.screen,dronebutton,30-(time.time()-drone_start))
+        elif droneB == True: #Timer for while using drone
+            Drone.draw_drone(g.screen,dronebutton,10-(time.time()-drone_start))
         else:
             Drone.draw_drone(g.screen,dronebutton)
         

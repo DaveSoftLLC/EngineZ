@@ -83,8 +83,7 @@ while g.running:
         if keys[K_d] and px+current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
             current_actor.move('RIGHT', g.background, g.collisionmap)
 
-        if current_actor.type == 'player' and left_click:#commenting this part out prevents firing twice when clicking
-        #or (m[0] == 1 and p.gif_counter % 30 == 0):
+        if current_actor.type == 'player' and left_click or (m[0] == 1 and p.gif_counter % 30 == 0)::#commenting this part out prevents firing twice when clicking
             p.state = 2
             for a in range(1,inventory.inventoryP[inventory.state].spread):
                 spread = p.rotation+90-(3-a)*6

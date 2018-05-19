@@ -5,7 +5,7 @@ from BaseGame import *
 
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10,image.load('Weapons/shotgun.png'), 6)
 inventory = Inventory(shotgun,shotgun,shotgun,shotgun,shotgun,shotgun)
-
+dronebutton = image.load("Background/dronebutton.png")
 #inventory.append(shotgun)
 inventory.add_item(shotgun)
 collision = image.load('Background/rocks+hole.png')
@@ -39,7 +39,7 @@ while g.running:
             keys = key.get_pressed()
             if keys[K_z]:
                 if droneB == False:
-                    drone = Drone(g, '%s' % ("Drone"), (p.pos), 6, 'drone')
+                    drone = Drone(g, '%s' % ("ID"), (p.pos), 6, 'drone')
                     current_actor = drone
                     client.drone = drone
                     droneB = True
@@ -60,7 +60,7 @@ while g.running:
             p.speed = 5
             p.state = 2
         elif keys[K_LSHIFT]:
-            p.speed = 15
+            p.speed = 13
             p.state = 1
         else:
             p.speed = 10
@@ -79,12 +79,14 @@ while g.running:
         if keys[K_d] and px+current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
             current_actor.move('RIGHT', g.background, g.collisionmap)
 
-        if current_actor.type == 'player' and left_click or (m[0] == 1 and p.gif_counter % 30 == 0):
+        if current_actor.type == 'player' and left_click:#commenting this part out prevents firing twice when clicking
+        #or (m[0] == 1 and p.gif_counter % 30 == 0):
             p.state = 2
             for a in range(1,inventory.inventoryP[inventory.state].spread):
                 spread = p.rotation+90-(3-a)*6
                 p.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
             p.fire(inventory)
+            left_click = False
         g.draw_screen(current_actor)
         if current_actor.type == 'player':
             p.update_gif(newSprites)
@@ -99,6 +101,7 @@ while g.running:
         render_bullets(g, p, inventory.inventoryP[inventory.state])
         client.render_enemy_bullets(inventory.inventoryP[inventory.state])
         inventory.draw_inventory(g.screen)
+        Drone.draw_drone(g.screen,dronebutton)
     display.flip()
 quit()
 

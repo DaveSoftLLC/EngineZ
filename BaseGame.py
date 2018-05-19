@@ -36,7 +36,6 @@ class Client:
             self.other_player_dict = data
             p.health = self.other_player_dict[p.name].health
         self.s.close()
-    #will be compressed later
     def render_other_players(self,Psprite=None):
         p = self.player
         g = self.game
@@ -147,6 +146,9 @@ class Player:
         self.gif_counter = 0
         self.local_bullets = []
         self.type = mode
+        if self.type == 'drone':
+            self.timer = 20 #seconds
+            self.cooldown = 60 #seconds
 
     def move(self, direction, background, collisionmap, speed=None):
         if speed is None:
@@ -185,9 +187,11 @@ class Player:
     def fire(self, inventory):
         px, py = self.pos
         self.bullets.append([(px, py), self.rotation])
+        
         for a in range(1,inventory.inventoryP[inventory.state].spread):
             spread = self.rotation+90-(3-a)*6
             self.local_bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
+        
 
     def render_player(self, sprites, game):
         sprite = transform.rotate(sprites[self.state][self.gif_counter // 10], self.rotation + 90)
@@ -209,7 +213,8 @@ class Player:
 class Drone(Player):
     def printdrone():
         print("I don't know what extra functions to put in yet")
-
+    def draw_drone(Game,pic):
+        Game.blit(pic,(20,700))
     ##########
     #To put in:
     #Drone time
@@ -217,6 +222,7 @@ class Drone(Player):
     
 
 def render_bullets(Game, player, gunType, drone=False):
+    
     for b in player.local_bullets:
         no_collision = True
         if drone:
@@ -241,13 +247,14 @@ def render_bullets(Game, player, gunType, drone=False):
                 del player.local_bullets[player.local_bullets.index(b)]
         else:
             del player.local_bullets[player.local_bullets.index(b)]
+    
     for b in player.bullets:
         no_collision = True
         px, py = player.pos
         nx = b[0][0] + 20*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
         ny = b[0][1] - 20*sin(radians(b[1]))
-        lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)
-        interpolate = [(b[0][0] - i * cos(radians(b[1])), b[0][1] + i * sin(radians(b[1]))) for i in range(20)]
+        lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)#Position on screen
+        interpolate = [(b[0][0] - i * cos(radians(b[1])), b[0][1] + i * sin(radians(b[1]))) for i in range(20)]#Checks if there's collsion within 20 px
         if 0 < lx < Game.screen.get_width() and 0 < ly < Game.screen.get_height():
             for cx, cy in interpolate:
                 if Game.collisionmap.get_at((int(cx), int(cy)))[3] != 0:
@@ -284,7 +291,6 @@ class Inventory:
                 self.state = 5
             else:
                 self.state-=1
-        print(self.state)
 
     def draw_inventory(self,Game):
         for i in range(6):

@@ -2,10 +2,10 @@ import glob
 from random import randint
 
 from BaseGame import *
-
-shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10,image.load('Weapons/shotgun.png'), 6)
+import time
+shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10,image.load('Weapons/shotgunb.png'), 6)
 inventory = Inventory(shotgun,shotgun,shotgun,shotgun,shotgun,shotgun)
-
+dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
 #inventory.append(shotgun)
 inventory.add_item(shotgun)
 collision = image.load('Background/rocks+hole.png')
@@ -20,7 +20,7 @@ droneB = False
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10, 'player')
 client = Client(p,0,g, '127.0.0.1', 4545, newSprites)
 #threading.Thread(target=client.get_data).start()
-
+drone_start = 31 #Drone can be used first
 current_actor = p
 while g.running:
     left_click = False
@@ -38,12 +38,16 @@ while g.running:
         elif e.type == KEYDOWN:
             keys = key.get_pressed()
             if keys[K_z]:
-                if droneB == False:
-                    drone = Drone(g, '%s' % ("Drone"), (p.pos), 10, 'drone')
+                if droneB == False and time.time()-drone_start >30:#If the cooldown is down, run
+                    drone = Drone(g, '%s' % ("ID"), (p.pos), 6, 'drone')
                     current_actor = drone
                     client.drone = drone
                     droneB = True
+                    drone_start=time.time()
+                elif droneB == False and time.time()-drone_start <30:
+                    pass
                 else:
+                    drone_start=time.time()
                     client.drone = 0
                     current_actor = p
                     droneB = False
@@ -55,12 +59,12 @@ while g.running:
     if 1:
         current_actor.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
         px, py = current_actor.get_pos()
-        #SPRINT
+        #SPRINT only for player
         if keys[K_LSHIFT] and m[0] == 1:
             p.speed = 5
             p.state = 2
         elif keys[K_LSHIFT]:
-            p.speed = 15
+            p.speed = 13
             p.state = 1
         else:
             p.speed = 10
@@ -79,12 +83,13 @@ while g.running:
         if keys[K_d] and px+current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
             current_actor.move('RIGHT', g.background, g.collisionmap)
 
-        if current_actor.type == 'player' and left_click or (m[0] == 1 and p.gif_counter % 30 == 0):
+        if current_actor.type == 'player' and left_click or (m[0] == 1 and p.gif_counter % 30 == 0):#commenting this part out prevents firing twice when clicking
             p.state = 2
             for a in range(1,inventory.inventoryP[inventory.state].spread):
                 spread = p.rotation+90-(3-a)*6
                 p.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
             p.fire(inventory)
+            left_click = False
         g.draw_screen(current_actor)
         if current_actor.type == 'player':
             p.update_gif(newSprites)
@@ -92,13 +97,22 @@ while g.running:
             client.render_other_players()
             client.update_player(p)
         else:
-            drone.update_gif(droneSprite)
-            drone.render_player(droneSprite, g)
             client.render_other_players(newSprites)
             client.update_drone(drone)
+            drone.update_gif(droneSprite)
+            drone.render_player(droneSprite, g)
+            #If time runs out
+            if time.time()-drone_start >10:
+                    client.drone = 0
+                    current_actor = p
+                    drone_start = time.time()
+                    droneB = False
+                    
         render_bullets(g, p, inventory.inventoryP[inventory.state])
         client.render_enemy_bullets(inventory.inventoryP[inventory.state])
         inventory.draw_inventory(g.screen)
+        Drone.draw_drone(g.screen,droneB,dronebuttonlist,(time.time()-drone_start))
+        
     display.flip()
 quit()
 

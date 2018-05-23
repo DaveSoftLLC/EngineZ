@@ -36,7 +36,6 @@ class Client:
             data = pickle.loads(data)
             self.other_player_dict = data
             p.health = self.other_player_dict[p.name].health
-            p.bullets = self.other_player_dict[p.name].bullets
         self.s.close()
     def render_other_players(self,Psprite=None):
         p = self.player
@@ -232,7 +231,7 @@ class Drone(Player):
     #Randomize pickup of weapons and pickup
     
 
-def render_bullets(Game, player, gunType, drone=False):
+def render_bullets(Game, player, gunType, client, drone=False):
     for b in player.bullets:
         no_collision = True
         px, py = player.pos
@@ -245,7 +244,22 @@ def render_bullets(Game, player, gunType, drone=False):
                 if Game.collisionmap.get_at((int(cx), int(cy)))[3] != 0:
                     no_collision = False
                     break
-
+                for o in client.other_player_dict.values():
+                    if o.name != player.name:
+                        ox, oy = o.pos
+                        other_sprite = transform.rotate(client.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
+                        other_sprite = transform.smoothscale(other_sprite, (
+                            other_sprite.get_width() // 3,
+                            other_sprite.get_height() // 3))
+                        ox = ox - px + Game.screen.get_width() // 2 \
+                             - other_sprite.get_width() // 2
+                        oy = oy - py + Game.screen.get_height() // 2 \
+                             - other_sprite.get_height() // 2
+                        if Rect(ox, oy, o.rect[2], o.rect[3]).collidepoint(cx, cy):
+                            bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
+                            Game.screen.blit(bullet_sprite, (cx, cy))
+                            player.bullets.remove(b)
+                            break
             if no_collision:
                 player.bullets[player.bullets.index(b)] = [(nx, ny), b[1]]
                 bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])

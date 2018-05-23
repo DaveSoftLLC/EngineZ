@@ -5,7 +5,6 @@ bullets = dict()
 g = GameMode(server=True)
 
 class Server:
-
     def __init__(self, game, BUFFER_SIZE):
         self.TCP_IP = ''  # ''159.203.163.149'
         self.TCP_PORT = 4545
@@ -58,9 +57,9 @@ class Server:
 
     def check_damage(self):
         g = self.game
-        for name, obj in self.player_dict.items():
+        for name, obj in {k: v for k,v in self.player_dict.items()}.items():
             for b in obj.bullets:
-                for p in self.player_dict.values():
+                for p in [i for i in self.player_dict.values()]:
                     if name == p.name:
                         continue
                     px, py = p.pos
@@ -75,7 +74,6 @@ class Server:
                         if p.rect.collidepoint((ix, iy)):
                             if self.player_health_dict[p.name] - 10 >= 0:
                                 self.player_health_dict[p.name] -= 10
-                            obj.bullets.remove(b)
                             break
 
     def take_damage(self, amount):

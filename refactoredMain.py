@@ -109,7 +109,7 @@ while g.running:
                     drone_start = time.time()
                     droneB = False
         if inventory.inventoryP[inventory.state] != 0:
-            render_bullets(g, p, inventory.inventoryP[inventory.state])
+            render_bullets(g, p, inventory.inventoryP[inventory.state], client)
         client.render_enemy_bullets(inventory.inventoryP[inventory.state])
         inventory.draw_inventory(g.screen)
         Drone.draw_drone(g.screen,droneB,dronebuttonlist,(time.time()-drone_start))

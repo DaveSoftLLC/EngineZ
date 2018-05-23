@@ -19,7 +19,7 @@ droneSprite = [[image.load(file) for file in glob.glob('newSprites/drone/*.png')
 droneB = False
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10, 'player')
 client = Client(p,0,g, '127.0.0.1', 4545, newSprites)
-#threading.Thread(target=client.get_data).start()
+threading.Thread(target=client.get_data).start()
 drone_start = 31 #Drone can be used first (30 seconds)
 current_actor = p
 while g.running:

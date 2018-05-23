@@ -56,23 +56,27 @@ class Server:
 
          conn.close()
 
-    def check_damage(self, all_bullets):
+    def check_damage(self):
         g = self.game
-        for b in all_bullets:
-            for p in self.player_dict.values():
-                px, py = p.pos
-                nx = b[0][0]
-                ny = b[0][1]
-                lx, ly = (nx - px + 1280 // 2, ny - py
-                          + 800 // 2)
-                angle = b[1]
-                interpolate = [(lx - i * cos(radians(angle)),
-                                ly + i * sin(radians(angle))) for i in range(20)]
-                for ix, iy in interpolate:
-                    if p.rect.collidepoint((ix, iy)):
-                        print('damaged')
-                        self.player_health_dict[p.name] -= 10
-                        break
+        for name, obj in self.player_dict.items():
+            for b in obj.bullets:
+                for p in self.player_dict.values():
+                    if name == p.name:
+                        continue
+                    px, py = p.pos
+                    nx = b[0][0]
+                    ny = b[0][1]
+                    lx, ly = (nx - px + 1280 // 2, ny - py
+                              + 800 // 2)
+                    angle = b[1]
+                    interpolate = [(lx - i * cos(radians(angle)),
+                                    ly + i * sin(radians(angle))) for i in range(20)]
+                    for ix, iy in interpolate:
+                        if p.rect.collidepoint((ix, iy)):
+                            if self.player_health_dict[p.name] - 10 >= 0:
+                                self.player_health_dict[p.name] -= 10
+                            obj.bullets.remove(b)
+                            break
 
     def take_damage(self, amount):
         self.player.health -= amount
@@ -81,12 +85,9 @@ juniper = Server(g, BUFFER_SIZE)
 threading.Thread(target=juniper.listen).start()
 while juniper.running:
     try:
-        bullet_list = []
-        for p in juniper.player_dict.values():
-            bullet_list += p.bullets
 ##        if __name__ == '__main__':
 ##            with mp.Pool(mp.cpu_count()) as p:
 ##                p.map(juniper.check_damage, bullet_list)
-        juniper.check_damage(bullet_list)
+        juniper.check_damage()
     except Exception as E:
         print('Error Checking Bullets:', E)

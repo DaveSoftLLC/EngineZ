@@ -36,7 +36,7 @@ class Client:
             data = pickle.loads(data)
             self.other_player_dict = data
             p.health = self.other_player_dict[p.name].health
-            print(self.other_player_dict[p.name].health, p.health)
+            p.bullets = self.other_player_dict[p.name].bullets
         self.s.close()
     def render_other_players(self,Psprite=None):
         p = self.player

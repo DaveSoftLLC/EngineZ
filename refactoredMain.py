@@ -15,11 +15,11 @@ newSprites = [[image.load(file).convert_alpha() for file in glob.glob('newSprite
               [image.load(file).convert_alpha() for file in glob.glob('newSprites/shotgun/move/*.png')],
               [image.load(file).convert_alpha() for file in glob.glob('newSprites/shotgun/shoot/*.png')]]
 
-droneSprite = [[image.load(file) for file in glob.glob('newSprites/drone/*.png')]]
+droneSprite = [[image.load(file) for file in glob.glob('newSprites/Drone/*.png')]]
 droneB = False
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10, 'player')
 client = Client(p,0,g, '127.0.0.1', 4545, newSprites)
-#threading.Thread(target=client.get_data).start()
+threading.Thread(target=client.get_data).start()
 drone_start = 31 #Drone can be used first
 current_actor = p
 while g.running:
@@ -85,9 +85,9 @@ while g.running:
 
         if current_actor.type == 'player' and left_click or (m[0] == 1 and p.gif_counter % 30 == 0):#commenting this part out prevents firing twice when clicking
             p.state = 2
-            for a in range(1,inventory.inventoryP[inventory.state].spread):
-                spread = p.rotation+90-(3-a)*6
-                p.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
+##            for a in range(1,inventory.inventoryP[inventory.state].spread):
+##                spread = p.rotation+90-(3-a)*6
+##                p.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
             p.fire(inventory)
             left_click = False
         g.draw_screen(current_actor)

@@ -1,4 +1,5 @@
 from BaseGame import *
+import copy
 import multiprocessing as mp
 bullets = dict()
 g = GameMode(server=True)
@@ -82,16 +83,16 @@ class Server:
                 px, py = p.pos
                 nx = b[0][0]
                 ny = b[0][1]
-                lx, ly = (nx - px + g.background.get_width() // 2, ny - py
-                          + g.background.get_height() // 2)
-                for a in range(1, 6):
-                    angle = b[1] + 90 - (3 - a) * 6
-                    interpolate = [(lx - i * cos(radians(angle)),
-                                    ly + i * sin(radians(angle))) for i in range(20)]
-                    for ix, iy in interpolate:
-                        if p.rect.collidepoint((ix, iy)):
-                            p.take_damage(10)
-                            break
+                lx, ly = (nx - px + 1280 // 2, ny - py
+                          + 800 // 2)
+                angle = b[1]
+                interpolate = [(lx - i * cos(radians(angle)),
+                                ly + i * sin(radians(angle))) for i in range(20)]
+                for ix, iy in interpolate:
+                    if p.rect.collidepoint((ix, iy)):
+                        print('damaged')
+                        p.take_damage(10)
+                        break
 
     def take_damage(self, amount):
         self.player.health -= amount
@@ -101,10 +102,11 @@ threading.Thread(target=juniper.listen).start()
 while juniper.running:
     try:
         bullet_list = []
-        for p in juniper.player_dict:
-            bullet_list.append(p.bullets)
-        if __name__ == '__main__':
-            with mp.Pool(mp.cpu_count()) as p:
-                p.map(juniper.check_damage, bullet_list)
+        for p in juniper.player_dict.values():
+            bullet_list += p.bullets
+##        if __name__ == '__main__':
+##            with mp.Pool(mp.cpu_count()) as p:
+##                p.map(juniper.check_damage, bullet_list)
+        juniper.check_damage(bullet_list)
     except Exception as E:
         print('Error Checking Bullets:', E)

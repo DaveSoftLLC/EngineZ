@@ -20,7 +20,7 @@ droneB = False
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10, 'player')
 client = Client(p,0,g, '127.0.0.1', 4545, newSprites)
 #threading.Thread(target=client.get_data).start()
-drone_start = 31 #Drone can be used first
+drone_start = 31 #Drone can be used first (30 seconds)
 current_actor = p
 while g.running:
     left_click = False

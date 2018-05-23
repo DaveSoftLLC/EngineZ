@@ -185,9 +185,10 @@ class Player:
 
     def fire(self, inventory):
         px, py = self.pos
-        for a in range(1,inventory.inventoryP[inventory.state].spread):
-            spread = self.rotation+90-(3-a)*6
-            self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
+        if inventory.inventoryP[inventory.state] != 0:
+            for a in range(1,inventory.inventoryP[inventory.state].spread):
+                spread = self.rotation+90-(3-a)*6
+                self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
         
 
     def render_player(self, sprites, game):
@@ -227,7 +228,8 @@ class Drone(Player):
         
     ##########
     #To put in:
-    
+    #Trees that can be broken down (randint tree rect)
+    #Randomize pickup of weapons and pickup
     
 
 def render_bullets(Game, player, gunType, drone=False):
@@ -280,9 +282,11 @@ class Inventory:
     def draw_inventory(self,Game):
         for i in range(6):
             if i!=self.state:
-                Game.blit(self.inventoryP[i].inventory_image,(850+i*69,700))
+                if self.inventoryP[i] != 0:
+                    Game.blit(self.inventoryP[i].inventory_image,(850+i*69,700))
                 draw.rect(Game,(0),(850+i*69,700,70,70),2)
-        Game.blit(self.inventoryP[self.state].inventory_image,(850+self.state*69,695))
+        if self.inventoryP[self.state] != 0:
+            Game.blit(self.inventoryP[self.state].inventory_image,(850+self.state*69,695))
         draw.rect(Game,(0,0,255),(850+self.state*69,695,70,70),2)
 
 

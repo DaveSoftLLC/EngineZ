@@ -1,33 +1,8 @@
 from BaseGame import *
+import copy
 import multiprocessing as mp
 bullets = dict()
 g = GameMode(server=True)
-
-
-class PlayerInstance:
-    def __init__(self, player, game):
-        self.player = player
-        self.game = game
-
-    def check_damage(self, all_bullets):
-        g = self.game
-        player = self.player
-        for b in all_bullets:
-            px,py = player.pos
-            nx = b[0][0]
-            ny = b[0][1]
-            lx, ly = (nx - px + g.screen.get_width() // 2, ny - py + g.screen.get_height() // 2)
-            for a in range(1, 6):
-                angle = b[1] + 90 - (3 - a) * 6
-                interpolate = [(lx - i * cos(radians(angle)), ly + i * sin(radians(angle))) for i in range(20)]
-                for ix, iy in interpolate:
-                    if player.rect.collidepoint((ix, iy)):
-                        player.take_damage(10)
-                        break
-
-    def take_damage(self, amount):
-        player = self.player
-        player.health -= amount
 
 class Server:
 
@@ -40,6 +15,7 @@ class Server:
         self.s.bind((self.TCP_IP, self.TCP_PORT))
         self.s.listen(1)
         self.player_dict = {}
+        self.player_health_dict = {}
         self.running = True
         self.instance = GameMode(server=True)
         self.send_dict = dict()
@@ -63,6 +39,11 @@ class Server:
                         try:
                              decoded = pickle.loads(data)
                              self.player_dict[decoded.name] = decoded
+                             if decoded.name not in self.player_health_dict.keys():
+                                 self.player_health_dict[decoded.name] = decoded.health
+                             else:
+                                 for key, value in self.player_health_dict.items():
+                                     self.player_dict[key].health = value
                              current_player = decoded.name
                              conn.send(pickle.dumps(self.player_dict))
                              bullets[current_player] = decoded.bullets
@@ -82,16 +63,16 @@ class Server:
                 px, py = p.pos
                 nx = b[0][0]
                 ny = b[0][1]
-                lx, ly = (nx - px + g.background.get_width() // 2, ny - py
-                          + g.background.get_height() // 2)
-                for a in range(1, 6):
-                    angle = b[1] + 90 - (3 - a) * 6
-                    interpolate = [(lx - i * cos(radians(angle)),
-                                    ly + i * sin(radians(angle))) for i in range(20)]
-                    for ix, iy in interpolate:
-                        if p.rect.collidepoint((ix, iy)):
-                            p.take_damage(10)
-                            break
+                lx, ly = (nx - px + 1280 // 2, ny - py
+                          + 800 // 2)
+                angle = b[1]
+                interpolate = [(lx - i * cos(radians(angle)),
+                                ly + i * sin(radians(angle))) for i in range(20)]
+                for ix, iy in interpolate:
+                    if p.rect.collidepoint((ix, iy)):
+                        print('damaged')
+                        self.player_health_dict[p.name] -= 10
+                        break
 
     def take_damage(self, amount):
         self.player.health -= amount
@@ -101,10 +82,11 @@ threading.Thread(target=juniper.listen).start()
 while juniper.running:
     try:
         bullet_list = []
-        for p in juniper.player_dict:
-            bullet_list.append(p.bullets)
-        if __name__ == '__main__':
-            with mp.Pool(mp.cpu_count()) as p:
-                p.map(juniper.check_damage, bullet_list)
+        for p in juniper.player_dict.values():
+            bullet_list += p.bullets
+##        if __name__ == '__main__':
+##            with mp.Pool(mp.cpu_count()) as p:
+##                p.map(juniper.check_damage, bullet_list)
+        juniper.check_damage(bullet_list)
     except Exception as E:
         print('Error Checking Bullets:', E)

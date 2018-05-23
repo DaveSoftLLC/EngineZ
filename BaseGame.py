@@ -29,12 +29,14 @@ class Client:
         print('beginning transfer')
         while self.game.running:
             p = self.player
+            p.update_gif(self.sprites)
             binary = pickle.dumps(p)
             self.s.send(binary)
             data = self.s.recv(BUFFER_SIZE)
             data = pickle.loads(data)
             self.other_player_dict = data
             p.health = self.other_player_dict[p.name].health
+            print(self.other_player_dict[p.name].health, p.health)
         self.s.close()
     def render_other_players(self,Psprite=None):
         p = self.player
@@ -89,11 +91,11 @@ class Client:
                 for b in o.bullets:
                     bx = b[0][0]
                     by = b[0][1]
-                    for a in range(1, 6):
-                        angle = b[1] + 90 - (3 - a) * 6
-                        lb = transform.rotate(gun.bulletSprite, angle)
-                        lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
-                        g.screen.blit(lb, (lx, ly))
+##                    for a in range(1, 6):
+##                        angle = b[1] + 90 - (3 - a) * 6
+                    lb = transform.rotate(gun.bulletSprite, b[1])
+                    lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
+                    g.screen.blit(lb, (lx, ly))
 
 class GameMode:
     def __init__(self,server=False):
@@ -146,7 +148,6 @@ class Player:
         self.gif_counter = 0
         self.local_bullets = []
         self.type = mode
-        
 
     def move(self, direction, background, collisionmap, speed=None):
         if speed is None:
@@ -184,11 +185,9 @@ class Player:
 
     def fire(self, inventory):
         px, py = self.pos
-        self.bullets.append([(px, py), self.rotation])
-        
         for a in range(1,inventory.inventoryP[inventory.state].spread):
             spread = self.rotation+90-(3-a)*6
-            self.local_bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
+            self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
         
 
     def render_player(self, sprites, game):
@@ -202,10 +201,10 @@ class Player:
     def get_pos(self):
         return self.pos
 
-    def update_gif(self, sprites):
+    def update_gif(self, sprites, server=False):
         if self.gif_counter >= 10 * len(sprites[self.state]) - 1:
             self.gif_counter = 0
-        else:
+        elif not server:
             self.gif_counter += 1
 
 class Drone(Player):
@@ -232,32 +231,6 @@ class Drone(Player):
     
 
 def render_bullets(Game, player, gunType, drone=False):
-    
-    for b in player.local_bullets:
-        no_collision = True
-        if drone:
-            px, py = drone.get_pos()
-        else:
-            px, py = player.pos
-        nx = b[0][0] + 20*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
-        ny = b[0][1] - 20*sin(radians(b[1]))
-        lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)#Position on screen
-        interpolate = [(b[0][0] - i * cos(radians(b[1])), b[0][1] + i * sin(radians(b[1]))) for i in range(20)]
-        if 0 < lx < Game.screen.get_width() and 0 < ly < Game.screen.get_height():
-            for cx, cy in interpolate:
-                if Game.collisionmap.get_at((int(cx), int(cy)))[3] != 0:
-                    no_collision = False
-                    break
-
-            if no_collision:
-                lb = transform.rotate(gunType.bulletSprite, b[1])
-                Game.screen.blit(lb, (lx, ly))
-                player.local_bullets[player.local_bullets.index(b)] = [(nx, ny), b[1]]
-            else:
-                del player.local_bullets[player.local_bullets.index(b)]
-        else:
-            del player.local_bullets[player.local_bullets.index(b)]
-    
     for b in player.bullets:
         no_collision = True
         px, py = player.pos
@@ -273,6 +246,8 @@ def render_bullets(Game, player, gunType, drone=False):
 
             if no_collision:
                 player.bullets[player.bullets.index(b)] = [(nx, ny), b[1]]
+                bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
+                Game.screen.blit(bullet_sprite, (lx, ly))
             else:
                 player.bullets.remove(b)
         else:

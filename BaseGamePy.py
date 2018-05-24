@@ -187,7 +187,8 @@ class Player:
         if inventory.inventoryP[inventory.state] != 0:
             for a in range(1,inventory.inventoryP[inventory.state].spread):
                 spread = self.rotation+90-(3-a)*6
-                self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
+                self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name])
+                print(self.bullets)
         
 
     def render_player(self, sprites, game):
@@ -256,21 +257,24 @@ def render_bullets(Game, player, gunType, client, drone=False):
                             oy = oy - py + Game.screen.get_height() // 2 \
                                  - other_sprite.get_height() // 2
                             if hypot(ox-cx, oy-cy) < max(other_sprite.get_size()):
-                                bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
-                                Game.screen.blit(bullet_sprite, (cx, cy))
+                                Gun.gun_Bullet(b[2],cx,cy,b[1],Game.screen)
+                                
+                                #bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
+                                #Game.screen.blit(bullet_sprite, (cx, cy))
                                 player.bullets.remove(b)
                                 hit_detected = True
                                 break
                 if hit_detected:
                     break
             if no_collision:
-                player.bullets[player.bullets.index(b)] = [(nx, ny), b[1]]
-                bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
-                Game.screen.blit(bullet_sprite, (lx, ly))
+                player.bullets[player.bullets.index(b)] = [(nx, ny), b[1],b[2]]
+                Gun.gun_Bullet(b[2],cx,cy,b[1],Game.screen)
+                #bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
+                #Game.screen.blit(bullet_sprite, (lx, ly))
             else:
                 player.bullets.remove(b)
         elif hypot(px-nx, py-ny) < 1500:
-            player.bullets[player.bullets.index(b)] = [(nx, ny), b[1]]
+            player.bullets[player.bullets.index(b)] = [(nx, ny), b[1],b[2]]
         else:
             player.bullets.remove(b)
 
@@ -315,4 +319,10 @@ class Gun:
         self.bulletSprite = bulletSprite
         self.damage = damage
         self.spread = spread
-        self.inventory_image = inventory_image        
+        self.inventory_image = inventory_image
+        self.gundict = {'Shotgun':image.load('Weapons/shellBullet.png')}
+    def gun_Bullet(self, name, x,y,rot,Game):
+        
+        bullet_sprite = transform.rotate(self.gundict[name], rot)
+        Game.blit(bullet_sprite, (x,y))
+        

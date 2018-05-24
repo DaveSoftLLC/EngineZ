@@ -26,6 +26,7 @@ p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10, 'player')
 client = Client(p,0,g, '127.0.0.1', 4545, newSprites)
 threading.Thread(target=client.get_data).start()
 drone_start = 31 #Drone can be used first (30 seconds)
+
 current_actor = p
 while g.running:
     left_click = False
@@ -91,9 +92,6 @@ while g.running:
         if current_actor.type == 'player' and left_click:#commenting this part out prevents firing twice when clicking
             if inventory.inventoryP[inventory.state] != 0:
                 p.state = 2
-                for a in range(1,inventory.inventoryP[inventory.state].spread):
-                    spread = p.rotation+90-(3-a)*6
-                    p.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
                 p.fire(inventory)
                 left_click = False
         g.draw_screen(current_actor)

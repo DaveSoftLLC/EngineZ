@@ -188,7 +188,7 @@ class Player:
             for a in range(1,inventory.inventoryP[inventory.state].spread):
                 spread = self.rotation+90-(3-a)*6
                 self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name])
-                print(self.bullets)
+                
         
 
     def render_player(self, sprites, game):
@@ -257,7 +257,7 @@ def render_bullets(Game, player, gunType, client, drone=False):
                             oy = oy - py + Game.screen.get_height() // 2 \
                                  - other_sprite.get_height() // 2
                             if hypot(ox-cx, oy-cy) < max(other_sprite.get_size()):
-                                Gun.gun_Bullet(b[2],cx,cy,b[1],Game.screen)
+                                gunType.gun_Bullet(b[2],cx,cy,b[1],Game.screen)#What is this for? cx and cy are outside screen
                                 
                                 #bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
                                 #Game.screen.blit(bullet_sprite, (cx, cy))
@@ -268,7 +268,7 @@ def render_bullets(Game, player, gunType, client, drone=False):
                     break
             if no_collision:
                 player.bullets[player.bullets.index(b)] = [(nx, ny), b[1],b[2]]
-                Gun.gun_Bullet(b[2],cx,cy,b[1],Game.screen)
+                gunType.gun_Bullet(b[2],lx,ly,b[1],Game.screen)
                 #bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
                 #Game.screen.blit(bullet_sprite, (lx, ly))
             else:
@@ -322,7 +322,6 @@ class Gun:
         self.inventory_image = inventory_image
         self.gundict = {'Shotgun':image.load('Weapons/shellBullet.png')}
     def gun_Bullet(self, name, x,y,rot,Game):
-        
         bullet_sprite = transform.rotate(self.gundict[name], rot)
         Game.blit(bullet_sprite, (x,y))
         

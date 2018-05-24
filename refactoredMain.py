@@ -94,12 +94,6 @@ while g.running:
             p.state = 2
             p.fire(inventory)
             left_click = False
-        if current_actor.type == 'player' and left_click:#commenting this part out prevents firing twice when clicking
-            if inventory.inventoryP[inventory.state] != 0:
-                p.state = 2
-                p.fire(inventory)
-                left_click = False
-                print(len(p.bullets))
         g.draw_screen(current_actor)
         if current_actor.type == 'player':
             p.update_gif(newSprites)
@@ -113,10 +107,10 @@ while g.running:
             drone.render_player(droneSprite, g)
             #If time runs out
             if time.time()-drone_start >10:
-                    client.drone = 0
-                    current_actor = p
-                    drone_start = time.time()
-                    droneB = False
+                client.drone = 0
+                current_actor = p
+                drone_start = time.time()
+                droneB = False
 
                     
         render_bullets(g, p, inventory.inventoryP[inventory.state], client)

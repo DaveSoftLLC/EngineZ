@@ -22,8 +22,10 @@ class Client:
 
     def update_player(self, player):
         self.player = player
+        
     def update_drone(self, drone):
         self.drone = drone
+        
     def get_data(self):
         self.s.connect((self.TCP_IP,self.TCP_PORT))
         print('beginning transfer')
@@ -37,6 +39,7 @@ class Client:
             self.other_player_dict = data
             p.health = self.other_player_dict[p.name].health
         self.s.close()
+        
     def render_other_players(self,Psprite=None):
         p = self.player
         g = self.game
@@ -70,6 +73,7 @@ class Client:
                     ny = py - dy + g.screen.get_height() // 2 \
                          - your_Player.get_height() // 2
                     g.screen.blit(your_Player, (nx,ny))
+                    
     def render_enemy_bullets(self, gun):
         p = self.player
         g = self.game

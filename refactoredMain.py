@@ -1,7 +1,7 @@
 import glob
 from random import randint
 
-from BaseGamePy import *
+from BaseGame import *
 import time
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10,image.load('Weapons/shotgunb.png'), 6)
 empty = Gun('Empty',0,0,image.load('Weapons/empty.png'),0)
@@ -16,6 +16,8 @@ def scale_and_load(path, factor):
     x, y = img.get_size()
     #print(x//factor, y//factor)
     return transform.smoothscale(img, (int(x/factor), int(y/factor)))
+def get_fps(old_time):
+    return int(1/(time.time()-old_time))
 sprites = [image.load('Sprites/sprite1.png'), image.load('Sprites/sprite2.png'), image.load('Sprites/sprite3.png')]
 newSprites = [[scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/idle/*.png')],
               [scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/move/*.png')],
@@ -27,7 +29,7 @@ p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10, 'player')
 client = Client(p,0,g, '127.0.0.1', 4545, newSprites)
 threading.Thread(target=client.get_data).start()
 drone_start = 31 #Drone can be used first (30 seconds)
-
+fps_font = font.SysFont('Arial',18)
 current_actor = p
 while g.running:
     left_click = False
@@ -62,7 +64,7 @@ while g.running:
     mx, my = mouse.get_pos()
     
     keys = key.get_pressed()
-
+    old_time = time.time()
     if 1:
         current_actor.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
         px, py = current_actor.get_pos()
@@ -123,7 +125,8 @@ while g.running:
         client.render_enemy_bullets(inventory.inventoryP[inventory.state])
         inventory.draw_inventory(g.screen)
         Drone.draw_drone(g.screen,droneB,dronebuttonlist,(time.time()-drone_start))
-        
+        fps = fps_font.render(str(get_fps(old_time)), True, (0,0,0))
+        g.screen.blit(fps, (1200,10))
     display.flip()
 quit()
 

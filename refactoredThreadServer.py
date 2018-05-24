@@ -1,7 +1,7 @@
 from BaseGame import *
 import copy
 import multiprocessing as mp
-bullets = dict()
+del_bullets = dict()
 g = GameMode(server=True)
 
 class Server:
@@ -29,31 +29,33 @@ class Server:
               threading.Thread(target=self.listen_client, args=(conn, addr)).start()
 
     def listen_client(self, conn, addr):
-         print('thread')
-         current_player = ''
-         while self.running:
-              try:
-                   data = conn.recv(self.BUFFER_SIZE)
-                   if data:
-                        try:
-                             decoded = pickle.loads(data)
-                             self.player_dict[decoded.name] = decoded
-                             if decoded.name not in self.player_health_dict.keys():
-                                 self.player_health_dict[decoded.name] = decoded.health
-                             else:
-                                 for key, value in self.player_health_dict.items():
-                                     self.player_dict[key].health = value
-                             current_player = decoded.name
-                             conn.send(pickle.dumps(self.player_dict))
-                             bullets[current_player] = decoded.bullets
-                        except Exception as E:
+        print('thread')
+        current_player = ''
+        while self.running:
+            try:
+                data = conn.recv(self.BUFFER_SIZE)
+                if data:
+                    try:
+                        decoded = pickle.loads(data)
+                        self.player_dict[decoded.name] = decoded
+                        if decoded.name not in self.player_health_dict.keys():
+                            self.player_health_dict[decoded.name] = 100
+                        else:
+                            for key, value in self.player_health_dict.items():
+                                self.player_dict[key].health = value
+                            for b in del_bullets:
+                                if b in decoded.bullets:
+                                    decoded.bullets.remove(b)
+                                    current_player = decoded.name
+                        conn.send(pickle.dumps(self.player_dict))
+                    except Exception as E:
                             print("Error:", E)
-                   else:
-                        pass
-              except Exception as E:
-                  print(E)
+                else:
+                    pass
+            except Exception as E:
+                print(E)
 
-         conn.close()
+        conn.close()
 
     def check_damage(self):
         g = self.game
@@ -77,7 +79,10 @@ class Server:
                         if p.rect.collidepoint((ix, iy)):
                             counter += 1
                             print(counter, name)
-                            obj.bullets.remove(b)
+                            if name not in del_bullets.keys():
+                                del_bullets[name] = [b]
+                            else:
+                                del_bullets[name].append(b)
                             if self.player_health_dict[p.name] - 10 >= 0:
                                 self.player_health_dict[p.name] -= 10
                             break

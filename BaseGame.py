@@ -38,7 +38,7 @@ class Client:
             data = pickle.loads(data)
             self.other_player_dict = data
             p.health = self.other_player_dict[p.name].health
-            print(self.other_player_dict[p.name].health, p.health)
+            p.health = self.other_player_dict[p.name].bullets
         self.s.close()
         
     def render_other_players(self,Psprite=None):
@@ -229,7 +229,6 @@ class Drone(Player):
     
 
 def render_bullets(Game, player, gunType, client, drone=False):
-
     for b in player.bullets:
         no_collision = True
         px, py = player.pos
@@ -254,7 +253,7 @@ def render_bullets(Game, player, gunType, client, drone=False):
                                  - other_sprite.get_width() // 2
                             oy = oy - py + Game.screen.get_height() // 2 \
                                  - other_sprite.get_height() // 2
-                            if Rect(ox, oy, o.rect[2], o.rect[3]).collidepoint(cx, cy):
+                            if hypot(ox-cx, oy-cy) < max(other_sprite.get_size()):
                                 bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
                                 Game.screen.blit(bullet_sprite, (cx, cy))
                                 player.bullets.remove(b)

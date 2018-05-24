@@ -38,6 +38,7 @@ class Client:
             data = pickle.loads(data)
             self.other_player_dict = data
             p.health = self.other_player_dict[p.name].health
+            print(self.other_player_dict[p.name].health, p.health)
         self.s.close()
         
     def render_other_players(self,Psprite=None):
@@ -228,6 +229,7 @@ class Drone(Player):
     
 
 def render_bullets(Game, player, gunType, client, drone=False):
+
     for b in player.bullets:
         no_collision = True
         px, py = player.pos

@@ -10,12 +10,17 @@ dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Backgrou
 #inventory.add_item(shotgun)
 collision = image.load('Background/rocks+hole.png')
 g = GameMode()
+def scale_and_load(path, factor):
+    img = image.load(path).convert_alpha()
+    x, y = img.get_size()
+    print(x//factor, y//factor)
+    return transform.smoothscale(img, (int(x/factor), int(y/factor)))
 sprites = [image.load('Sprites/sprite1.png'), image.load('Sprites/sprite2.png'), image.load('Sprites/sprite3.png')]
-newSprites = [[image.load(file).convert_alpha() for file in glob.glob('newSprites/shotgun/idle/*.png')],
-              [image.load(file).convert_alpha() for file in glob.glob('newSprites/shotgun/move/*.png')],
-              [image.load(file).convert_alpha() for file in glob.glob('newSprites/shotgun/shoot/*.png')]]
+newSprites = [[scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/idle/*.png')],
+              [scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/move/*.png')],
+              [scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/shoot/*.png')]]
 
-droneSprite = [[image.load(file) for file in glob.glob('newSprites/drone/*.png')]]
+droneSprite = [[scale_and_load(file, 0.8) for file in glob.glob('newSprites/drone/*.png')]]
 droneB = False
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10, 'player')
 client = Client(p,0,g, '127.0.0.1', 4545, newSprites)
@@ -83,7 +88,7 @@ while g.running:
         if keys[K_d] and px+current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
             current_actor.move('RIGHT', g.background, g.collisionmap)
 
-        if current_actor.type == 'player' and left_click or (m[0] == 1 and p.gif_counter % 30 == 0):#commenting this part out prevents firing twice when clicking
+        if current_actor.type == 'player' and left_click:#commenting this part out prevents firing twice when clicking
             if inventory.inventoryP[inventory.state] != 0:
                 p.state = 2
                 for a in range(1,inventory.inventoryP[inventory.state].spread):

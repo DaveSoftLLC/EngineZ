@@ -65,6 +65,8 @@ class Server:
                     px, py = p.pos
                     nx = b[0][0]
                     ny = b[0][1]
+                    if hypot(px-nx, py-ny) > 60:
+                        continue
                     lx, ly = (nx - px + 1280 // 2, ny - py
                               + 800 // 2)
                     angle = b[1]

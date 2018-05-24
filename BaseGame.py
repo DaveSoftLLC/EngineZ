@@ -51,17 +51,13 @@ class Client:
                 if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() \
                         and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2:
                     other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
-                    other_sprite = transform.smoothscale(other_sprite, (
-                        other_sprite.get_width() // 3,
-                        other_sprite.get_height() // 3))
+
                     nx = ox - px + g.screen.get_width() // 2 \
                          - other_sprite.get_width() // 2
                     ny = oy - py + g.screen.get_height() // 2 \
                          - other_sprite.get_height() // 2
                     other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
-                    other_sprite = transform.smoothscale(other_sprite, (
-                        other_sprite.get_width() // 3,
-                        other_sprite.get_height() // 3))
+
                     g.screen.blit(other_sprite, (nx,ny))
         if Psprite: #displaying player
             px, py = p.get_pos()
@@ -69,9 +65,6 @@ class Client:
             if dx - g.screen.get_width() // 2 < px < dx + g.screen.get_width() //2 \
                         and dy - g.screen.get_height() // 2 < py < dy + g.screen.get_height() // 2:
                     your_Player = transform.rotate(Psprite[p.state][p.gif_counter // 10], p.rotation + 90)
-                    your_Player = transform.smoothscale(your_Player, (
-                        your_Player.get_width() // 3,
-                        your_Player.get_height() // 3))
                     nx = px - dx + g.screen.get_width() // 2 \
                          - your_Player.get_width() // 2
                     ny = py - dy + g.screen.get_height() // 2 \
@@ -192,7 +185,6 @@ class Player:
 
     def render_player(self, sprites, game):
         sprite = transform.rotate(sprites[self.state][self.gif_counter // 10], self.rotation + 90)
-        sprite = transform.smoothscale(sprite, (sprite.get_width() // 3, sprite.get_height() // 3))
         self.rect = game.screen.blit(sprite, (640 - sprite.get_width() // 2, 400 - sprite.get_height() // 2))
 
     def get_rect(self):
@@ -235,11 +227,14 @@ def render_bullets(Game, player, gunType, client, drone=False):
     for b in player.bullets:
         no_collision = True
         px, py = player.pos
-        nx = b[0][0] + 20*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
-        ny = b[0][1] - 20*sin(radians(b[1]))
+        bx, by = b[0]
+        nx = bx + 20*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
+        ny = by - 20*sin(radians(b[1]))
         lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)#Position on screen
         interpolate = [(b[0][0] - i * cos(radians(b[1])), b[0][1] + i * sin(radians(b[1]))) for i in range(20)]#Checks if there's collsion within 20 px
+         
         if 0 < lx < Game.screen.get_width() and 0 < ly < Game.screen.get_height():
+            hit_detected = False
             for cx, cy in interpolate:
                 if Game.collisionmap.get_at((int(cx), int(cy)))[3] != 0:
                     no_collision = False
@@ -247,25 +242,28 @@ def render_bullets(Game, player, gunType, client, drone=False):
                 for o in client.other_player_dict.values():
                     if o.name != player.name:
                         ox, oy = o.pos
-                        other_sprite = transform.rotate(client.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
-                        other_sprite = transform.smoothscale(other_sprite, (
-                            other_sprite.get_width() // 3,
-                            other_sprite.get_height() // 3))
-                        ox = ox - px + Game.screen.get_width() // 2 \
-                             - other_sprite.get_width() // 2
-                        oy = oy - py + Game.screen.get_height() // 2 \
-                             - other_sprite.get_height() // 2
-                        if Rect(ox, oy, o.rect[2], o.rect[3]).collidepoint(cx, cy):
-                            bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
-                            Game.screen.blit(bullet_sprite, (cx, cy))
-                            player.bullets.remove(b)
-                            break
+                        if hypot(ox-cx, oy-cy) < 60:
+                            other_sprite = transform.rotate(client.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
+                            ox = ox - px + Game.screen.get_width() // 2 \
+                                 - other_sprite.get_width() // 2
+                            oy = oy - py + Game.screen.get_height() // 2 \
+                                 - other_sprite.get_height() // 2
+                            if Rect(ox, oy, o.rect[2], o.rect[3]).collidepoint(cx, cy):
+                                bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
+                                Game.screen.blit(bullet_sprite, (cx, cy))
+                                player.bullets.remove(b)
+                                hit_detected = True
+                                break
+                if hit_detected:
+                    break
             if no_collision:
                 player.bullets[player.bullets.index(b)] = [(nx, ny), b[1]]
                 bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
                 Game.screen.blit(bullet_sprite, (lx, ly))
             else:
                 player.bullets.remove(b)
+        elif hypot(px-nx, py-ny) < 1500:
+            player.bullets[player.bullets.index(b)] = [(nx, ny), b[1]]
         else:
             player.bullets.remove(b)
 

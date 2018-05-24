@@ -72,8 +72,12 @@ class Server:
                     angle = b[1]
                     interpolate = [(lx - i * cos(radians(angle)),
                                     ly + i * sin(radians(angle))) for i in range(20)]
+                    counter = 0
                     for ix, iy in interpolate:
                         if p.rect.collidepoint((ix, iy)):
+                            counter += 1
+                            print(counter, name)
+                            obj.bullets.remove(b)
                             if self.player_health_dict[p.name] - 10 >= 0:
                                 self.player_health_dict[p.name] -= 10
                             break
@@ -85,9 +89,6 @@ juniper = Server(g, BUFFER_SIZE)
 threading.Thread(target=juniper.listen).start()
 while juniper.running:
     try:
-##        if __name__ == '__main__':
-##            with mp.Pool(mp.cpu_count()) as p:
-##                p.map(juniper.check_damage, bullet_list)
         juniper.check_damage()
     except Exception as E:
         print('Error Checking Bullets:', E)

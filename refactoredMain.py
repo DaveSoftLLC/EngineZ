@@ -4,8 +4,9 @@ from random import randint
 from BaseGame import *
 import time
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10,image.load('Weapons/shotgunb.png'), 6)
+empty = Gun('Empty',0,0,image.load('Weapons/empty.png'),0)
 #empty = Gun('None
-inventory = Inventory(shotgun,shotgun,shotgun,shotgun,shotgun,0)
+inventory = Inventory(shotgun,shotgun,shotgun,shotgun,shotgun,empty)
 dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
 #inventory.add_item(shotgun)
 collision = image.load('Background/rocks+hole.png')
@@ -13,7 +14,7 @@ g = GameMode()
 def scale_and_load(path, factor):
     img = image.load(path).convert_alpha()
     x, y = img.get_size()
-    print(x//factor, y//factor)
+    #print(x//factor, y//factor)
     return transform.smoothscale(img, (int(x/factor), int(y/factor)))
 sprites = [image.load('Sprites/sprite1.png'), image.load('Sprites/sprite2.png'), image.load('Sprites/sprite3.png')]
 newSprites = [[scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/idle/*.png')],
@@ -89,11 +90,10 @@ while g.running:
         if keys[K_d] and px+current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
             current_actor.move('RIGHT', g.background, g.collisionmap)
 
-        if current_actor.type == 'player' and left_click:#commenting this part out prevents firing twice when clicking
-            if inventory.inventoryP[inventory.state] != 0:
-                p.state = 2
-                p.fire(inventory)
-                left_click = False
+        if current_actor.type == 'player' and left_click:
+            p.state = 2
+            p.fire(inventory)
+            left_click = False
         g.draw_screen(current_actor)
         if current_actor.type == 'player':
             p.update_gif(newSprites)
@@ -111,8 +111,7 @@ while g.running:
                     current_actor = p
                     drone_start = time.time()
                     droneB = False
-        if inventory.inventoryP[inventory.state] != 0:
-            render_bullets(g, p, inventory.inventoryP[inventory.state], client)
+        render_bullets(g, p, inventory.inventoryP[inventory.state], client)
         client.render_enemy_bullets(inventory.inventoryP[inventory.state])
         inventory.draw_inventory(g.screen)
         Drone.draw_drone(g.screen,droneB,dronebuttonlist,(time.time()-drone_start))

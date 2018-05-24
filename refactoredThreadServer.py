@@ -37,16 +37,16 @@ class Server:
                 if data:
                     try:
                         decoded = pickle.loads(data)
+                        current_player = decoded.name
                         self.player_dict[decoded.name] = decoded
                         if decoded.name not in self.player_health_dict.keys():
                             self.player_health_dict[decoded.name] = 100
                         else:
                             for key, value in self.player_health_dict.items():
                                 self.player_dict[key].health = value
-                            for b in del_bullets:
-                                if b in decoded.bullets:
-                                    decoded.bullets.remove(b)
-                                    current_player = decoded.name
+                        for b in del_bullets:
+                            if b in decoded.bullets:
+                                decoded.bullets.remove(b)
                         conn.send(pickle.dumps(self.player_dict))
                     except Exception as E:
                             print("Error:", E)

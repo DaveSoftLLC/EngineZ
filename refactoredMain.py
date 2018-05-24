@@ -1,7 +1,7 @@
 import glob
 from random import randint
 
-from BaseGame import *
+from BaseGamePy import *
 import time
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10,image.load('Weapons/shotgunb.png'), 6)
 empty = Gun('Empty',0,0,image.load('Weapons/empty.png'),0)

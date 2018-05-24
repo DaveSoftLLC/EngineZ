@@ -21,7 +21,7 @@ newSprites = [[scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun
               [scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/move/*.png')],
               [scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/shoot/*.png')]]
 
-droneSprite = [[scale_and_load(file, 0.8) for file in glob.glob('newSprites/drone/*.png')]]
+droneSprite = [[scale_and_load(file, 2) for file in glob.glob('newSprites/drone/*.png')]]
 droneB = False
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10, 'player')
 client = Client(p,0,g, '127.0.0.1', 4545, newSprites)
@@ -94,6 +94,12 @@ while g.running:
             p.state = 2
             p.fire(inventory)
             left_click = False
+        if current_actor.type == 'player' and left_click:#commenting this part out prevents firing twice when clicking
+            if inventory.inventoryP[inventory.state] != 0:
+                p.state = 2
+                p.fire(inventory)
+                left_click = False
+                print(len(p.bullets))
         g.draw_screen(current_actor)
         if current_actor.type == 'player':
             p.update_gif(newSprites)

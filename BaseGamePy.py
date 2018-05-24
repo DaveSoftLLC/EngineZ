@@ -38,7 +38,9 @@ class Client:
             data = pickle.loads(data)
             self.other_player_dict = data
             p.health = self.other_player_dict[p.name].health
-            p.bullets = self.other_player_dict[p.name].bullets
+            for b in self.other_player_dict[p.name].del_bullets:
+                if b in p.bullets:
+                    p.bullets.remove(b)
         self.s.close()
         
     def render_other_players(self,Psprite=None):
@@ -143,7 +145,7 @@ class Player:
         self.bullets = []
         self.rect = None
         self.gif_counter = 0
-        self.local_bullets = []
+        self.del_bullets = []
         self.type = mode
 
     def move(self, direction, background, collisionmap, speed=None):

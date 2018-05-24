@@ -44,9 +44,8 @@ class Server:
                         else:
                             for key, value in self.player_health_dict.items():
                                 self.player_dict[key].health = value
-                        for b in del_bullets:
-                            if b in decoded.bullets:
-                                decoded.bullets.remove(b)
+                        self.player_dict[current_player].del_bullets += del_bullets[current_player]
+                        del_bullets[current_player] = []
                         conn.send(pickle.dumps(self.player_dict))
                     except Exception as E:
                             print("Error:", E)
@@ -64,6 +63,9 @@ class Server:
                 for p in [i for i in self.player_dict.values()]:
                     if name == p.name:
                         continue
+                    if name in del_bullets.keys():
+                        if b in del_bullets[name]:
+                            continue
                     px, py = p.pos
                     nx = b[0][0]
                     ny = b[0][1]
@@ -79,6 +81,7 @@ class Server:
                         if p.rect.collidepoint((ix, iy)):
                             counter += 1
                             print(counter, name)
+                            obj.bullets.remove(b)
                             if name not in del_bullets.keys():
                                 del_bullets[name] = [b]
                             else:

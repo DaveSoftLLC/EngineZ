@@ -110,7 +110,9 @@ class GameMode:
             self.screen.blit(self.textFont.render('Loading Assets...', True, (0,0,0)), (590, 700))
             display.flip()
             self.music = mixer.music.load("Outcast.wav")
-        self.background = image.load('Background/MapFinal.png')
+            self.background = image.load('Background/MapFinal.png').convert()
+        else:
+            self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
         self.running = True
 

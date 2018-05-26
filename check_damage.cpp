@@ -25,8 +25,8 @@ vector<Player> check_damage(vector<vector<double> > bullets, vector<Player> play
   vector<Player> damaged = players;
   for (auto const& b: bullets) {
     for (int p = 0; p < players.size(); p++) {
-      double lx = b[0] - players[p].pos.x + 1280 / 2;
-      double ly = b[1] - players[p].pos.y + 800 / 2;
+      double lx = b[0];
+      double ly = b[1];
       double angle = b[2] * 3.1415926535 / 180;
       for (int i = 0; i < 20; i++) {
         double ix = lx + i * cos(angle);

@@ -15,7 +15,6 @@ collision = image.load('Background/rocks+hole.png').convert_alpha()
 def scale_and_load(path, factor):
     img = image.load(path).convert_alpha()
     x, y = img.get_size()
-    #print(x//factor, y//factor)
     return transform.smoothscale(img, (int(x/factor), int(y/factor)))
 def get_fps(old_time):
     return int(1/(t.time()-old_time))
@@ -34,7 +33,7 @@ fps_font = font.SysFont('Arial',18)
 current_actor = p
 myClock = time.Clock()
 while g.running:
-    myClock.tick(144)
+    myClock.tick(60)
     left_click = False
     for e in event.get():
         if e.type == QUIT:

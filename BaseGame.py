@@ -252,24 +252,32 @@ def render_bullets(Game, player, gunType, client, drone=False):
                 for o in client.other_player_dict.values():
                     if o.name != player.name:
                         ox, oy = o.pos
-                        if hypot(ox-cx, oy-cy) < 60:
-                            other_sprite = transform.rotate(client.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
-                            ox = ox - px + Game.screen.get_width() // 2 \
-                                 - other_sprite.get_width() // 2
-                            oy = oy - py + Game.screen.get_height() // 2 \
-                                 - other_sprite.get_height() // 2
-                            if hypot(ox-cx, oy-cy) < max(other_sprite.get_size()):
-                                gunType.gun_Bullet(b[2],cx,cy,b[1],Game.screen)#What is this for? cx and cy are outside screen
-                                
-                                #bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
-                                #Game.screen.blit(bullet_sprite, (cx, cy))
+                        if hypot(ox-cx, oy-cy) < 30:
+##                            other_sprite = transform.rotate(client.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
+##                            ox = ox - px + Game.screen.get_width() // 2 \
+##                                 - other_sprite.get_width() // 2
+##                            oy = oy - py + Game.screen.get_height() // 2 \
+##                                 - other_sprite.get_height() // 2
+##                            if hypot(ox-cx, oy-cy) < max(other_sprite.get_size()):
+##                                gunType.gun_Bullet(b[2],cx,cy,b[1],Game.screen)#What is this for? cx and cy are outside screen
+##                                
+##                                #bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
+##                                #Game.screen.blit(bullet_sprite, (cx, cy))
+                            try:
                                 player.bullets.remove(b)
-                                hit_detected = True
-                                break
+
+                            except ValueError:
+                                pass
+                            hit_detected = True
+                            break
                 if hit_detected:
                     break
             if no_collision:
-                player.bullets[player.bullets.index(b)] = [(nx, ny), b[1],b[2]]
+        
+                try: #faster than doing 'if not in', because that takes O(N) time
+                    player.bullets[player.bullets.index(b)] = [(nx, ny), b[1],b[2]]
+                except ValueError:
+                    pass
                 gunType.gun_Bullet(b[2],lx,ly,b[1],Game.screen)
                 #bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
                 #Game.screen.blit(bullet_sprite, (lx, ly))

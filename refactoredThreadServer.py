@@ -54,7 +54,8 @@ class Server:
                     pass
             except Exception as E:
                 print(E)
-
+                self.remove(current_player)
+                break
         conn.close()
 
     def check_damage(self):
@@ -94,6 +95,19 @@ class Server:
     def take_damage(self, amount):
         self.player.health -= amount
 
+    def remove(self, player_name):
+        try:
+            del self.player_health_dict[player_name]
+        except ValueError:
+            pass
+        try:
+            del self.player_dict[player_name]
+        except ValueError:
+            pass
+        try:
+            del del_bullets[player_name]
+        except ValueError:
+            pass
 juniper = Server(g, BUFFER_SIZE)
 threading.Thread(target=juniper.listen).start()
 while juniper.running:

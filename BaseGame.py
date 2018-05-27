@@ -4,7 +4,7 @@ import threading
 from math import *
 from pygame import *
 
-TCP_IP = '127.0.0.1'
+TCP_IP = '159.203.147.141'
 TCP_PORT = 4545
 BUFFER_SIZE = 5000
 
@@ -150,9 +150,10 @@ class Player:
         self.del_bullets = []
         self.type = mode
 
-    def move(self, direction, background, collisionmap, speed=None):
+    def move(self, direction, background, collisionmap, FPS, speed=None):
         if speed is None:
             speed = self.speed
+        speed = int(speed/FPS*60)
         if direction == 'UP':
             nx,ny = (self.pos[0],self.pos[1] - speed)
             if 0 < ny :
@@ -233,11 +234,13 @@ class Drone(Player):
     #Randomize pickup of weapons and pickup
     
 
-def render_bullets(Game, player, gunType, client, drone=False):
+def render_bullets(Game, player, gunType, client, FPS, drone=False):
     for b in player.bullets:
         no_collision = True
         px, py = player.pos
         bx, by = b[0]
+        int(speed/FPS*60)
+        delta = 20/FPS*60
         nx = bx + 20*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
         ny = by - 20*sin(radians(b[1]))
         lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)#Position on screen

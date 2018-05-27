@@ -26,14 +26,15 @@ newSprites = [[scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun
 droneSprite = [[scale_and_load(file, 2) for file in glob.glob('newSprites/drone/*.png')]]
 droneB = False
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10, 'player')
-client = Client(p,0,g, '127.0.0.1', 4545, newSprites)
+client = Client(p,0,g, TCP_IP, 4545, newSprites)
 threading.Thread(target=client.get_data).start()
 drone_start = 31 #Drone can be used first (30 seconds)
 fps_font = font.SysFont('Arial',18)
 current_actor = p
 myClock = time.Clock()
+last_fire = 0
 while g.running:
-    myClock.tick(60)
+    myClock.tick(144)
     left_click = False
     for e in event.get():
         if e.type == QUIT:
@@ -83,18 +84,19 @@ while g.running:
 
         #UP
         if keys[K_w] and g.screen.get_height()//2<py-current_actor.speed:
-            current_actor.move('UP', g.background, g.collisionmap)
+            current_actor.move('UP', g.background, g.collisionmap, myClock.get_fps())
         #DOWN
         if keys[K_s] and py+p.speed<g.background.get_height()-g.screen.get_height()//2:
-            current_actor.move('DOWN', g.background, g.collisionmap)
+            current_actor.move('DOWN', g.background, g.collisionmap, myClock.get_fps())
         #LEFT
         if keys[K_a] and g.screen.get_width()//2<px-current_actor.speed:
-            current_actor.move('LEFT', g.background, g.collisionmap)
+            current_actor.move('LEFT', g.background, g.collisionmap, myClock.get_fps())
         #RIGHT
         if keys[K_d] and px+current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
-            current_actor.move('RIGHT', g.background, g.collisionmap)
+            current_actor.move('RIGHT', g.background, g.collisionmap, myClock.get_fps())
 
-        if current_actor.type == 'player' and left_click:
+        if current_actor.type == 'player' and left_click and t.time() - last_fire > 0.3:
+            last_fire = t.time()
             p.state = 2
             p.fire(inventory)
             left_click = False

@@ -4,7 +4,7 @@ import threading
 from math import *
 from pygame import *
 
-TCP_IP = '159.203.147.141'
+TCP_IP = '127.0.0.1'#'159.203.147.141'
 TCP_PORT = 4545
 BUFFER_SIZE = 5000
 
@@ -185,12 +185,12 @@ class Player:
         print("dead")
         pass
 
-    def fire(self, inventory):
+    def fire(self, inventory, FPS):
         px, py = self.pos
         if inventory.inventoryP[inventory.state] != 0:
             for a in range(1,inventory.inventoryP[inventory.state].spread):
                 spread = self.rotation+90-(3-a)*6
-                self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name])
+                self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name, int(40/FPS*60)])
                 
         
 
@@ -239,11 +239,11 @@ def render_bullets(Game, player, gunType, client, FPS, drone=False):
         no_collision = True
         px, py = player.pos
         bx, by = b[0]
-        delta = 20/FPS*60
+        delta = int(40/FPS*60)
         nx = bx + delta*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
         ny = by - delta*sin(radians(b[1]))
         lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)#Position on screen
-        interpolate = [(b[0][0] - i * cos(radians(b[1])), b[0][1] + i * sin(radians(b[1]))) for i in range(20)]#Checks if there's collsion within 20 px
+        interpolate = [(b[0][0] - i * cos(radians(b[1])), b[0][1] + i * sin(radians(b[1]))) for i in range(delta)]#Checks if there's collsion within 20 px
          
         if 0 < lx < Game.screen.get_width() and 0 < ly < Game.screen.get_height():
             hit_detected = False
@@ -277,7 +277,7 @@ def render_bullets(Game, player, gunType, client, FPS, drone=False):
             if no_collision:
         
                 try: #faster than doing 'if not in', because that takes O(N) time
-                    player.bullets[player.bullets.index(b)] = [(nx, ny), b[1],b[2]]
+                    player.bullets[player.bullets.index(b)] = [(nx, ny), b[1],b[2], delta]
                 except ValueError:
                     pass
                 gunType.gun_Bullet(b[2],lx,ly,b[1],Game.screen)
@@ -286,7 +286,7 @@ def render_bullets(Game, player, gunType, client, FPS, drone=False):
             else:
                 player.bullets.remove(b)
         elif hypot(px-nx, py-ny) < 1500:
-            player.bullets[player.bullets.index(b)] = [(nx, ny), b[1],b[2]]
+            player.bullets[player.bullets.index(b)] = [(nx, ny), b[1],b[2], delta]
         else:
             player.bullets.remove(b)
 

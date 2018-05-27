@@ -77,7 +77,7 @@ class Server:
 ##                              + 800 // 2)
                     angle = b[1]
                     interpolate = [(nx - i * cos(radians(angle)),
-                                    ny + i * sin(radians(angle))) for i in range(20)]
+                                    ny + i * sin(radians(angle))) for i in range(b[3])]
                     counter = 0
                     for ix, iy in interpolate:
                         if hypot(px - nx, py - ny) < 30:

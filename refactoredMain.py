@@ -35,6 +35,7 @@ myClock = time.Clock()
 last_fire = 0
 while g.running:
     myClock.tick(144)
+    FPS = myClock.get_fps()
     left_click = False
     for e in event.get():
         if e.type == QUIT:
@@ -84,21 +85,21 @@ while g.running:
 
         #UP
         if keys[K_w] and g.screen.get_height()//2<py-current_actor.speed:
-            current_actor.move('UP', g.background, g.collisionmap, myClock.get_fps())
+            current_actor.move('UP', g.background, g.collisionmap, FPS)
         #DOWN
         if keys[K_s] and py+p.speed<g.background.get_height()-g.screen.get_height()//2:
-            current_actor.move('DOWN', g.background, g.collisionmap, myClock.get_fps())
+            current_actor.move('DOWN', g.background, g.collisionmap, FPS)
         #LEFT
         if keys[K_a] and g.screen.get_width()//2<px-current_actor.speed:
-            current_actor.move('LEFT', g.background, g.collisionmap, myClock.get_fps())
+            current_actor.move('LEFT', g.background, g.collisionmap, FPS)
         #RIGHT
         if keys[K_d] and px+current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
-            current_actor.move('RIGHT', g.background, g.collisionmap, myClock.get_fps())
+            current_actor.move('RIGHT', g.background, g.collisionmap, FPS)
 
         if current_actor.type == 'player' and left_click and t.time() - last_fire > 0.3:
             last_fire = t.time()
             p.state = 2
-            p.fire(inventory)
+            p.fire(inventory, FPS)
             left_click = False
         g.draw_screen(current_actor)
         if current_actor.type == 'player':
@@ -118,12 +119,11 @@ while g.running:
                 drone_start = time.time()
                 droneB = False
 
-                    
-        render_bullets(g, p, inventory.inventoryP[inventory.state], client)
+        render_bullets(g, p, inventory.inventoryP[inventory.state], client, FPS)
         client.render_enemy_bullets(inventory.inventoryP[inventory.state])
         inventory.draw_inventory(g.screen)
         Drone.draw_drone(g.screen,droneB,dronebuttonlist,(t.time()-drone_start))
-        fps = fps_font.render(str(int(myClock.get_fps())), True, (0,0,0))
+        fps = fps_font.render(str(int(FPS)), True, (0,0,0))
         g.screen.blit(fps, (1200,10))
     display.flip()
 quit()

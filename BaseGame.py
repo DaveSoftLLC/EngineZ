@@ -239,10 +239,9 @@ def render_bullets(Game, player, gunType, client, FPS, drone=False):
         no_collision = True
         px, py = player.pos
         bx, by = b[0]
-        int(speed/FPS*60)
         delta = 20/FPS*60
-        nx = bx + 20*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
-        ny = by - 20*sin(radians(b[1]))
+        nx = bx + delta*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
+        ny = by - delta*sin(radians(b[1]))
         lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)#Position on screen
         interpolate = [(b[0][0] - i * cos(radians(b[1])), b[0][1] + i * sin(radians(b[1]))) for i in range(20)]#Checks if there's collsion within 20 px
          

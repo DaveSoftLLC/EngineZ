@@ -190,7 +190,7 @@ class Player:
         if inventory.inventoryP[inventory.state] != 0:
             for a in range(1,inventory.inventoryP[inventory.state].spread):
                 spread = self.rotation+90-(3-a)*6
-                self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name, int(40/FPS*60)])
+                self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name, int(20/FPS*60)])
                 
         
 
@@ -239,7 +239,7 @@ def render_bullets(Game, player, gunType, client, FPS, drone=False):
         no_collision = True
         px, py = player.pos
         bx, by = b[0]
-        delta = int(40/FPS*60)
+        delta = int(20/FPS*60)
         nx = bx + delta*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
         ny = by - delta*sin(radians(b[1]))
         lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)#Position on screen

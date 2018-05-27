@@ -4,7 +4,6 @@ from random import randint
 from BaseGame import *
 import time as t
 g = GameMode()
-
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png').convert_alpha(), 10,image.load('Weapons/shotgunb.png').convert_alpha(), 6)
 empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0)
 #empty = Gun('None
@@ -51,12 +50,12 @@ while g.running:
         elif e.type == KEYDOWN:
             keys = key.get_pressed()
             if keys[K_z]:
-                if droneB == False and time.time()-drone_start >30:#If the cooldown is down, run
+                if droneB == False and t.time()-drone_start >30:#If the cooldown is down, run
                     drone = Drone(g, '%s' % ("ID"), (p.pos), 6, 'drone')
                     current_actor = drone
                     client.drone = drone
                     droneB = True
-                    drone_start=time.time()
+                    drone_start=t.time()
                 elif droneB == False and t.time()-drone_start <30:
                     pass
                 else:
@@ -113,10 +112,10 @@ while g.running:
             drone.update_gif(droneSprite)
             drone.render_player(droneSprite, g)
             #If time runs out
-            if time.time()-drone_start >10:
+            if t.time()-drone_start >10:
                 client.drone = 0
                 current_actor = p
-                drone_start = time.time()
+                drone_start = t.time()
                 droneB = False
 
         render_bullets(g, p, inventory.inventoryP[inventory.state], client, FPS)

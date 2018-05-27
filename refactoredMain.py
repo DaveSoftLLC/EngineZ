@@ -2,27 +2,38 @@ import glob
 from random import randint
 
 from BaseGame import *
-import time
-shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'), 10,image.load('Weapons/shotgunb.png'), 6)
-inventory = Inventory(shotgun,shotgun,shotgun,shotgun,shotgun,shotgun)
-dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
-#inventory.append(shotgun)
-inventory.add_item(shotgun)
-collision = image.load('Background/rocks+hole.png')
+import time as t
 g = GameMode()
-sprites = [image.load('Sprites/sprite1.png'), image.load('Sprites/sprite2.png'), image.load('Sprites/sprite3.png')]
-newSprites = [[image.load(file).convert_alpha() for file in glob.glob('newSprites/shotgun/idle/*.png')],
-              [image.load(file).convert_alpha() for file in glob.glob('newSprites/shotgun/move/*.png')],
-              [image.load(file).convert_alpha() for file in glob.glob('newSprites/shotgun/shoot/*.png')]]
 
-droneSprite = [[image.load(file) for file in glob.glob('newSprites/Drone/*.png')]]
+shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png').convert_alpha(), 10,image.load('Weapons/shotgunb.png').convert_alpha(), 6)
+empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0)
+#empty = Gun('None
+inventory = Inventory(shotgun,shotgun,shotgun,shotgun,shotgun,empty)
+dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
+#inventory.add_item(shotgun)
+collision = image.load('Background/rocks+hole.png').convert_alpha()
+def scale_and_load(path, factor):
+    img = image.load(path).convert_alpha()
+    x, y = img.get_size()
+    return transform.smoothscale(img, (int(x/factor), int(y/factor)))
+def get_fps(old_time):
+    return int(1/(t.time()-old_time))
+sprites = [image.load('Sprites/sprite1.png'), image.load('Sprites/sprite2.png'), image.load('Sprites/sprite3.png')]
+newSprites = [[scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/idle/*.png')],
+              [scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/move/*.png')],
+              [scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/shoot/*.png')]]
+
+droneSprite = [[scale_and_load(file, 2) for file in glob.glob('newSprites/drone/*.png')]]
 droneB = False
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10, 'player')
 client = Client(p,0,g, '127.0.0.1', 4545, newSprites)
 threading.Thread(target=client.get_data).start()
-drone_start = 31 #Drone can be used first
+drone_start = 31 #Drone can be used first (30 seconds)
+fps_font = font.SysFont('Arial',18)
 current_actor = p
+myClock = time.Clock()
 while g.running:
+    myClock.tick(60)
     left_click = False
     for e in event.get():
         if e.type == QUIT:
@@ -44,10 +55,10 @@ while g.running:
                     client.drone = drone
                     droneB = True
                     drone_start=time.time()
-                elif droneB == False and time.time()-drone_start <30:
+                elif droneB == False and t.time()-drone_start <30:
                     pass
                 else:
-                    drone_start=time.time()
+                    drone_start=t.time()
                     client.drone = 0
                     current_actor = p
                     droneB = False
@@ -55,7 +66,7 @@ while g.running:
     mx, my = mouse.get_pos()
     
     keys = key.get_pressed()
-
+    old_time = t.time()
     if 1:
         current_actor.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
         px, py = current_actor.get_pos()
@@ -83,11 +94,8 @@ while g.running:
         if keys[K_d] and px+current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
             current_actor.move('RIGHT', g.background, g.collisionmap)
 
-        if current_actor.type == 'player' and left_click or (m[0] == 1 and p.gif_counter % 30 == 0):#commenting this part out prevents firing twice when clicking
+        if current_actor.type == 'player' and left_click:
             p.state = 2
-##            for a in range(1,inventory.inventoryP[inventory.state].spread):
-##                spread = p.rotation+90-(3-a)*6
-##                p.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
             p.fire(inventory)
             left_click = False
         g.draw_screen(current_actor)
@@ -103,16 +111,18 @@ while g.running:
             drone.render_player(droneSprite, g)
             #If time runs out
             if time.time()-drone_start >10:
-                    client.drone = 0
-                    current_actor = p
-                    drone_start = time.time()
-                    droneB = False
+                client.drone = 0
+                current_actor = p
+                drone_start = time.time()
+                droneB = False
+
                     
-        render_bullets(g, p, inventory.inventoryP[inventory.state])
+        render_bullets(g, p, inventory.inventoryP[inventory.state], client)
         client.render_enemy_bullets(inventory.inventoryP[inventory.state])
         inventory.draw_inventory(g.screen)
-        Drone.draw_drone(g.screen,droneB,dronebuttonlist,(time.time()-drone_start))
-        
+        Drone.draw_drone(g.screen,droneB,dronebuttonlist,(t.time()-drone_start))
+        fps = fps_font.render(str(int(myClock.get_fps())), True, (0,0,0))
+        g.screen.blit(fps, (1200,10))
     display.flip()
 quit()
 

@@ -22,8 +22,10 @@ class Client:
 
     def update_player(self, player):
         self.player = player
+        
     def update_drone(self, drone):
         self.drone = drone
+        
     def get_data(self):
         self.s.connect((self.TCP_IP,self.TCP_PORT))
         print('beginning transfer')
@@ -36,8 +38,11 @@ class Client:
             data = pickle.loads(data)
             self.other_player_dict = data
             p.health = self.other_player_dict[p.name].health
-            print(self.other_player_dict[p.name].health, p.health)
+            for b in self.other_player_dict[p.name].del_bullets:
+                if b in p.bullets:
+                    p.bullets.remove(b)
         self.s.close()
+        
     def render_other_players(self,Psprite=None):
         p = self.player
         g = self.game
@@ -52,17 +57,13 @@ class Client:
                 if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() \
                         and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2:
                     other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
-                    other_sprite = transform.smoothscale(other_sprite, (
-                        other_sprite.get_width() // 3,
-                        other_sprite.get_height() // 3))
+
                     nx = ox - px + g.screen.get_width() // 2 \
                          - other_sprite.get_width() // 2
                     ny = oy - py + g.screen.get_height() // 2 \
                          - other_sprite.get_height() // 2
                     other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
-                    other_sprite = transform.smoothscale(other_sprite, (
-                        other_sprite.get_width() // 3,
-                        other_sprite.get_height() // 3))
+
                     g.screen.blit(other_sprite, (nx,ny))
         if Psprite: #displaying player
             px, py = p.get_pos()
@@ -70,14 +71,12 @@ class Client:
             if dx - g.screen.get_width() // 2 < px < dx + g.screen.get_width() //2 \
                         and dy - g.screen.get_height() // 2 < py < dy + g.screen.get_height() // 2:
                     your_Player = transform.rotate(Psprite[p.state][p.gif_counter // 10], p.rotation + 90)
-                    your_Player = transform.smoothscale(your_Player, (
-                        your_Player.get_width() // 3,
-                        your_Player.get_height() // 3))
                     nx = px - dx + g.screen.get_width() // 2 \
                          - your_Player.get_width() // 2
                     ny = py - dy + g.screen.get_height() // 2 \
                          - your_Player.get_height() // 2
                     g.screen.blit(your_Player, (nx,ny))
+                    
     def render_enemy_bullets(self, gun):
         p = self.player
         g = self.game
@@ -111,7 +110,9 @@ class GameMode:
             self.screen.blit(self.textFont.render('Loading Assets...', True, (0,0,0)), (590, 700))
             display.flip()
             self.music = mixer.music.load("Outcast.wav")
-        self.background = image.load('Background/MapFinal.png')
+            self.background = image.load('Background/MapFinal.png').convert()
+        else:
+            self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
         self.running = True
 
@@ -146,9 +147,8 @@ class Player:
         self.bullets = []
         self.rect = None
         self.gif_counter = 0
-        self.local_bullets = []
+        self.del_bullets = []
         self.type = mode
-        
 
     def move(self, direction, background, collisionmap, speed=None):
         if speed is None:
@@ -186,14 +186,15 @@ class Player:
 
     def fire(self, inventory):
         px, py = self.pos
-        for a in range(1,inventory.inventoryP[inventory.state].spread):
-            spread = self.rotation+90-(3-a)*6
-            self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread])
+        if inventory.inventoryP[inventory.state] != 0:
+            for a in range(1,inventory.inventoryP[inventory.state].spread):
+                spread = self.rotation+90-(3-a)*6
+                self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name])
+                
         
 
     def render_player(self, sprites, game):
         sprite = transform.rotate(sprites[self.state][self.gif_counter // 10], self.rotation + 90)
-        sprite = transform.smoothscale(sprite, (sprite.get_width() // 3, sprite.get_height() // 3))
         self.rect = game.screen.blit(sprite, (640 - sprite.get_width() // 2, 400 - sprite.get_height() // 2))
 
     def get_rect(self):
@@ -228,29 +229,62 @@ class Drone(Player):
         
     ##########
     #To put in:
-    
+    #Trees that can be broken down (randint tree rect)
+    #Randomize pickup of weapons and pickup
     
 
-def render_bullets(Game, player, gunType, drone=False):
+def render_bullets(Game, player, gunType, client, drone=False):
     for b in player.bullets:
         no_collision = True
         px, py = player.pos
-        nx = b[0][0] + 20*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
-        ny = b[0][1] - 20*sin(radians(b[1]))
+        bx, by = b[0]
+        nx = bx + 20*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
+        ny = by - 20*sin(radians(b[1]))
         lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)#Position on screen
         interpolate = [(b[0][0] - i * cos(radians(b[1])), b[0][1] + i * sin(radians(b[1]))) for i in range(20)]#Checks if there's collsion within 20 px
+         
         if 0 < lx < Game.screen.get_width() and 0 < ly < Game.screen.get_height():
+            hit_detected = False
             for cx, cy in interpolate:
                 if Game.collisionmap.get_at((int(cx), int(cy)))[3] != 0:
                     no_collision = False
                     break
+                for o in client.other_player_dict.values():
+                    if o.name != player.name:
+                        ox, oy = o.pos
+                        if hypot(ox-cx, oy-cy) < 30:
+##                            other_sprite = transform.rotate(client.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
+##                            ox = ox - px + Game.screen.get_width() // 2 \
+##                                 - other_sprite.get_width() // 2
+##                            oy = oy - py + Game.screen.get_height() // 2 \
+##                                 - other_sprite.get_height() // 2
+##                            if hypot(ox-cx, oy-cy) < max(other_sprite.get_size()):
+##                                gunType.gun_Bullet(b[2],cx,cy,b[1],Game.screen)#What is this for? cx and cy are outside screen
+##                                
+##                                #bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
+##                                #Game.screen.blit(bullet_sprite, (cx, cy))
+                            try:
+                                player.bullets.remove(b)
 
+                            except ValueError:
+                                pass
+                            hit_detected = True
+                            break
+                if hit_detected:
+                    break
             if no_collision:
-                player.bullets[player.bullets.index(b)] = [(nx, ny), b[1]]
-                bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
-                Game.screen.blit(bullet_sprite, (lx, ly))
+        
+                try: #faster than doing 'if not in', because that takes O(N) time
+                    player.bullets[player.bullets.index(b)] = [(nx, ny), b[1],b[2]]
+                except ValueError:
+                    pass
+                gunType.gun_Bullet(b[2],lx,ly,b[1],Game.screen)
+                #bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
+                #Game.screen.blit(bullet_sprite, (lx, ly))
             else:
                 player.bullets.remove(b)
+        elif hypot(px-nx, py-ny) < 1500:
+            player.bullets[player.bullets.index(b)] = [(nx, ny), b[1],b[2]]
         else:
             player.bullets.remove(b)
 
@@ -281,9 +315,11 @@ class Inventory:
     def draw_inventory(self,Game):
         for i in range(6):
             if i!=self.state:
-                Game.blit(self.inventoryP[i].inventory_image,(850+i*69,700))
+                if self.inventoryP[i] != 0:
+                    Game.blit(self.inventoryP[i].inventory_image,(850+i*69,700))
                 draw.rect(Game,(0),(850+i*69,700,70,70),2)
-        Game.blit(self.inventoryP[self.state].inventory_image,(850+self.state*69,695))
+        if self.inventoryP[self.state] != 0:
+            Game.blit(self.inventoryP[self.state].inventory_image,(850+self.state*69,695))
         draw.rect(Game,(0,0,255),(850+self.state*69,695,70,70),2)
 
 
@@ -293,4 +329,9 @@ class Gun:
         self.bulletSprite = bulletSprite
         self.damage = damage
         self.spread = spread
-        self.inventory_image = inventory_image        
+        self.inventory_image = inventory_image
+        self.gundict = {'Shotgun':image.load('Weapons/shellBullet.png')}
+    def gun_Bullet(self, name, x,y,rot,Game):
+        bullet_sprite = transform.rotate(self.gundict[name], rot)
+        Game.blit(bullet_sprite, (x,y))
+        

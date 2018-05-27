@@ -54,7 +54,8 @@ class Server:
                     pass
             except Exception as E:
                 print(E)
-
+                self.remove(current_player)
+                break
         conn.close()
 
     def check_damage(self):
@@ -76,7 +77,7 @@ class Server:
 ##                              + 800 // 2)
                     angle = b[1]
                     interpolate = [(nx - i * cos(radians(angle)),
-                                    ny + i * sin(radians(angle))) for i in range(20)]
+                                    ny + i * sin(radians(angle))) for i in range(b[3])]
                     counter = 0
                     for ix, iy in interpolate:
                         if hypot(px - nx, py - ny) < 30:
@@ -94,6 +95,19 @@ class Server:
     def take_damage(self, amount):
         self.player.health -= amount
 
+    def remove(self, player_name):
+        try:
+            del self.player_health_dict[player_name]
+        except ValueError:
+            pass
+        try:
+            del self.player_dict[player_name]
+        except ValueError:
+            pass
+        try:
+            del del_bullets[player_name]
+        except ValueError:
+            pass
 juniper = Server(g, BUFFER_SIZE)
 threading.Thread(target=juniper.listen).start()
 while juniper.running:

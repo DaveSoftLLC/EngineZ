@@ -4,7 +4,6 @@ from random import randint
 from BaseGame import *
 import time as t
 g = GameMode()
-
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png').convert_alpha(), 10,image.load('Weapons/shotgunb.png').convert_alpha(), 6)
 empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0)
 #empty = Gun('None
@@ -26,14 +25,16 @@ newSprites = [[scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun
 droneSprite = [[scale_and_load(file, 2) for file in glob.glob('newSprites/drone/*.png')]]
 droneB = False
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10, 'player')
-client = Client(p,0,g, '127.0.0.1', 4545, newSprites)
+client = Client(p,0,g, TCP_IP, 4545, newSprites)
 threading.Thread(target=client.get_data).start()
 drone_start = 31 #Drone can be used first (30 seconds)
 fps_font = font.SysFont('Arial',18)
 current_actor = p
 myClock = time.Clock()
+last_fire = 0
 while g.running:
-    myClock.tick(60)
+    myClock.tick(144)
+    FPS = myClock.get_fps()
     left_click = False
     for e in event.get():
         if e.type == QUIT:
@@ -49,12 +50,12 @@ while g.running:
         elif e.type == KEYDOWN:
             keys = key.get_pressed()
             if keys[K_z]:
-                if droneB == False and time.time()-drone_start >30:#If the cooldown is down, run
+                if droneB == False and t.time()-drone_start >30:#If the cooldown is down, run
                     drone = Drone(g, '%s' % ("ID"), (p.pos), 6, 'drone')
                     current_actor = drone
                     client.drone = drone
                     droneB = True
-                    drone_start=time.time()
+                    drone_start=t.time()
                 elif droneB == False and t.time()-drone_start <30:
                     pass
                 else:
@@ -83,20 +84,21 @@ while g.running:
 
         #UP
         if keys[K_w] and g.screen.get_height()//2<py-current_actor.speed:
-            current_actor.move('UP', g.background, g.collisionmap)
+            current_actor.move('UP', g.background, g.collisionmap, FPS)
         #DOWN
         if keys[K_s] and py+p.speed<g.background.get_height()-g.screen.get_height()//2:
-            current_actor.move('DOWN', g.background, g.collisionmap)
+            current_actor.move('DOWN', g.background, g.collisionmap, FPS)
         #LEFT
         if keys[K_a] and g.screen.get_width()//2<px-current_actor.speed:
-            current_actor.move('LEFT', g.background, g.collisionmap)
+            current_actor.move('LEFT', g.background, g.collisionmap, FPS)
         #RIGHT
         if keys[K_d] and px+current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
-            current_actor.move('RIGHT', g.background, g.collisionmap)
+            current_actor.move('RIGHT', g.background, g.collisionmap, FPS)
 
-        if current_actor.type == 'player' and left_click:
+        if current_actor.type == 'player' and left_click and t.time() - last_fire > 0.3:
+            last_fire = t.time()
             p.state = 2
-            p.fire(inventory)
+            p.fire(inventory, FPS)
             left_click = False
         g.draw_screen(current_actor)
         if current_actor.type == 'player':
@@ -110,18 +112,17 @@ while g.running:
             drone.update_gif(droneSprite)
             drone.render_player(droneSprite, g)
             #If time runs out
-            if time.time()-drone_start >10:
+            if t.time()-drone_start >10:
                 client.drone = 0
                 current_actor = p
-                drone_start = time.time()
+                drone_start = t.time()
                 droneB = False
 
-                    
-        render_bullets(g, p, inventory.inventoryP[inventory.state], client)
+        render_bullets(g, p, inventory.inventoryP[inventory.state], client, FPS)
         client.render_enemy_bullets(inventory.inventoryP[inventory.state])
         inventory.draw_inventory(g.screen)
         Drone.draw_drone(g.screen,droneB,dronebuttonlist,(t.time()-drone_start))
-        fps = fps_font.render(str(int(myClock.get_fps())), True, (0,0,0))
+        fps = fps_font.render(str(int(FPS)), True, (0,0,0))
         g.screen.blit(fps, (1200,10))
     display.flip()
 quit()

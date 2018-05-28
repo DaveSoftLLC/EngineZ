@@ -6,10 +6,10 @@ import time as t
 g = GameMode()
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png').convert_alpha(), 10,image.load('Weapons/shotgunb.png').convert_alpha(), 6)
 empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0)
-#empty = Gun('None
+
 inventory = Inventory(shotgun,shotgun,shotgun,shotgun,shotgun,empty)
 dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
-#inventory.add_item(shotgun)
+
 collision = image.load('Background/rocks+hole.png').convert_alpha()
 def scale_and_load(path, factor):
     img = image.load(path).convert_alpha()
@@ -119,7 +119,7 @@ while g.running:
                 droneB = False
 
         render_bullets(g, p, inventory.inventoryP[inventory.state], client, FPS)
-        client.render_enemy_bullets(inventory.inventoryP[inventory.state])
+        client.render_enemy_bullets(inventory.inventoryP[inventory.state],g.screen)
         inventory.draw_inventory(g.screen)
         Drone.draw_drone(g.screen,droneB,dronebuttonlist,(t.time()-drone_start))
         fps = fps_font.render(str(int(FPS)), True, (0,0,0))

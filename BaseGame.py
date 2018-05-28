@@ -77,7 +77,7 @@ class Client:
                          - your_Player.get_height() // 2
                     g.screen.blit(your_Player, (nx,ny))
                     
-    def render_enemy_bullets(self, gun):
+    def render_enemy_bullets(self, gun,screen):
         p = self.player
         g = self.game
         d = self.drone
@@ -92,9 +92,11 @@ class Client:
                     by = b[0][1]
 ##                    for a in range(1, 6):
 ##                        angle = b[1] + 90 - (3 - a) * 6
-                    lb = transform.rotate(gun.bulletSprite, b[1])
+                    
+                    #lb = transform.rotate(gun.bulletSprite, b[1])
                     lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
-                    g.screen.blit(lb, (lx, ly))
+                    gunType.gun_Bullet(b[2],lx,ly,b[1],screen)
+                    #g.screen.blit(lb, (lx, ly))
 
 class GameMode:
     def __init__(self,server=False):

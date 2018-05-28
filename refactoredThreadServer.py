@@ -44,7 +44,7 @@ class Server:
                         else:
                             for key, value in self.player_health_dict.items():
                                 self.player_dict[key].health = value
-                        if current_player in del_bullets:
+                        if current_player in del_bullets: #Disconnect, bullets will be deleted
                             self.player_dict[current_player].del_bullets += del_bullets[current_player]
                         del_bullets[current_player] = []
                         conn.send(pickle.dumps(self.player_dict))

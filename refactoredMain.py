@@ -4,10 +4,11 @@ from random import randint
 from BaseGame import *
 import time as t
 g = GameMode()
+assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png').convert_alpha(),5,image.load('Weapons/machinegun.png').convert_alpha(),2)
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png').convert_alpha(), 10,image.load('Weapons/shotgunb.png').convert_alpha(), 6)
 empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0)
 
-inventory = Inventory(shotgun,shotgun,shotgun,shotgun,shotgun,empty)
+inventory = Inventory(shotgun,shotgun,shotgun,assaultrifle,shotgun,empty)
 dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
 
 collision = image.load('Background/rocks+hole.png').convert_alpha()

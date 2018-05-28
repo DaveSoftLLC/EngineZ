@@ -334,7 +334,7 @@ class Gun:
         self.damage = damage
         self.spread = spread
         self.inventory_image = inventory_image
-        self.gundict = {'Shotgun':image.load('Weapons/shellBullet.png')}
+        self.gundict = {'Shotgun':image.load('Weapons/shellBullet.png'),'AR':image.load('Weapons/lightbullet.png')}
     def gun_Bullet(self, name, x,y,rot,Game):
         bullet_sprite = transform.rotate(self.gundict[name], rot)
         Game.blit(bullet_sprite, (x,y))

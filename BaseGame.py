@@ -4,6 +4,7 @@ import threading
 from math import *
 from pygame import *
 from random import*
+import time as t
 
 TCP_IP = '127.0.0.1'#'159.203.147.141'
 TCP_PORT = 4545
@@ -114,8 +115,10 @@ class GameMode:
             display.flip()
             self.music = mixer.music.load("Outcast.wav")
             self.background = image.load('Background/MapFinal.png').convert()
+            self.droneB =False
+            self.drone_start = 31
             weapon_list = ["Shotgun","AR","Sniper"]
-            
+            self.current_actor = 0
             for i in range(20):
                 weapon = choice(weapon_list)
                 wx,wy = (randint(100,11900),randint(100,7900))
@@ -145,6 +148,20 @@ class GameMode:
         except Exception as E:
             print("Error:", E)
 
+    def drone_click(self,g,p,client):
+        if self.droneB == False and t.time()-self.drone_start >30:#If the cooldown is down, run
+            self.drone = Drone(g, '%s' % ("ID"), (p.pos), 6, 'drone')
+            self.current_actor = self.drone
+            client.drone = self.drone
+            self.droneB = True
+            self.drone_start=t.time()
+        elif self.droneB == False and t.time()-self.drone_start <30:
+            pass
+        else:
+            self.drone_start=t.time()
+            client.drone = 0
+            self.current_actor = p
+            self.droneB = False
 
 class Player:
     def __init__(self, game, name, pos, speed, mode):
@@ -356,7 +373,6 @@ class Gun:
         self.gundict = {'Shotgun':image.load('Weapons/shellBullet.png'),'AR':image.load('Weapons/lightbullet.png'),'Sniper':image.load('Weapons/heavyBullet.png')}
     def gun_Bullet(self, name, x,y,rot,Game):
         if name!='Empty':
-            
             bullet_sprite = transform.rotate(self.gundict[name], rot)
             Game.blit(bullet_sprite, (x,y))
         

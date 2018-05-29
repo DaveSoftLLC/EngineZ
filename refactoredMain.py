@@ -4,7 +4,7 @@ from random import randint
 from BaseGame import *
 import time as t
 g = GameMode()
-assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png').convert_alpha(),5,image.load('Weapons/machinegun.png').convert_alpha(),2,0.05)
+assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png').convert_alpha(),5,image.load('Weapons/machinegun.png').convert_alpha(),0,0.05)
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png').convert_alpha(), 10,image.load('Weapons/shotgunb.png').convert_alpha(), 6,0)
 empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
 

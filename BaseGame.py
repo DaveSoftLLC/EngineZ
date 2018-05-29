@@ -190,9 +190,14 @@ class Player:
     def fire(self, inventory, FPS):
         px, py = self.pos
         if inventory.inventoryP[inventory.state] != 0:
-            for a in range(1,inventory.inventoryP[inventory.state].spread):
-                spread = self.rotation+90-(3-a)*6
-                self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name, int(20/FPS*60)])
+            if inventory.inventoryP[inventory.state].spread > 1:
+                print(inventory.inventoryP[inventory.state].spread)
+                for a in range(1,inventory.inventoryP[inventory.state].spread):
+                    spread = self.rotation+90-(3-a)*6
+                    self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name, int(20/FPS*60)])
+            else:
+                angle = self.rotation+90
+                self.bullets.append([(px+5*cos(radians(angle)), py-5*sin(radians(angle))), angle, inventory.inventoryP[inventory.state].name, int(20/FPS*60)])               
                 
         
 

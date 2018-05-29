@@ -3,12 +3,8 @@ from random import randint
 
 from BaseGame import *
 g = GameMode()
-assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png').convert_alpha(),5,image.load('Weapons/machinegun.png').convert_alpha(),0,0.15)
-shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png').convert_alpha(), 10,image.load('Weapons/shotgunb.png').convert_alpha(), 6,0)
-sniper = Gun('Sniper',image.load('Weapons/heavyBullet.png').convert_alpha(),25,image.load('Weapons/sniper.png').convert_alpha(),1,0)
-empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
 
-inventory = Inventory(shotgun,shotgun,shotgun,assaultrifle,sniper,empty)
+inventory = Inventory(g.guns)
 dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
 
 collision = image.load('Background/rocks+hole.png').convert_alpha()
@@ -35,6 +31,8 @@ g.current_actor = p
 myClock = time.Clock()
 last_fire = 0
 while g.running:
+    m = mouse.get_pressed()
+    mx, my = mouse.get_pos()
     myClock.tick(144)
     FPS = myClock.get_fps()
     if inventory.inventoryP[inventory.state].rate >0 and m[0] == 1:
@@ -127,7 +125,7 @@ while g.running:
                 g.drone_start = t.time()
                 g.droneB = False
 
-        render_bullets(g, p, inventory.inventoryP[inventory.state], client, FPS)
+        render_bullets(g, p, client, FPS)
         client.render_enemy_bullets(inventory.inventoryP[inventory.state],g.screen)
         inventory.draw_inventory(g.screen,p.ammo)
         Drone.draw_drone(g.screen,g.droneB,dronebuttonlist,(t.time()-g.drone_start))

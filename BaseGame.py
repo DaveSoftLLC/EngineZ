@@ -328,12 +328,13 @@ class Inventory:
 
 
 class Gun:
-    def __init__(self, name, bulletSprite, damage, inventory_image, spread=None):
+    def __init__(self, name, bulletSprite, damage, inventory_image, spread,rate):
         self.name = name
         self.bulletSprite = bulletSprite
         self.damage = damage
         self.spread = spread
         self.inventory_image = inventory_image
+        self.rate = rate
         self.gundict = {'Shotgun':image.load('Weapons/shellBullet.png'),'AR':image.load('Weapons/lightbullet.png')}
     def gun_Bullet(self, name, x,y,rot,Game):
         bullet_sprite = transform.rotate(self.gundict[name], rot)

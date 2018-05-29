@@ -4,9 +4,9 @@ from random import randint
 from BaseGame import *
 import time as t
 g = GameMode()
-assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png').convert_alpha(),5,image.load('Weapons/machinegun.png').convert_alpha(),2)
-shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png').convert_alpha(), 10,image.load('Weapons/shotgunb.png').convert_alpha(), 6)
-empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0)
+assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png').convert_alpha(),5,image.load('Weapons/machinegun.png').convert_alpha(),2,0.05)
+shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png').convert_alpha(), 10,image.load('Weapons/shotgunb.png').convert_alpha(), 6,0)
+empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
 
 inventory = Inventory(shotgun,shotgun,shotgun,assaultrifle,shotgun,empty)
 dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
@@ -36,7 +36,10 @@ last_fire = 0
 while g.running:
     myClock.tick(144)
     FPS = myClock.get_fps()
-    left_click = False
+    if inventory.inventoryP[inventory.state].rate >0 and m[0] == 1:
+        left_click = True
+    else:
+        left_click = False
     for e in event.get():
         if e.type == QUIT:
             g.running = False
@@ -96,11 +99,16 @@ while g.running:
         if keys[K_d] and px+current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
             current_actor.move('RIGHT', g.background, g.collisionmap, FPS)
 
-        if current_actor.type == 'player' and left_click and t.time() - last_fire > 0.3:
+        if current_actor.type == 'player' and left_click and (t.time() - last_fire > 0.3 or (inventory.inventoryP[inventory.state].rate >0 and t.time() - last_fire > inventory.inventoryP[inventory.state].rate)):
             last_fire = t.time()
             p.state = 2
             p.fire(inventory, FPS)
-            left_click = False
+            """
+            if inventory.inventoryP[inventory.state].rate >0:
+                left_click = True
+            else:
+                left_click = False
+            """
         g.draw_screen(current_actor)
         if current_actor.type == 'player':
             p.update_gif(newSprites)

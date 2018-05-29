@@ -3,6 +3,8 @@ import socket
 import threading
 from math import *
 from pygame import *
+from random import*
+import time as t
 
 TCP_IP = '127.0.0.1'#'159.203.147.141'
 TCP_PORT = 4545
@@ -77,7 +79,7 @@ class Client:
                          - your_Player.get_height() // 2
                     g.screen.blit(your_Player, (nx,ny))
                     
-    def render_enemy_bullets(self, gun):
+    def render_enemy_bullets(self, gun,screen):
         p = self.player
         g = self.game
         d = self.drone
@@ -92,9 +94,11 @@ class Client:
                     by = b[0][1]
 ##                    for a in range(1, 6):
 ##                        angle = b[1] + 90 - (3 - a) * 6
-                    lb = transform.rotate(gun.bulletSprite, b[1])
+                    
+                    #lb = transform.rotate(gun.bulletSprite, b[1])
                     lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
-                    g.screen.blit(lb, (lx, ly))
+                    gunType.gun_Bullet(b[2],lx,ly,b[1],screen)
+                    #g.screen.blit(lb, (lx, ly))
 
 class GameMode:
     def __init__(self,server=False):
@@ -111,6 +115,24 @@ class GameMode:
             display.flip()
             self.music = mixer.music.load("Outcast.wav")
             self.background = image.load('Background/MapFinal.png').convert()
+            self.droneB =False
+            self.drone_start = 31
+            weapon_list = ["Shotgun","AR","Sniper"]
+            self.current_actor = 0
+            assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png').convert_alpha(),
+                               5,image.load('Weapons/machinegun.png').convert_alpha(),0,0.15)
+            shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png').convert_alpha(),
+                          10,image.load('Weapons/shotgunb.png').convert_alpha(), 6,0)
+            sniper = Gun('Sniper',image.load('Weapons/heavyBullet.png').convert_alpha(),
+                         25,image.load('Weapons/sniper.png').convert_alpha(),1,0)
+            empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
+            self.guns = [assaultrifle,shotgun,sniper,empty]
+            weapon_list = [n.name for n in self.guns]
+            for i in range(20):
+                weapon = choice(weapon_list)
+                wx,wy = (randint(100,11900),randint(100,7900))
+                
+            
         else:
             self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
@@ -135,6 +157,20 @@ class GameMode:
         except Exception as E:
             print("Error:", E)
 
+    def drone_click(self,g,p,client):
+        if self.droneB == False and t.time()-self.drone_start >30:#If the cooldown is down, run
+            self.drone = Drone(g, '%s' % ("ID"), (p.pos), 6, 'drone')
+            self.current_actor = self.drone
+            client.drone = self.drone
+            self.droneB = True
+            self.drone_start=t.time()
+        elif self.droneB == False and t.time()-self.drone_start <30:
+            pass
+        else:
+            self.drone_start=t.time()
+            client.drone = 0
+            self.current_actor = p
+            self.droneB = False
 
 class Player:
     def __init__(self, game, name, pos, speed, mode):
@@ -148,6 +184,7 @@ class Player:
         self.rect = None
         self.gif_counter = 0
         self.del_bullets = []
+        self.ammo = []
         self.type = mode
 
     def move(self, direction, background, collisionmap, FPS, speed=None):
@@ -186,11 +223,19 @@ class Player:
         pass
 
     def fire(self, inventory, FPS):
-        px, py = self.pos
-        if inventory.inventoryP[inventory.state] != 0:
-            for a in range(1,inventory.inventoryP[inventory.state].spread):
-                spread = self.rotation+90-(3-a)*6
-                self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name, int(20/FPS*60)])
+        if inventory.inventoryP[inventory.state].name != 'Empty' and self.ammo[inventory.state]>0:
+            
+            px, py = self.pos
+            self.ammo[inventory.state] -=1
+            
+            if inventory.inventoryP[inventory.state].spread > 1:
+                #print(inventory.inventoryP[inventory.state].spread)
+                for a in range(1,inventory.inventoryP[inventory.state].spread):
+                    spread = self.rotation+90-(3-a)*6
+                    self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name, int(20/FPS*60)])
+            else:
+                angle = self.rotation+90
+                self.bullets.append([(px+5*cos(radians(angle)), py-5*sin(radians(angle))), angle, inventory.inventoryP[inventory.state].name, int(20/FPS*60)])               
                 
         
 
@@ -233,8 +278,13 @@ class Drone(Player):
     #Trees that can be broken down (randint tree rect)
     #Randomize pickup of weapons and pickup
     
+def map_to_bullet(name,game):
+    for n in game.guns:
+        if name == n.name:
+            return n.bulletSprite
+    return None
 
-def render_bullets(Game, player, gunType, client, FPS, drone=False):
+def render_bullets(Game, player, client, FPS):
     for b in player.bullets:
         no_collision = True
         px, py = player.pos
@@ -280,7 +330,8 @@ def render_bullets(Game, player, gunType, client, FPS, drone=False):
                     player.bullets[player.bullets.index(b)] = [(nx, ny), b[1],b[2], delta]
                 except ValueError:
                     pass
-                gunType.gun_Bullet(b[2],lx,ly,b[1],Game.screen)
+                bullet_sprite = map_to_bullet(b[2], Game)
+                Game.screen.blit(transform.rotate(bullet_sprite, b[1]), (lx, ly))
                 #bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
                 #Game.screen.blit(bullet_sprite, (lx, ly))
             else:
@@ -291,9 +342,10 @@ def render_bullets(Game, player, gunType, client, FPS, drone=False):
             player.bullets.remove(b)
 
 class Inventory:
-    def __init__(self, i0, i1, i2, i3, i4, i5):
-        self.inventoryP = [i0, i1, i2, i3, i4, i5]
+    def __init__(self, items):
+        self.inventoryP = items
         self.state = 0
+        self.textFont = font.SysFont("Arial", 22)
 
     def add_item(self,item):
         if 0 in self.inventoryP:
@@ -310,30 +362,38 @@ class Inventory:
                 self.state += 1
         else:
             if 0 == self.state:
-                self.state = 5
+                self.state = len(self.inventoryP)-1
             else:
                 self.state-=1
 
-    def draw_inventory(self,Game):
-        for i in range(6):
+    def draw_inventory(self,Game,ammo):
+        for i in range(len(self.inventoryP)):
             if i!=self.state:
-                if self.inventoryP[i] != 0:
-                    Game.blit(self.inventoryP[i].inventory_image,(850+i*69,700))
+                Game.blit(self.inventoryP[i].inventory_image,(850+i*69,700))
+                Game.blit(self.textFont.render(str(ammo[i]), True, (255,255,255)), (850+i*69,700))
                 draw.rect(Game,(0),(850+i*69,700,70,70),2)
-        if self.inventoryP[self.state] != 0:
-            Game.blit(self.inventoryP[self.state].inventory_image,(850+self.state*69,695))
+        Game.blit(self.inventoryP[self.state].inventory_image,(850+self.state*69,695))
+        Game.blit(self.textFont.render(str(ammo[self.state]), True, (255,255,255)), (850+self.state*69,695))
         draw.rect(Game,(0,0,255),(850+self.state*69,695,70,70),2)
-
+        
 
 class Gun:
-    def __init__(self, name, bulletSprite, damage, inventory_image, spread=None):
+    def __init__(self, name, bulletSprite, damage, inventory_image, spread,rate):
         self.name = name
         self.bulletSprite = bulletSprite
         self.damage = damage
         self.spread = spread
         self.inventory_image = inventory_image
-        self.gundict = {'Shotgun':image.load('Weapons/shellBullet.png')}
+        self.rate = rate
+        self.gundict = {'Shotgun':image.load('Weapons/shellBullet.png'),'AR':image.load('Weapons/lightbullet.png'),'Sniper':image.load('Weapons/heavyBullet.png')}
     def gun_Bullet(self, name, x,y,rot,Game):
-        bullet_sprite = transform.rotate(self.gundict[name], rot)
-        Game.blit(bullet_sprite, (x,y))
+        if name!='Empty':
+            bullet_sprite = transform.rotate(self.gundict[name], rot)
+            Game.blit(bullet_sprite, (x,y))
         
+##    def gun_Bullet(self, name, x,y,rot,Game):
+##        if name!='Empty':
+##            
+##            bullet_sprite = transform.rotate(self.bulletSprite, rot)
+##            Game.blit(bullet_sprite, (x,y))
+##        

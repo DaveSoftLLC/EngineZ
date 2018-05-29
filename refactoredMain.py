@@ -4,7 +4,7 @@ from random import randint
 from BaseGame import *
 import time as t
 g = GameMode()
-assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png').convert_alpha(),5,image.load('Weapons/machinegun.png').convert_alpha(),0,0.1)
+assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png').convert_alpha(),5,image.load('Weapons/machinegun.png').convert_alpha(),0,0.15)
 shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png').convert_alpha(), 10,image.load('Weapons/shotgunb.png').convert_alpha(), 6,0)
 sniper = Gun('Sniper',image.load('Weapons/heavyBullet.png').convert_alpha(),25,image.load('Weapons/sniper.png').convert_alpha(),1,0)
 empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
@@ -27,6 +27,7 @@ newSprites = [[scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun
 droneSprite = [[scale_and_load(file, 2) for file in glob.glob('newSprites/drone/*.png')]]
 droneB = False
 p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10, 'player')
+p.ammo =[15,15,15,40,6,0]
 client = Client(p,0,g, TCP_IP, 4545, newSprites)
 threading.Thread(target=client.get_data).start()
 drone_start = 31 #Drone can be used first (30 seconds)
@@ -78,10 +79,10 @@ while g.running:
         px, py = current_actor.get_pos()
         #SPRINT only for player
         if keys[K_LSHIFT] and m[0] == 1:
-            p.speed = 5
+            p.speed = 6
             p.state = 2
         elif keys[K_LSHIFT]:
-            p.speed = 13
+            p.speed = 14
             p.state = 1
         else:
             p.speed = 10
@@ -104,6 +105,7 @@ while g.running:
             last_fire = t.time()
             p.state = 2
             p.fire(inventory, FPS)
+            
             """
             if inventory.inventoryP[inventory.state].rate >0:
                 left_click = True
@@ -130,7 +132,7 @@ while g.running:
 
         render_bullets(g, p, inventory.inventoryP[inventory.state], client, FPS)
         client.render_enemy_bullets(inventory.inventoryP[inventory.state],g.screen)
-        inventory.draw_inventory(g.screen)
+        inventory.draw_inventory(g.screen,p.ammo)
         Drone.draw_drone(g.screen,droneB,dronebuttonlist,(t.time()-drone_start))
         fps = fps_font.render(str(int(FPS)), True, (0,0,0))
         g.screen.blit(fps, (1200,10))

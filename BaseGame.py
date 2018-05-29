@@ -3,6 +3,7 @@ import socket
 import threading
 from math import *
 from pygame import *
+from random import*
 
 TCP_IP = '127.0.0.1'#'159.203.147.141'
 TCP_PORT = 4545
@@ -113,6 +114,13 @@ class GameMode:
             display.flip()
             self.music = mixer.music.load("Outcast.wav")
             self.background = image.load('Background/MapFinal.png').convert()
+            weapon_list = ["Shotgun","AR","Sniper"]
+            
+            for i in range(20):
+                weapon = choice(weapon_list)
+                wx,wy = (randint(100,11900),randint(100,7900))
+                
+            
         else:
             self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
@@ -150,6 +158,7 @@ class Player:
         self.rect = None
         self.gif_counter = 0
         self.del_bullets = []
+        self.ammo = []
         self.type = mode
 
     def move(self, direction, background, collisionmap, FPS, speed=None):
@@ -188,10 +197,13 @@ class Player:
         pass
 
     def fire(self, inventory, FPS):
-        px, py = self.pos
-        if inventory.inventoryP[inventory.state] != 0:
+        if inventory.inventoryP[inventory.state].name != 'Empty' and self.ammo[inventory.state]>0:
+            
+            px, py = self.pos
+            self.ammo[inventory.state] -=1
+            
             if inventory.inventoryP[inventory.state].spread > 1:
-                print(inventory.inventoryP[inventory.state].spread)
+                #print(inventory.inventoryP[inventory.state].spread)
                 for a in range(1,inventory.inventoryP[inventory.state].spread):
                     spread = self.rotation+90-(3-a)*6
                     self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name, int(20/FPS*60)])
@@ -301,6 +313,7 @@ class Inventory:
     def __init__(self, i0, i1, i2, i3, i4, i5):
         self.inventoryP = [i0, i1, i2, i3, i4, i5]
         self.state = 0
+        self.textFont = font.SysFont("Arial", 22)
 
     def add_item(self,item):
         if 0 in self.inventoryP:
@@ -321,16 +334,16 @@ class Inventory:
             else:
                 self.state-=1
 
-    def draw_inventory(self,Game):
+    def draw_inventory(self,Game,ammo):
         for i in range(6):
             if i!=self.state:
-                if self.inventoryP[i] != 0:
-                    Game.blit(self.inventoryP[i].inventory_image,(850+i*69,700))
+                Game.blit(self.inventoryP[i].inventory_image,(850+i*69,700))
+                Game.blit(self.textFont.render(str(ammo[i]), True, (255,255,255)), (850+i*69,700))
                 draw.rect(Game,(0),(850+i*69,700,70,70),2)
-        if self.inventoryP[self.state] != 0:
-            Game.blit(self.inventoryP[self.state].inventory_image,(850+self.state*69,695))
+        Game.blit(self.inventoryP[self.state].inventory_image,(850+self.state*69,695))
+        Game.blit(self.textFont.render(str(ammo[self.state]), True, (255,255,255)), (850+self.state*69,695))
         draw.rect(Game,(0,0,255),(850+self.state*69,695,70,70),2)
-
+        
 
 class Gun:
     def __init__(self, name, bulletSprite, damage, inventory_image, spread,rate):

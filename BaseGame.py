@@ -135,12 +135,11 @@ class GameMode:
             for i in range(20):
                 weapon = choice(list(self.weapon_dict))
                 wx,wy = (randint(100,11900),randint(100,7900))
-                self.weapon_map.append([weapon,(wx,wy)])
+                self.weapon_map.append([weapon,(wx,wy),100])
         else:
             self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
         self.running = True
-
     def draw_screen(self, player):
         try:
             px,py = player.get_pos()
@@ -174,11 +173,16 @@ class GameMode:
             client.drone = 0
             self.current_actor = p
             self.droneB = False
+    def draw_weapons(self):
+        pass
 
     def weapon_pickup(self,p,inventory):
         for i in self.weapon_map:
             if hypot(i[1][0]-p.pos[0],i[1][1]-p.pos[1]) <30:
-                inventory.add_item(self.weapon_dict[i[0]],p)
+                inventory.add_item(self.weapon_dict[i[0]],p,self.weapon_dict[i][2])
+                del self.weapon_map[self.weapon_map,index(i)]
+                self.weapon_map.append([inventory.inventoryP[inventory.state].name,(p.pos),p.ammo[inventory.state]])
+                
                 print("item added")
         print(p.pos)
         print(self.weapon_map)
@@ -358,13 +362,14 @@ class Inventory:
         self.textFont = font.SysFont("Arial", 22)
         self.empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
 
-    def add_item(self,item,p):
+    def add_item(self,item,p,ammo):
         if  self.empty in self.inventoryP:
             self.inventoryP[self.inventoryP.index(self.empty)] = item
-            p.ammo[self.inventoryP.index(self.empty)] = 100
+            p.ammo[self.inventoryP.index(self.empty)] = ammo
         else:
             self.inventoryP[self.state] = item
-            p.ammo[self.state] = 100
+            p.ammo[self.state] = ammo
+        
         #Visually remove or add object needs to be done
     
     def switch(self,scroll):

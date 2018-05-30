@@ -173,19 +173,28 @@ class GameMode:
             client.drone = 0
             self.current_actor = p
             self.droneB = False
-    def draw_weapons(self):
-        pass
+    def draw_weapons(self,screen,pos):
+        for i in self.weapon_map:
+            if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \
+                        and pos[1] - screen.get_height() // 2 < i[1][1] < pos[1] + screen.get_height() // 2:
+                image = self.weapon_dict[i[0]].inventory_image
+                nx = i[1][0] - pos[0] + screen.get_width() // 2 \
+                         - image.get_width() // 2
+                ny = i[1][1] - pos[1] + screen.get_height() // 2 \
+                         - image.get_height() // 2
+                screen.blit(image,(nx,ny))
 
     def weapon_pickup(self,p,inventory):
         for i in self.weapon_map:
-            if hypot(i[1][0]-p.pos[0],i[1][1]-p.pos[1]) <30:
-                inventory.add_item(self.weapon_dict[i[0]],p,self.weapon_dict[i][2])
-                del self.weapon_map[self.weapon_map,index(i)]
+            if hypot(i[1][0]-25-p.pos[0],i[1][1]-25-p.pos[1]) <100:
+                del self.weapon_map[self.weapon_map.index(i)]
                 self.weapon_map.append([inventory.inventoryP[inventory.state].name,(p.pos),p.ammo[inventory.state]])
+                inventory.add_item(self.weapon_dict[i[0]],p,self.weapon_map[self.weapon_map.index(i)][2])
                 
+                
+                print(p.ammo)
                 print("item added")
-        print(p.pos)
-        print(self.weapon_map)
+        
 
 class Player:
     def __init__(self, game, name, pos, speed, mode):
@@ -242,6 +251,7 @@ class Player:
             
             px, py = self.pos
             self.ammo[inventory.state] -=1
+            print(self.ammo)
             
             if inventory.inventoryP[inventory.state].spread > 1:
                 #print(inventory.inventoryP[inventory.state].spread)
@@ -363,9 +373,11 @@ class Inventory:
         self.empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
 
     def add_item(self,item,p,ammo):
+        print(ammo)
         if  self.empty in self.inventoryP:
-            self.inventoryP[self.inventoryP.index(self.empty)] = item
             p.ammo[self.inventoryP.index(self.empty)] = ammo
+            self.inventoryP[self.inventoryP.index(self.empty)] = item
+            
         else:
             self.inventoryP[self.state] = item
             p.ammo[self.state] = ammo

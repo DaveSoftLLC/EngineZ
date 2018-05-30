@@ -187,10 +187,10 @@ class GameMode:
     def weapon_pickup(self,p,inventory):
         for i in self.weapon_map:
             if hypot(i[1][0]-25-p.pos[0],i[1][1]-25-p.pos[1]) <100:
-                del self.weapon_map[self.weapon_map.index(i)]
+                
                 self.weapon_map.append([inventory.inventoryP[inventory.state].name,(p.pos),p.ammo[inventory.state]])
                 inventory.add_item(self.weapon_dict[i[0]],p,self.weapon_map[self.weapon_map.index(i)][2])
-                
+                del self.weapon_map[self.weapon_map.index(i)]
                 
                 print(p.ammo)
                 print("item added")

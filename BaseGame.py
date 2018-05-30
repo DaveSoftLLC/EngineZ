@@ -97,7 +97,9 @@ class Client:
                     
                     #lb = transform.rotate(gun.bulletSprite, b[1])
                     lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
-                    gunType.gun_Bullet(b[2],lx,ly,b[1],screen)
+                    bullet_sprite = map_to_bullet(b[2], Game)
+                    screen.blit(transform.rotate(bullet_sprite, b[1]), (lx, ly))
+                    #gunType.gun_Bullet(b[2],lx,ly,b[1],screen)
                     #g.screen.blit(lb, (lx, ly))
 
 class GameMode:
@@ -126,13 +128,13 @@ class GameMode:
             sniper = Gun('Sniper',image.load('Weapons/heavyBullet.png').convert_alpha(),
                          25,image.load('Weapons/sniper.png').convert_alpha(),1,0)
             empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
-            self.guns = [assaultrifle,shotgun,sniper,empty]
+            self.guns = [assaultrifle,shotgun,sniper,empty,empty,empty]
             weapon_list = [n.name for n in self.guns]
+            self.weapon_map =[]
             for i in range(20):
                 weapon = choice(weapon_list)
                 wx,wy = (randint(100,11900),randint(100,7900))
-                
-            
+                self.weapon_map.append([weapon,(wx,wy)])
         else:
             self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
@@ -171,6 +173,9 @@ class GameMode:
             client.drone = 0
             self.current_actor = p
             self.droneB = False
+
+    def weapon_pickup(self):
+        
 
 class Player:
     def __init__(self, game, name, pos, speed, mode):
@@ -256,16 +261,15 @@ class Player:
             self.gif_counter += 1
 
 class Drone(Player):
-    def printdrone():
-        print("I don't know what extra functions to put in yet")
     def draw_drone(Game,droneB,piclist,timer):
         textFont = font.SysFont("Arial", 18)
         if timer>30 and droneB == False:#When cooldown is done
             dronebutton = piclist[0]
-            #Game.blit(textFont.render(str(round(timer,2)), True, (255,255,255)), (35, 770))
+
         elif droneB == False and timer<30:#Cooldown till you can use it again
             dronebutton = piclist[1]
             Game.blit(textFont.render(str(round(30-timer,2)), True, (255,255,255)), (35, 770))
+            
         elif droneB == True: #Timer for while using drone
             dronebutton = piclist[1]
             Game.blit(textFont.render(str(round(10-timer,2)), True, (255,255,255)), (35, 770))

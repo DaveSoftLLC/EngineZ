@@ -54,21 +54,8 @@ while g.running:
             keys = key.get_pressed()
             if keys[K_z]:
                 g.drone_click(g,p,client)
-                
-##                if droneB == False and t.time()-drone_start >30:#If the cooldown is down, run
-##                    drone = Drone(g, '%s' % ("ID"), (p.pos), 6, 'drone')
-##                    current_actor = drone
-##                    client.drone = drone
-##                    droneB = True
-##                    drone_start=t.time()
-##                elif droneB == False and t.time()-drone_start <30:
-##                    pass
-##                else:
-##                    drone_start=t.time()
-##                    client.drone = 0
-##                    current_actor = p
-##                    droneB = False
-#alt 3
+            if keys[K_e] and g.current_actor.type == 'player':
+                g.weapon_pickup(p,inventory)
     m = mouse.get_pressed()
     mx, my = mouse.get_pos()
     

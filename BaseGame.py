@@ -119,7 +119,7 @@ class GameMode:
             self.background = image.load('Background/MapFinal.png').convert()
             self.droneB =False
             self.drone_start = 31
-            weapon_list = ["Shotgun","AR","Sniper"]
+            
             self.current_actor = 0
             assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png').convert_alpha(),
                                5,image.load('Weapons/machinegun.png').convert_alpha(),0,0.15)
@@ -128,11 +128,12 @@ class GameMode:
             sniper = Gun('Sniper',image.load('Weapons/heavyBullet.png').convert_alpha(),
                          25,image.load('Weapons/sniper.png').convert_alpha(),1,0)
             empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
+            self.weapon_dict = {"Shotgun":shotgun,"AR":assaultrifle,"Sniper":sniper}
             self.guns = [assaultrifle,shotgun,sniper,empty,empty,empty]
-            weapon_list = [n.name for n in self.guns]
+            #weapon_list = [n.name for n in self.guns]
             self.weapon_map =[]
             for i in range(20):
-                weapon = choice(weapon_list)
+                weapon = choice(list(self.weapon_dict))
                 wx,wy = (randint(100,11900),randint(100,7900))
                 self.weapon_map.append([weapon,(wx,wy)])
         else:
@@ -174,8 +175,13 @@ class GameMode:
             self.current_actor = p
             self.droneB = False
 
-    def weapon_pickup(self):
-        
+    def weapon_pickup(self,p,inventory):
+        for i in self.weapon_map:
+            if hypot(i[1][0]-p.pos[0],i[1][1]-p.pos[1]) <30:
+                inventory.add_item(self.weapon_dict[i[0]],p)
+                print("item added")
+        print(p.pos)
+        print(self.weapon_map)
 
 class Player:
     def __init__(self, game, name, pos, speed, mode):
@@ -350,12 +356,15 @@ class Inventory:
         self.inventoryP = items
         self.state = 0
         self.textFont = font.SysFont("Arial", 22)
+        self.empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
 
-    def add_item(self,item):
-        if 0 in self.inventoryP:
-            self.inventoryP[self.inventoryP.index(0)] = item
+    def add_item(self,item,p):
+        if  self.empty in self.inventoryP:
+            self.inventoryP[self.inventoryP.index(self.empty)] = item
+            p.ammo[self.inventoryP.index(self.empty)] = 100
         else:
             self.inventoryP[self.state] = item
+            p.ammo[self.state] = 100
         #Visually remove or add object needs to be done
     
     def switch(self,scroll):

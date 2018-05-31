@@ -122,27 +122,30 @@ class Server:
               conn.settimeout(10)
               room = pickle.loads(conn.recv())
               STRUCT = ['room name', 'player list']
-              threading.Thread(target=self.listen_client, args=(conn, addr, room)).start()
+              threading.Thread(target=self.listen_client, args=(conn, addr)).start()
 
-    def listen_client(self, conn, addr, room_name):
+    def listen_client(self, conn, addr):
         print('thread')
-        current_player = ''
-        data = conn.recv(self.BUFFER_SIZE)
-        name = data['name']
-        master = data['master']
-        if data:
-            self.rooms.setdefault(room_name,[]).append([name, start, (conn, addr)])
         while self.running:
             try:
-                if master:
-                    start = True
-                    for p in self.rooms[room_name]:
-                        start = p['start']
-                    if start:
-                        instance = GameInstance(room_name, self.rooms[room_name])
-                        self.game_instances[room_name] = instance
-                        process = mp.Process(target=instance.create_thread).start()
-                        raise StopIteration
+                received = conn.recv(self.BUFFER_SIZE)
+                name = data['name']
+                master = data['master']
+                room_name = data['room_name']
+                self.rooms.setdefault(room_name,[]).append([name, start, (conn, addr)])
+                start = True
+                for p in self.rooms[room_name]:
+                    start = p['start']
+                if start and master:
+                    msg = 'game_begin'
+                    conn.send(pickle.dumps(msg))
+                    instance = GameInstance(room_name, self.rooms[room_name])
+                    self.game_instances[room_name] = instance
+                    process = mp.Process(target=instance.create_thread).start()
+                    raise StopIteration
+                else:
+                    msg = pickle.loads(self.rooms)
+                    conn.send(msg)
             except Exception as E:
                 print(E)
                 self.remove(room_name)

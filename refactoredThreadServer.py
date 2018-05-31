@@ -4,7 +4,7 @@ import multiprocessing as mp
 del_bullets = dict()
 
 
-class Room:
+class GameInstance:
     
     def __init__(self, name, clients):
         'name: str; clients = [(conn,addr)]'
@@ -19,63 +19,6 @@ class Room:
         for c, a in self.clients:
             threading.Thread(target=self.listen_client, args=(c, a)).start()
         
-    def listen_client(self, conn, addr):
-        print('thread')
-        current_player = ''
-        while self.running:
-            try:
-                data = conn.recv(self.BUFFER_SIZE)
-                if data:
-                    try:
-                        decoded = pickle.loads(data)
-                        current_player = decoded.name
-                        self.player_dict[decoded.name] = decoded
-                        if current_player not in self.player_health_dict.keys():
-                            self.player_health_dict[decoded.name] = 100
-                        else:
-                            for key, value in self.player_health_dict.items():
-                                self.player_dict[key].health = value
-                        if current_player in del_bullets: #Disconnect, bullets will be deleted
-                            self.player_dict[current_player].del_bullets += del_bullets[current_player]
-                        del_bullets[current_player] = []
-                        conn.send(pickle.dumps(self.player_dict))
-                    except Exception as E:
-                            print("Error:", E)
-                else:
-                    pass
-            except Exception as E:
-                print(E)
-                self.remove(current_player)
-                break
-        conn.close()
-        
-
-
-class Server:
-    def __init__(self, game, BUFFER_SIZE):
-        self.TCP_IP = ''  # ''159.203.163.149'
-        self.TCP_PORT = 4545
-        self.BUFFER_SIZE = BUFFER_SIZE  # Normally 1024, but we want fast response
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.s.bind((self.TCP_IP, self.TCP_PORT))
-        self.s.listen(1)
-        self.player_dict = {}
-        self.player_health_dict = {}
-        self.running = True
-        self.send_dict = dict()
-        self.game = GameMode(server=True)
-
-    def listen(self):
-         while self.running:
-              print("Before looking")
-              conn, addr = self.s.accept()
-              print("After looking")
-              conn.settimeout(10)
-              data = pickle.loads(conn.recv())
-              STRUCT = ['room name', 'player list']
-              threading.Thread(target=self.listen_client, args=(conn, addr)).start()
-
     def listen_client(self, conn, addr):
         print('thread')
         current_player = ''
@@ -156,6 +99,62 @@ class Server:
             del del_bullets[player_name]
         except ValueError:
             pass
+
+
+class Server:
+    def __init__(self, game, BUFFER_SIZE):
+        self.TCP_IP = ''  # ''159.203.163.149'
+        self.TCP_PORT = 4545
+        self.BUFFER_SIZE = BUFFER_SIZE  # Normally 1024, but we want fast response
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.s.bind((self.TCP_IP, self.TCP_PORT))
+        self.s.listen(1)
+        self.rooms = {}
+        self.game = GameMode(server=True)
+        self.game_instances = {}
+
+    def listen(self):
+         while self.running:
+              print("Before looking")
+              conn, addr = self.s.accept()
+              print("After looking")
+              conn.settimeout(10)
+              room = pickle.loads(conn.recv())
+              STRUCT = ['room name', 'player list']
+              threading.Thread(target=self.listen_client, args=(conn, addr, room)).start()
+
+    def listen_client(self, conn, addr, room_name):
+        print('thread')
+        current_player = ''
+        data = conn.recv(self.BUFFER_SIZE)
+        name = data['name']
+        master = data['master']
+        if data:
+            self.rooms.setdefault(room_name,[]).append([name, start, (conn, addr)])
+        while self.running:
+            try:
+                if master:
+                    start = True
+                    for p in self.rooms[room_name]:
+                        start = p['start']
+                    if start:
+                        instance = GameInstance(room_name, self.rooms[room_name])
+                        self.game_instances[room_name] = instance
+                        process = mp.Process(target=instance.create_thread).start()
+                        raise StopIteration
+            except Exception as E:
+                print(E)
+                self.remove(room_name)
+                break
+        conn.close()
+
+    def remove(self, room):
+        try:
+            del self.rooms[room]
+        except:
+            print('Room Not found: %s' %room)
+
 juniper = Server(g, BUFFER_SIZE)
 threading.Thread(target=juniper.listen).start()
 while juniper.running:

@@ -59,13 +59,11 @@ class Client:
                 if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() \
                         and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2:
                     other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
-
                     nx = ox - px + g.screen.get_width() // 2 \
                          - other_sprite.get_width() // 2
                     ny = oy - py + g.screen.get_height() // 2 \
                          - other_sprite.get_height() // 2
                     other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
-
                     g.screen.blit(other_sprite, (nx,ny))
         if Psprite: #displaying player
             px, py = p.get_pos()
@@ -94,7 +92,6 @@ class Client:
                     by = b[0][1]
 ##                    for a in range(1, 6):
 ##                        angle = b[1] + 90 - (3 - a) * 6
-                    
                     #lb = transform.rotate(gun.bulletSprite, b[1])
                     lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
                     bullet_sprite = map_to_bullet(b[2], Game)
@@ -119,7 +116,6 @@ class GameMode:
             self.background = image.load('Background/MapFinal.png').convert()
             self.droneB =False
             self.drone_start = 31
-            weapon_list = ["Shotgun","AR","Sniper"]
             self.current_actor = 0
             assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png').convert_alpha(),
                                5,image.load('Weapons/machinegun.png').convert_alpha(),0,0.15)
@@ -128,18 +124,19 @@ class GameMode:
             sniper = Gun('Sniper',image.load('Weapons/heavyBullet.png').convert_alpha(),
                          25,image.load('Weapons/sniper.png').convert_alpha(),1,0)
             empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
+            self.weapon_dict = {"Shotgun":shotgun,"AR":assaultrifle,"Sniper":sniper}
             self.guns = [assaultrifle,shotgun,sniper,empty,empty,empty]
-            weapon_list = [n.name for n in self.guns]
+            #weapon_list = [n.name for n in self.guns]
             self.weapon_map =[]
             for i in range(20):
-                weapon = choice(weapon_list)
+                weapon = choice(list(self.weapon_dict))
                 wx,wy = (randint(100,11900),randint(100,7900))
-                self.weapon_map.append([weapon,(wx,wy)])
+                self.weapon_map.append([weapon,(wx,wy),100])
         else:
             self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
         self.running = True
-
+        
     def draw_screen(self, player):
         try:
             px,py = player.get_pos()
@@ -147,7 +144,6 @@ class GameMode:
                                                  py-self.screen.get_height()//2,
                                                  self.screen.get_width(), self.screen.get_height()))
             self.screen.blit(portion, (0, 0))
-
             if player.health > 80:
                 health_color = (0, 255, 0)
             elif player.health > 40:
@@ -173,10 +169,25 @@ class GameMode:
             client.drone = 0
             self.current_actor = p
             self.droneB = False
+    def draw_weapons(self,screen,pos):
+        for i in self.weapon_map:
+            if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \
+                        and pos[1] - screen.get_height() // 2 < i[1][1] < pos[1] + screen.get_height() // 2:
+                image = self.weapon_dict[i[0]].inventory_image
+                nx = i[1][0] - pos[0] + screen.get_width() // 2 \
+                         - image.get_width() // 2
+                ny = i[1][1] - pos[1] + screen.get_height() // 2 \
+                         - image.get_height() // 2
+                screen.blit(image,(nx,ny))
 
-    def weapon_pickup(self):
-        pass
 
+    def weapon_pickup(self,p,inventory):
+        for i in self.weapon_map:
+            if hypot(i[1][0]-25-p.pos[0],i[1][1]-25-p.pos[1]) <100:
+                inventory.add_item(self.weapon_dict[i[0]],p,self.weapon_map[self.weapon_map.index(i)][2],self.weapon_map)
+                del self.weapon_map[self.weapon_map.index(i)]
+                break
+                
 class Player:
     def __init__(self, game, name, pos, speed, mode):
         self.name = name
@@ -232,7 +243,6 @@ class Player:
             
             px, py = self.pos
             self.ammo[inventory.state] -=1
-            
             if inventory.inventoryP[inventory.state].spread > 1:
                 #print(inventory.inventoryP[inventory.state].spread)
                 for a in range(1,inventory.inventoryP[inventory.state].spread):
@@ -242,8 +252,6 @@ class Player:
                 angle = self.rotation+90
                 self.bullets.append([(px+5*cos(radians(angle)), py-5*sin(radians(angle))), angle, inventory.inventoryP[inventory.state].name, int(20/FPS*60)])               
                 
-        
-
     def render_player(self, sprites, game):
         sprite = transform.rotate(sprites[self.state][self.gif_counter // 10], self.rotation + 90)
         self.rect = game.screen.blit(sprite, (640 - sprite.get_width() // 2, 400 - sprite.get_height() // 2))
@@ -265,22 +273,17 @@ class Drone(Player):
         textFont = font.SysFont("Arial", 18)
         if timer>30 and droneB == False:#When cooldown is done
             dronebutton = piclist[0]
-
         elif droneB == False and timer<30:#Cooldown till you can use it again
             dronebutton = piclist[1]
             Game.blit(textFont.render(str(round(30-timer,2)), True, (255,255,255)), (35, 770))
-            
         elif droneB == True: #Timer for while using drone
             dronebutton = piclist[1]
             Game.blit(textFont.render(str(round(10-timer,2)), True, (255,255,255)), (35, 770))
-
         Game.blit(dronebutton,(20,700))
-        
-        
     ##########
     #To put in:
     #Trees that can be broken down (randint tree rect)
-    #Randomize pickup of weapons and pickup
+    #The Storm
     
 def map_to_bullet(name,game):
     for n in game.guns:
@@ -329,7 +332,6 @@ def render_bullets(Game, player, client, FPS):
                 if hit_detected:
                     break
             if no_collision:
-        
                 try: #faster than doing 'if not in', because that takes O(N) time
                     player.bullets[player.bullets.index(b)] = [(nx, ny), b[1],b[2], delta]
                 except ValueError:
@@ -350,13 +352,18 @@ class Inventory:
         self.inventoryP = items
         self.state = 0
         self.textFont = font.SysFont("Arial", 22)
+        self.empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
 
-    def add_item(self,item):
-        if 0 in self.inventoryP:
-            self.inventoryP[self.inventoryP.index(0)] = item
+    def add_item(self,item,p,ammo,weaponm):
+        print(ammo)
+        inventoryF = [i.name for i in self.inventoryP]
+        if  "Empty" in inventoryF:
+            p.ammo[inventoryF.index("Empty")] = ammo
+            self.inventoryP[inventoryF.index("Empty")] = item
         else:
+            weaponm.append([self.inventoryP[self.state].name,(p.pos),p.ammo[self.state]])
             self.inventoryP[self.state] = item
-        #Visually remove or add object needs to be done
+            p.ammo[self.state] = ammo
     
     def switch(self,scroll):
         if scroll == "RIGHT":
@@ -380,7 +387,6 @@ class Inventory:
         Game.blit(self.textFont.render(str(ammo[self.state]), True, (255,255,255)), (850+self.state*69,695))
         draw.rect(Game,(0,0,255),(850+self.state*69,695,70,70),2)
         
-
 class Gun:
     def __init__(self, name, bulletSprite, damage, inventory_image, spread,rate):
         self.name = name

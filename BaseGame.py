@@ -175,7 +175,7 @@ class GameMode:
             self.droneB = False
 
     def weapon_pickup(self):
-        
+        pass
 
 class Player:
     def __init__(self, game, name, pos, speed, mode):

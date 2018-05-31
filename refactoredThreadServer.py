@@ -5,7 +5,6 @@ del_bullets = dict()
 
 
 class GameInstance:
-    
     def __init__(self, name, clients):
         'name: str; clients = [(conn,addr)]'
         self.player_dict = {}

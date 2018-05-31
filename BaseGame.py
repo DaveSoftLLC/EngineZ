@@ -180,6 +180,7 @@ class GameMode:
                          - image.get_height() // 2
                 screen.blit(image,(nx,ny))
 
+
     def weapon_pickup(self,p,inventory):
         for i in self.weapon_map:
             if hypot(i[1][0]-25-p.pos[0],i[1][1]-25-p.pos[1]) <100:

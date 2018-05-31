@@ -19,7 +19,19 @@ class Server:
         self.instance = GameMode(server=True)
         self.send_dict = dict()
         self.game = game
-
+        assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png').convert_alpha(),\
+                        5,image.load('Weapons/machinegun.png').convert_alpha(),0,0.15)
+        shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png').convert_alpha(),\
+                      10,image.load('Weapons/shotgunb.png').convert_alpha(), 6,0)
+        sniper = Gun('Sniper',image.load('Weapons/heavyBullet.png').convert_alpha(),\
+                     25,image.load('Weapons/sniper.png').convert_alpha(),1,0)
+        self.weapon_dict = {"Shotgun":shotgun,"AR":assaultrifle,"Sniper":sniper}
+        self.weapon_map =[]
+            for i in range(20):
+                weapon = choice(list(self.weapon_dict))
+                wx,wy = (randint(100,11900),randint(100,7900))
+                self.weapon_map.append([weapon,(wx,wy),100])
+                #self.weapon_map will be sent along with player_dict, client will send weapon that they picked up, and the weapon they will drop (or none)
     def listen(self):
          while self.running:
               print("Before looking")
@@ -42,7 +54,7 @@ class Server:
                         if current_player not in self.player_health_dict.keys():
                             self.player_health_dict[decoded.name] = 100
                         else:
-                            for key, value in self.player_health_dict.items():
+                            for key, value in self.player_health_dict.items():#Whatever the check bullet does, update it to player dict
                                 self.player_dict[key].health = value
                         if current_player in del_bullets: #Disconnect, bullets will be deleted
                             self.player_dict[current_player].del_bullets += del_bullets[current_player]
@@ -108,10 +120,14 @@ class Server:
             del del_bullets[player_name]
         except ValueError:
             pass
+    def weapon_pick(self):
+        
+        pass
 juniper = Server(g, BUFFER_SIZE)
 threading.Thread(target=juniper.listen).start()
 while juniper.running:
     try:
         juniper.check_damage()
+        juniper.weapon_pick()
     except Exception as E:
         print('Error Checking Bullets:', E)

@@ -68,13 +68,14 @@ class Main:
         self.background = []
         self.running = True
         self.menu_text = ['JOIN', 'CREATE', 'OPTIONS', 'QUIT']
-        self.menu_color = {key: (255,255,255) for key in self.menu_text}
+        self.menu_color = {key: (212,175,55) for key in self.menu_text}
+        self.menu_buttons = {w: None for w in self.menu_text}
         font.init()
         self.menu_font = font.Font('geonms-font.ttf', 32)
         self.title_font = font.Font('geonms-font.ttf', 72)
 
     def load_images(self, start, end):
-        background = transform.smoothscale(image.load('nmsdark.jpg').convert(), (1280,800))
+        background = transform.smoothscale(image.load('nmsplanet.jpg').convert(), (1280,800))
         for file in range(start,end):
             self.background.append(image.load("frames/output-{0:06}.jpg".format(file+1)).convert())
             percent = (file-start)/(end-start)
@@ -115,6 +116,8 @@ class Main:
         target_mode = ''
         mode_function = {word: str('self.draw_' + word.lower()) for word in self.menu_text if word != 'QUIT'}
         title = self.title_font.render('outcast: the game', True, (255,255,255))
+        wallpaper = transform.smoothscale(image.load('nmsplanet.jpg').convert(), (1280, 800))
+        self.msg = ''
         while self.running:
             left_click = False
             for e in event.get():
@@ -122,21 +125,27 @@ class Main:
                     self.running = False
                 if e.type == MOUSEBUTTONDOWN:
                     left_click = True
+                if e.type == KEYDOWN:
+                    if e.key == K_BACKSPACE:
+                        if len(self.msg) > 0:
+                            self.msg = self.msg[:-1]#Delete a character when backspace is pressed
+                    elif e.key < 256:
+                        self.msg += e.unicode#Add letter to text
             myClock.tick(60)
             file = transform.smoothscale(self.background[index], (1280,800))
-            screen.blit(file, (0,0))
+            screen.blit(wallpaper, (0,0))
             if mode == 'menu':
+                self.screen.blit(title, (self.screen.get_width()//2-title.get_width()//2, 350))
                 menu = self.draw_menu(left_click)
-                screen.blit(menu[0], (x, 350))
+##                screen.blit(menu[0], (x, 350))
             else:
                 ui = eval(mode_function[mode])(left_click)
-                screen.blit(ui, (490, 350))
-            self.screen.blit(title, (self.screen.get_width()//2-title.get_width()//2, 100))
-            if mode == 'menu' and (menu[1] or change_screen):
+            if mode == 'menu' and (menu or change_screen):
                 if menu[1]:
-                    target_mode = menu[1]
-                change_screen = True
-                x = self.shift(menu[0], x)
+                    target_mode = menu
+                    mode = target_mode
+##                change_screen = True
+##                x = self.shift(menu[0], x)
                 if not x:
                     x = 490
                     change_screen = False
@@ -149,45 +158,52 @@ class Main:
             display.flip()
 
     def draw_menu(self, left_click):
-        menu_background = Surface((300,400))
-        menu_background.set_colorkey(0)
-        menu_background.set_alpha(220)
-        AAfilledRoundedRect(menu_background,(0,0,300,400),(53,121,169), radius=0.1)
+##        menu_background = Surface((300,400))
+##        menu_background.set_colorkey(0)
+##        menu_background.set_alpha(220)
+##        AAfilledRoundedRect(menu_background,(0,0,300,400),(53,121,169), radius=0.1)
         mx, my = mouse.get_pos()
         blitted_words = dict()
         text = []
-        for w in self.menu_text:
-            word = self.menu_font.render(w,True,self.menu_color[w])
-            index = self.menu_text.index(w) + 1
-            x = menu_background.get_width()//2-word.get_width()//2
-            y = index*75
-            blitted_words[w] = tuple(menu_background.blit(word, (x, y)))
+        for word in self.menu_text:
+            index = self.menu_text.index(word) + 1
+            button = self.render_button(word, self.menu_color[word])
+            w, h = button.get_size()
+            x = 400
+            y = 400+index*25+index*30
+            blitted_words[word] = self.screen.blit(button, (x, y))
         changed = None
-        for word, rect in blitted_words.items():
-            try:
-                if Rect(rect).collidepoint((mx-490, my-350)):
-                    self.menu_color[word] = (238,168,73)
-                    if left_click:
-                        changed = word
-                    break
-                
-                else:
-                    self.menu_color[word] = (255,255,255)
-            except:
-                pass        
-
-        return menu_background,changed
+        response = self.hover(blitted_words, (mx,my), left_click)
+        hovered = None
+        if response:
+            word, state = response
+            if state == 'clicked':
+                changed = word
+            elif state == 'hover':
+                hovered = word
+        for word in self.menu_text:
+            if word == hovered:
+                self.menu_color[word] = (255,255,255)
+            else:
+                self.menu_color[word] = (212,175,55)
+        return changed
 
     def draw_join(self, left_click):
-        join_background = Surface((300,400))
-        join_background.set_colorkey(0)
-        join_background.set_alpha(220)
-        AAfilledRoundedRect(join_background,(0,0,300,400),(53,121,169), radius=0.1)
+        w, h = self.screen.get_size()
+        AAfilledRoundedRect(self.screen,(w//2-700//2,350,700,200),(53,121,169,100), radius=0.05)
         mx, my = mouse.get_pos()
         join_label = self.menu_font.render('JOIN', True, (255,255,255))
-        join_background.blit(join_label, (join_background.get_width()//2-join_label.get_width()//2,
-                                          25))
-        return join_background
+        label_text = {'JOIN':(w//2-join_label.get_width()//2, 310),
+                      'ENTER ROOM NAME:': (300,375)}
+        connect_button = self.render_button('CONNECT', (255,255,255))
+        self.screen.blit(connect_button, (w//2-connect_button.get_width()//2, 500))
+        for word, pos in label_text.items():
+            rendered = self.menu_font.render(word, True, (255,255,255))
+            self.screen.blit(rendered, pos)
+        box = self.input_box(self.msg, 'geonms-font.ttf', 32, 500, 40)
+        bw, bh = box.get_size()
+        self.screen.blit(box, (w//2-bw//2, 435))
+        return False
 
     def draw_create(self):
         pass
@@ -201,6 +217,43 @@ class Main:
         if ox + w - 30 < 0:
             return False
         return ox - 30
+
+    def render_button(self, text, box_color):
+        render_text = self.menu_font.render(text, True, (0,0,0))
+        w, h = render_text.get_size()
+        button_surf = Surface((w+24,h+6))
+        button_surf.fill(box_color)
+        button_surf.blit(render_text, (12,3))
+        return button_surf
+    
+    def hover(self, button_list, mouse_pos, left_click):
+        for word, r in button_list.items():
+            if r.collidepoint(mouse_pos):
+                if left_click:
+                    return word, 'clicked'
+                return word, 'hover'
+        return None
+
+    def input_box(self, msg, font_name, start_size, width, height):
+        def justify(text, size):
+            newFont = font.Font(font_name, size)
+            msg = newFont.render(text, True, (0,0,0))
+            newWidth, newHeight = msg.get_size()
+            while newWidth > width:
+                newWidth = msg.get_width()
+                newFont = font.Font(font_name, size)
+                msg = newFont.render(text, True, (0,255,0))
+                newWidth = msg.get_width()
+                size -= 1
+            return size
+        box = Surface((width, height))
+        box.set_colorkey(0)
+        input_rect = Rect(0,0,width,height)
+        AAfilledRoundedRect(box, input_rect, (255,255,255))
+        rendered_msg = font.Font(font_name, justify(msg, start_size)).render(msg, True, (0,0,0))
+        box.blit(rendered_msg, (5,0))
+        return box
+        
 main = Main()
 main.draw_home()
 quit()

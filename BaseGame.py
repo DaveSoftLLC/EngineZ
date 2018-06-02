@@ -312,16 +312,6 @@ def render_bullets(Game, player, client, FPS):
                     if o.name != player.name:
                         ox, oy = o.pos
                         if hypot(ox-cx, oy-cy) < 30:
-##                            other_sprite = transform.rotate(client.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
-##                            ox = ox - px + Game.screen.get_width() // 2 \
-##                                 - other_sprite.get_width() // 2
-##                            oy = oy - py + Game.screen.get_height() // 2 \
-##                                 - other_sprite.get_height() // 2
-##                            if hypot(ox-cx, oy-cy) < max(other_sprite.get_size()):
-##                                gunType.gun_Bullet(b[2],cx,cy,b[1],Game.screen)#What is this for? cx and cy are outside screen
-##                                
-##                                #bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
-##                                #Game.screen.blit(bullet_sprite, (cx, cy))
                             try:
                                 player.bullets.remove(b)
 

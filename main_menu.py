@@ -66,29 +66,55 @@ class Main:
     def __init__(self):
         self.screen = display.set_mode((1280,800))
         self.background = []
-        a = 0
-        print(1)
-        for file in range(1000,1200):
-            self.background.append(image.load("frames/output-{0:06}.jpg".format(file+1)).convert())
-            a += 1
-            if a % 100 == 0:
-                print(a)
         self.running = True
         self.menu_text = ['JOIN', 'CREATE', 'OPTIONS', 'QUIT']
         self.menu_color = {key: (255,255,255) for key in self.menu_text}
         font.init()
         self.menu_font = font.Font('geonms-font.ttf', 32)
         self.title_font = font.Font('geonms-font.ttf', 72)
-    
+
+    def load_images(self, start, end):
+        background = transform.smoothscale(image.load('nmsdark.jpg').convert(), (1280,800))
+        for file in range(start,end):
+            self.background.append(image.load("frames/output-{0:06}.jpg".format(file+1)).convert())
+            percent = (file-start)/(end-start)
+            self.loading_screen(percent, background)
+            display.flip()
+
+    def loading_screen(self, percent, background):
+        for e in event.get():
+            if e.type == QUIT:
+                quit()
+        screen = self.screen
+        title = self.title_font.render('outcast: the game', True, (255,255,255))
+        msg = self.menu_font.render('loading', True, (255,255,255))
+        width = 500
+        height = 25
+        main_status_rect = (screen.get_width()//2-width//2,
+                            600,
+                            width,
+                            height)
+        progress_rect = (main_status_rect[0],
+                         main_status_rect[1], int(percent*500), height)
+##        screen.fill(0)
+        screen.blit(background, (0,0))
+        screen.blit(title, (screen.get_width()//2-title.get_width()//2, 100))
+        screen.blit(msg, (screen.get_width()//2-msg.get_width()//2, 550))
+        AAfilledRoundedRect(screen, main_status_rect, (255,255,255), 0.4)
+        AAfilledRoundedRect(screen, progress_rect, (53,121,169), 0.4)
 
     def draw_home(self):
         screen = self.screen
         index = 0
+        self.load_images(800,810)
         myClock = time.Clock()
         increment = 1
         change_screen = False
         x = 490
         mode = 'menu'
+        target_mode = ''
+        mode_function = {word: str('self.draw_' + word.lower()) for word in self.menu_text if word != 'QUIT'}
+        title = self.title_font.render('outcast: the game', True, (255,255,255))
         while self.running:
             left_click = False
             for e in event.get():
@@ -102,12 +128,20 @@ class Main:
             if mode == 'menu':
                 menu = self.draw_menu(left_click)
                 screen.blit(menu[0], (x, 350))
-            if menu[1] or change_screen:
+            else:
+                ui = eval(mode_function[mode])(left_click)
+                screen.blit(ui, (490, 350))
+            self.screen.blit(title, (self.screen.get_width()//2-title.get_width()//2, 100))
+            if mode == 'menu' and (menu[1] or change_screen):
+                if menu[1]:
+                    target_mode = menu[1]
                 change_screen = True
                 x = self.shift(menu[0], x)
                 if not x:
-                    x = 0-menu[0].get_width()
+                    x = 490
                     change_screen = False
+                    mode = target_mode
+                    target_mode = ''
             index += increment
             if index == len(self.background) or index == 0:
                 increment *= -1
@@ -141,15 +175,30 @@ class Main:
                     self.menu_color[word] = (255,255,255)
             except:
                 pass        
-        title = self.title_font.render('OUTCAST: THE GAME', True, (255,255,255))
-        self.screen.blit(title, (self.screen.get_width()//2-title.get_width()//2, 125))
+
         return menu_background,changed
+
+    def draw_join(self, left_click):
+        join_background = Surface((300,400))
+        join_background.set_colorkey(0)
+        join_background.set_alpha(220)
+        AAfilledRoundedRect(join_background,(0,0,300,400),(53,121,169), radius=0.1)
+        mx, my = mouse.get_pos()
+        join_label = self.menu_font.render('JOIN', True, (255,255,255))
+        join_background.blit(join_label, (join_background.get_width()//2-join_label.get_width()//2,
+                                          25))
+        return join_background
+
+    def draw_create(self):
+        pass
+
+    def draw_options(self):
+        pass
         
     def shift(self, surface, original_pos):
         w, h = surface.get_size()
         ox = original_pos
         if ox + w - 30 < 0:
-            print(w)
             return False
         return ox - 30
 main = Main()

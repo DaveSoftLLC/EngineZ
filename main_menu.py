@@ -1,6 +1,7 @@
 from BaseGame import *
 import glob
 import multiprocessing as mp
+import queue
 
 def AAfilledRoundedRect(surface,rect,color,radius=0.4):
 
@@ -44,24 +45,39 @@ def AAfilledRoundedRect(surface,rect,color,radius=0.4):
 
 class ClientMatch:
     def __init__(self, player_name):
-        self.rooms = {}
+        self.room = {}
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.name = player_name
-        self.room_name = None
-        
-    def process_rooms(self):
+        self.running = True
+        self.events = queue.Queue()
+    def join_room(self, room_name):
+        room_name = room_name
         self.s.connect(TCP_IP, TCP_PORT)
-        while True:
+        while self.running:
             room_data = {'name':self.name,
                          'room_name':self.room_name,
+                         'mode': 'join',
                          'master':False}
             self.s.send(pickle.dumps(room_data))
             data = pickle.loads(self.s.recv(BUFFER_SIZE))
-            if data != 'game_begin':
-                self.rooms = data
-            else:
-                break
-        return True
+            if not self.events.empty():
+                event = self.events.get(block=False)
+                if event == 'leave':
+                    conn.send('leaving')
+                    conn.close()
+                    return False, None
+                elif type(event) == list and event[0] == 'change_room':
+                    room_name = event[1]
+            if type(data) == list:
+                self.room = data
+            elif data == 'game_begin':
+                return True, conn
+    def create_room(self):
+        self.s.connect(TCP_IP, TCP_PORT)
+        while self.running:
+            room_data = {'name':self.name,
+                         'room_name':self.room_name,
+                         'master':True}
 class Main:
     def __init__(self):
         self.screen = display.set_mode((1280,800))
@@ -73,6 +89,9 @@ class Main:
         font.init()
         self.menu_font = font.Font('geonms-font.ttf', 32)
         self.title_font = font.Font('geonms-font.ttf', 72)
+        self.client = None
+        self.room_data = None
+        self.room_name = ''
 
     def load_images(self, start, end):
         background = transform.smoothscale(image.load('nmsplanet.jpg').convert(), (1280,800))
@@ -131,7 +150,7 @@ class Main:
                             self.msg = self.msg[:-1]#Delete a character when backspace is pressed
                     elif e.key < 256:
                         self.msg += e.unicode#Add letter to text
-            myClock.tick(60)
+            myClock.tick(144)
             file = transform.smoothscale(self.background[index], (1280,800))
             screen.blit(wallpaper, (0,0))
             if mode == 'menu':
@@ -204,7 +223,20 @@ class Main:
         bw, bh = box.get_size()
         self.screen.blit(box, (w//2-bw//2, 435))
         return False
-
+    
+    def render_room(self, left_click, room_name):
+        w, h = self.screen.get_size()
+        AAfilledRoundedRect(self.screen,(w//2-700//2,350,700,200),(53,121,169,100), radius=0.05)
+        mx, my = mouse.get_pos()
+        join_label = self.menu_font.render('JOIN', True, (255,255,255))
+        label_text = {'JOIN':(w//2-join_label.get_width()//2, 310),
+                      'ENTER ROOM NAME:': (300,375)}
+        connect_button = self.render_button('CONNECT', (255,255,255))
+        self.screen.blit(connect_button, (w//2-connect_button.get_width()//2, 500))
+        room_members = []
+        client = ClientMatch('temp')
+        
+        
     def draw_create(self):
         pass
 

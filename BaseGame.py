@@ -99,6 +99,8 @@ class Client:
                     #gunType.gun_Bullet(b[2],lx,ly,b[1],screen)
                     #g.screen.blit(lb, (lx, ly))
 
+    
+
 class GameMode:
     def __init__(self,server=False):
         self.resolution = (1280,800)
@@ -184,13 +186,13 @@ class GameMode:
     def weapon_pickup(self,p,inventory):
         for i in self.weapon_map:
             if hypot(i[1][0]-25-p.pos[0],i[1][1]-25-p.pos[1]) <100:
-                inventory.add_item(self.weapon_dict[i[0]],p,self.weapon_map[self.weapon_map.index(i)][2],self.weapon_map)
+                inventory.add_item(self.weapon_dict[i[0]],p,self.weapon_map,i)
                 del self.weapon_map[self.weapon_map.index(i)]
                 break
                 
 class Player:
     def __init__(self, game, name, pos, speed, mode):
-        self.name = name
+        self.name = nameW
         self.pos = pos
         self.rotation = 90
         self.state = 0
@@ -201,6 +203,7 @@ class Player:
         self.gif_counter = 0
         self.del_bullets = []
         self.ammo = []
+        self.weapon_send = [0,0]#[weapon to remove, weapon to add]
         self.type = mode
 
     def move(self, direction, background, collisionmap, FPS, speed=None):
@@ -354,16 +357,23 @@ class Inventory:
         self.textFont = font.SysFont("Arial", 22)
         self.empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
 
-    def add_item(self,item,p,ammo,weaponm):
-        print(ammo)
+    def add_item(self,item,p,weaponm,d):
+        #inventory.add_item(self.weapon_dict[i[0]],p,self.weapon_map[self.weapon_map.index(i)][2],self.weapon_map)
+        ammo = weaponm[weaponm.index(d)][2]
         inventoryF = [i.name for i in self.inventoryP]
         if  "Empty" in inventoryF:
+            p.weapon_send = [d,0]
             p.ammo[inventoryF.index("Empty")] = ammo
             self.inventoryP[inventoryF.index("Empty")] = item
+            
+            
+            
         else:
+            p.weapon_send = [d,[self.inventoryP[self.state].name,(p.pos),p.ammo[self.state]]]
             weaponm.append([self.inventoryP[self.state].name,(p.pos),p.ammo[self.state]])
             self.inventoryP[self.state] = item
             p.ammo[self.state] = ammo
+            
     
     def switch(self,scroll):
         if scroll == "RIGHT":

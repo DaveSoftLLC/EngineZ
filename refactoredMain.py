@@ -111,7 +111,7 @@ while g.running:
                 g.current_actor = p
                 g.drone_start = t.time()
                 g.droneB = False
-        g.draw_weapons(g.screen,p.pos)
+        g.draw_weapons(g.screen,g.current_actor.pos)
         render_bullets(g, p, client, FPS)
         client.render_enemy_bullets(inventory.inventoryP[inventory.state],g.screen)
         inventory.draw_inventory(g.screen,p.ammo)

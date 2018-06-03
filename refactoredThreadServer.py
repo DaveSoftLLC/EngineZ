@@ -110,7 +110,7 @@ class Server:
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((self.TCP_IP, self.TCP_PORT))
         self.s.listen(1)
-        self.rooms = {}
+        self.rooms = {'funroom':set()}
         self.game = GameMode(server=True)
         self.game_instances = {}
         self.running = True
@@ -127,12 +127,15 @@ class Server:
     def listen_client(self, conn, addr):
         print('thread')
         data = pickle.loads(conn.recv(self.BUFFER_SIZE))
+        name = data['name']
         mode = data['mode']
         room_name = data['room_name']
         if mode == 'join':
             if room_name not in self.rooms.keys():
                 conn.send(pickle.dumps('no_such_room'))
+                print(self.rooms.keys(), room_name)
                 conn.close()
+                return
         conn.send(pickle.dumps('all_good'))
         while self.running:
             try:
@@ -141,8 +144,8 @@ class Server:
                 master = data['master']
                 room_name = data['room_name']
                 ready = data['ready']
-                self.rooms.setdefault(room_name,[]).append([name, ready, conn, addr])
-                start = all([r[1] for r in self.rooms[room_name].values()])
+                self.rooms.setdefault(room_name, set()).add((name, ready, conn, addr))
+                start = all([r[1] for r in self.rooms[room_name]])
                 if start and master:
                     msg = 'game_begin'
                     conn.send(pickle.dumps(msg))
@@ -151,13 +154,16 @@ class Server:
                     process = mp.Process(target=instance.create_thread).start()
                     return True
                 else:
-                    msg = pickle.dumps(self.rooms)
+                    players = []
+                    for player in self.rooms[room_name]:
+                        players.append(player[:2])
+                    msg = pickle.dumps(players)
                     conn.send(msg)
-            except Exception as E:
-                print(E)
-##                self.remove(room_name)
-                conn.close()
-                return
+            except:
+                for player in self.rooms[room_name]:
+                    if player[0] == name:
+                        self.rooms[room_name].remove(player)
+                        return
         conn.close()
 
     def remove(self, room):

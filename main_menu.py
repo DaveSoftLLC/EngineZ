@@ -46,14 +46,15 @@ def AAfilledRoundedRect(surface,rect,color,radius=0.4):
 class ClientMatch:
     def __init__(self, player_name):
         self.room = {}
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.name = player_name
         self.running = True
         self.events = queue.Queue()
         self.send_queue = queue.Queue()
     def join_room(self, room_name):
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         room_name = room_name
         self.s.connect((TCP_IP, TCP_PORT))
+        print('room name', room_name)
         room_data = {'name':self.name,
              'room_name':room_name,
              'ready':False,
@@ -62,8 +63,10 @@ class ClientMatch:
         self.s.send(pickle.dumps(room_data))
         data = pickle.loads(self.s.recv(BUFFER_SIZE))
         if data != 'all_good':
-            conn.close()
+            self.s.close()
             self.send_queue.put((False, None))
+            print('not all good :(')
+            return
         
         while self.running:
             room_data = {'name':self.name,
@@ -77,12 +80,15 @@ class ClientMatch:
             if not self.events.empty():
                 event = self.events.get(block=False)
                 if event == 'leave':
-                    conn.close()
+                    print('leaving')
+                    self.s.close()
                     self.send_queue.put((False, None))
+                    return
             if type(data) == list:
                 self.room = data
             elif data == 'game_begin':
                 self.send_queue.put((True, conn))
+                return
     def create_room(self):
         self.s.connect(TCP_IP, TCP_PORT)
         while self.running:
@@ -222,8 +228,8 @@ class Main:
                 self.mode_buttons = {}
                 self.room_name = self.msg
                 self.mode = 'room'
-                self.msg = ''
                 threading.Thread(target=self.client.join_room, args=(self.msg,)).start()
+                self.msg = ''
                 return True
         for word, pos in label_text.items():
             rendered = self.menu_font.render(word, True, (255,255,255))
@@ -237,7 +243,7 @@ class Main:
         button_list = [['READY', 'center', 720], ['BACK', 350, 720]]
         room_name = self.room_name
         w, h = self.screen.get_size()
-        AAfilledRoundedRect(self.screen,(w//2-700//2,350,700,430),(53,121,169,100), radius=0.05)
+        bx, by, bw, bh = AAfilledRoundedRect(self.screen,(w//2-700//2,350,700,430),(53,121,169,100), radius=0.05)
         mx, my = mouse.get_pos()
         join_label = self.menu_font.render('ROOM: {}'.format(room_name), True, (255,255,255))
         label_text = {'ROOM: %s' %room_name:(w//2-join_label.get_width()//2, 310),
@@ -246,14 +252,25 @@ class Main:
             self.screen.blit(self.menu_font.render(word, True, (255,255,255)), pos)
         click, word = check_hover(self.screen, button_list, self.mode_buttons, (mx,my), left_click, self.menu_font)
         if not self.client.send_queue.empty():
-            if type(room_data) == dict:
-                room_data = self.client.send_queue.get(blocking=False)
-            elif type(room_data) == tuple:
-                status, conn = self.client.send_queue.get(blocking=False)
+            data = self.client.send_queue.get(block=False)
+            if type(data) == list:
+                room_data = data
+##                screen, rect, username, master, color, font
+                for p in range(len(room_data)):
+                    username, status = room_data[p]
+                    rect = (bx+25,
+                            by + 70 + p*60 + p*10,
+                            bw-50,
+                            60)
+                    player_bar(self.screen, rect, username, status, (128,128,128), self.menu_font)
+                            
+                    
+            elif type(data) == tuple:
+                status, conn = data
                 if not status:
+                    print(data)
                     click = True
                     word = 'BACK'
-            print(room_data)
         if click:
             if word == 'READY':
                 pass
@@ -368,6 +385,17 @@ def check_hover(screen, buttons, button_dict, mouse_pos, left_click, font):
                 break
         return (False, hovered)
     return (None, None)
+
+def player_bar(screen, rect, username, master, color, font):
+    'screen, rect, username, master, color, font'
+    draw.rect(screen, color, rect)
+    tx, ty, tw, th = rect
+    synonyms = {True: 'Leader', False: 'Member'}
+    username_rendered = font.render(username, True, (255,255,255))
+    status_rendered = font.render(synonyms[master], True, (255,255,255))
+    h = username_rendered.get_height()
+    screen.blit(username_rendered, (tx+20, ty+th//2-h//2))
+    screen.blit(status_rendered, (tx+400, ty+th//2-h//2))
 main = Main()
 main.draw_home()
 quit()

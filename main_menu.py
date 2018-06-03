@@ -84,11 +84,14 @@ class Main:
         self.background = []
         self.running = True
         self.menu_text = ['JOIN', 'CREATE', 'OPTIONS', 'QUIT']
+        self.function_text = ['room']
         self.menu_color = {key: (212,175,55) for key in self.menu_text}
         self.menu_buttons = {w: None for w in self.menu_text}
         font.init()
+        self.mode_buttons = {}
         self.menu_font = font.Font('geonms-font.ttf', 32)
         self.title_font = font.Font('geonms-font.ttf', 72)
+        self.mode = 'menu'
         self.client = None
         self.room_data = None
         self.room_name = ''
@@ -131,9 +134,8 @@ class Main:
         increment = 1
         change_screen = False
         x = 490
-        mode = 'menu'
         target_mode = ''
-        mode_function = {word: str('self.draw_' + word.lower()) for word in self.menu_text if word != 'QUIT'}
+        mode_function = {word: str('self.draw_' + word.lower()) for word in self.menu_text + self.function_text}
         title = self.title_font.render('outcast: the game', True, (255,255,255))
         wallpaper = transform.smoothscale(image.load('nmsplanet.jpg').convert(), (1280, 800))
         self.msg = ''
@@ -153,23 +155,13 @@ class Main:
             myClock.tick(144)
             file = transform.smoothscale(self.background[index], (1280,800))
             screen.blit(wallpaper, (0,0))
-            if mode == 'menu':
+            if self.mode == 'menu':
                 self.screen.blit(title, (self.screen.get_width()//2-title.get_width()//2, 350))
                 menu = self.draw_menu(left_click)
-##                screen.blit(menu[0], (x, 350))
+                if menu:
+                    self.mode = menu
             else:
-                ui = eval(mode_function[mode])(left_click)
-            if mode == 'menu' and (menu or change_screen):
-                if menu[1]:
-                    target_mode = menu
-                    mode = target_mode
-##                change_screen = True
-##                x = self.shift(menu[0], x)
-                if not x:
-                    x = 490
-                    change_screen = False
-                    mode = target_mode
-                    target_mode = ''
+                ui = eval(mode_function[self.mode])(left_click)
             index += increment
             if index == len(self.background) or index == 0:
                 increment *= -1
@@ -177,10 +169,6 @@ class Main:
             display.flip()
 
     def draw_menu(self, left_click):
-##        menu_background = Surface((300,400))
-##        menu_background.set_colorkey(0)
-##        menu_background.set_alpha(220)
-##        AAfilledRoundedRect(menu_background,(0,0,300,400),(53,121,169), radius=0.1)
         mx, my = mouse.get_pos()
         blitted_words = dict()
         text = []
@@ -214,8 +202,35 @@ class Main:
         join_label = self.menu_font.render('JOIN', True, (255,255,255))
         label_text = {'JOIN':(w//2-join_label.get_width()//2, 310),
                       'ENTER ROOM NAME:': (300,375)}
-        connect_button = self.render_button('CONNECT', (255,255,255))
-        self.screen.blit(connect_button, (w//2-connect_button.get_width()//2, 500))
+        connect_button = self.render_button('CONNECT', (212,175,55))
+        for b in [['CONNECT', 'center', 500], ['BACK', 350, 500]]:
+            button = self.render_button(b[0], (212,175,55))
+            y = b[2]
+            if b[1] == 'center':
+                x = w//2-button.get_width()//2
+            else:
+                x = b[1]
+            self.mode_buttons[b[0]] = [self.screen.blit(button, (x,y)), (212,175,55)]
+        response = self.hover({key: value[0] for key, value in self.mode_buttons.items()}, (mx,my), left_click)
+        hovered = None
+        if response:
+            word, state = response
+            if state == 'clicked':
+                if word == 'BACK':
+                    self.mode = 'menu'
+                elif word == 'CONNECT':
+                    self.room_name = self.msg
+                    self.mode = 'room'
+                    self.msg = ''
+                    return True
+            elif state == 'hover':
+                hovered = word
+        if hovered:
+            for word, b in self.mode_buttons.items():
+                if word == hovered:
+                    button = self.render_button(word, (255,255,255))
+                    self.screen.blit(button, (b[0][0], b[0][1]))
+                    break
         for word, pos in label_text.items():
             rendered = self.menu_font.render(word, True, (255,255,255))
             self.screen.blit(rendered, pos)
@@ -224,15 +239,18 @@ class Main:
         self.screen.blit(box, (w//2-bw//2, 435))
         return False
     
-    def render_room(self, left_click, room_name):
+    def draw_room(self, left_click):
+        room_name = self.room_name
         w, h = self.screen.get_size()
-        AAfilledRoundedRect(self.screen,(w//2-700//2,350,700,200),(53,121,169,100), radius=0.05)
+        AAfilledRoundedRect(self.screen,(w//2-700//2,350,700,430),(53,121,169,100), radius=0.05)
         mx, my = mouse.get_pos()
-        join_label = self.menu_font.render('JOIN', True, (255,255,255))
-        label_text = {'JOIN':(w//2-join_label.get_width()//2, 310),
-                      'ENTER ROOM NAME:': (300,375)}
-        connect_button = self.render_button('CONNECT', (255,255,255))
-        self.screen.blit(connect_button, (w//2-connect_button.get_width()//2, 500))
+        join_label = self.menu_font.render('ROOM: {}'.format(room_name), True, (255,255,255))
+        label_text = {'ROOM: %s' %room_name:(w//2-join_label.get_width()//2, 310),
+                      'PLAYERS:': (300,375)}
+        for word, pos in label_text.items():
+            self.screen.blit(self.menu_font.render(word, True, (255,255,255)), pos)
+        connect_button = self.render_button('READY', (255,255,255))
+        self.screen.blit(connect_button, (w//2-connect_button.get_width()//2, 720))
         room_members = []
         client = ClientMatch('temp')
         

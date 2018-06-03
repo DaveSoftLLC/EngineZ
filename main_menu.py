@@ -50,28 +50,39 @@ class ClientMatch:
         self.name = player_name
         self.running = True
         self.events = queue.Queue()
+        self.send_queue = queue.Queue()
     def join_room(self, room_name):
         room_name = room_name
-        self.s.connect(TCP_IP, TCP_PORT)
+        self.s.connect((TCP_IP, TCP_PORT))
+        room_data = {'name':self.name,
+             'room_name':room_name,
+             'ready':False,
+             'mode': 'join',
+             'master':False}
+        self.s.send(pickle.dumps(room_data))
+        data = pickle.loads(self.s.recv(BUFFER_SIZE))
+        if data != 'all_good':
+            conn.close()
+            self.send_queue.put((False, None))
+        
         while self.running:
             room_data = {'name':self.name,
-                         'room_name':self.room_name,
+                         'room_name':room_name,
+                         'ready':False,
                          'mode': 'join',
                          'master':False}
             self.s.send(pickle.dumps(room_data))
             data = pickle.loads(self.s.recv(BUFFER_SIZE))
+            self.send_queue.put(data)
             if not self.events.empty():
                 event = self.events.get(block=False)
                 if event == 'leave':
-                    conn.send('leaving')
                     conn.close()
-                    return False, None
-                elif type(event) == list and event[0] == 'change_room':
-                    room_name = event[1]
+                    self.send_queue.put((False, None))
             if type(data) == list:
                 self.room = data
             elif data == 'game_begin':
-                return True, conn
+                self.send_queue.put((True, conn))
     def create_room(self):
         self.s.connect(TCP_IP, TCP_PORT)
         while self.running:
@@ -92,7 +103,7 @@ class Main:
         self.menu_font = font.Font('geonms-font.ttf', 32)
         self.title_font = font.Font('geonms-font.ttf', 72)
         self.mode = 'menu'
-        self.client = None
+        self.client = ClientMatch('pay2lose')
         self.room_data = None
         self.room_name = ''
 
@@ -174,13 +185,13 @@ class Main:
         text = []
         for word in self.menu_text:
             index = self.menu_text.index(word) + 1
-            button = self.render_button(word, self.menu_color[word])
+            button = render_button(word, self.menu_color[word], self.menu_font)
             w, h = button.get_size()
             x = 400
             y = 400+index*25+index*30
             blitted_words[word] = self.screen.blit(button, (x, y))
         changed = None
-        response = self.hover(blitted_words, (mx,my), left_click)
+        response = hover(blitted_words, (mx,my), left_click)
         hovered = None
         if response:
             word, state = response
@@ -202,35 +213,18 @@ class Main:
         join_label = self.menu_font.render('JOIN', True, (255,255,255))
         label_text = {'JOIN':(w//2-join_label.get_width()//2, 310),
                       'ENTER ROOM NAME:': (300,375)}
-        connect_button = self.render_button('CONNECT', (212,175,55))
-        for b in [['CONNECT', 'center', 500], ['BACK', 350, 500]]:
-            button = self.render_button(b[0], (212,175,55))
-            y = b[2]
-            if b[1] == 'center':
-                x = w//2-button.get_width()//2
-            else:
-                x = b[1]
-            self.mode_buttons[b[0]] = [self.screen.blit(button, (x,y)), (212,175,55)]
-        response = self.hover({key: value[0] for key, value in self.mode_buttons.items()}, (mx,my), left_click)
-        hovered = None
-        if response:
-            word, state = response
-            if state == 'clicked':
-                if word == 'BACK':
-                    self.mode = 'menu'
-                elif word == 'CONNECT':
-                    self.room_name = self.msg
-                    self.mode = 'room'
-                    self.msg = ''
-                    return True
-            elif state == 'hover':
-                hovered = word
-        if hovered:
-            for word, b in self.mode_buttons.items():
-                if word == hovered:
-                    button = self.render_button(word, (255,255,255))
-                    self.screen.blit(button, (b[0][0], b[0][1]))
-                    break
+        button_list = [['CONNECT', 'center', 500], ['BACK', 350, 500]]
+        click, word = check_hover(self.screen, button_list, self.mode_buttons, (mx,my), left_click, self.menu_font)
+        if click:
+            if word == 'BACK':
+                self.mode = 'menu'
+            elif word == 'CONNECT':
+                self.mode_buttons = {}
+                self.room_name = self.msg
+                self.mode = 'room'
+                self.msg = ''
+                threading.Thread(target=self.client.join_room, args=(self.msg,)).start()
+                return True
         for word, pos in label_text.items():
             rendered = self.menu_font.render(word, True, (255,255,255))
             self.screen.blit(rendered, pos)
@@ -240,6 +234,7 @@ class Main:
         return False
     
     def draw_room(self, left_click):
+        button_list = [['READY', 'center', 720], ['BACK', 350, 720]]
         room_name = self.room_name
         w, h = self.screen.get_size()
         AAfilledRoundedRect(self.screen,(w//2-700//2,350,700,430),(53,121,169,100), radius=0.05)
@@ -249,8 +244,24 @@ class Main:
                       'PLAYERS:': (300,375)}
         for word, pos in label_text.items():
             self.screen.blit(self.menu_font.render(word, True, (255,255,255)), pos)
-        connect_button = self.render_button('READY', (255,255,255))
-        self.screen.blit(connect_button, (w//2-connect_button.get_width()//2, 720))
+        click, word = check_hover(self.screen, button_list, self.mode_buttons, (mx,my), left_click, self.menu_font)
+        if not self.client.send_queue.empty():
+            if type(room_data) == dict:
+                room_data = self.client.send_queue.get(blocking=False)
+            elif type(room_data) == tuple:
+                status, conn = self.client.send_queue.get(blocking=False)
+                if not status:
+                    click = True
+                    word = 'BACK'
+            print(room_data)
+        if click:
+            if word == 'READY':
+                pass
+            elif word == 'BACK':
+                self.client.events.put('leave')
+                self.mode = 'JOIN'
+                self.mode_buttons = {}
+        display.flip()
         room_members = []
         client = ClientMatch('temp')
         
@@ -303,9 +314,61 @@ class Main:
         rendered_msg = font.Font(font_name, justify(msg, start_size)).render(msg, True, (0,0,0))
         box.blit(rendered_msg, (5,0))
         return box
-        
+    
+def render_button(text, box_color, font):
+    render_text = font.render(text, True, (0,0,0))
+    w, h = render_text.get_size()
+    button_surf = Surface((w+24,h+6))
+    button_surf.fill(box_color)
+    button_surf.blit(render_text, (12,3))
+    return button_surf
+    
+def hover(button_dict, mouse_pos, left_click):
+    for word, r in button_dict.items():
+        if r.collidepoint(mouse_pos):
+            if left_click:
+                return word, 'clicked'
+            return word, 'hover'
+    return None
+
+def check_hover(screen, buttons, button_dict, mouse_pos, left_click, font):
+    '''
+    [[word, x, y]]
+    x = int or x = 'center'
+    '''
+    w, h = screen.get_size()
+    for b in buttons:
+        button = render_button(b[0], (212,175,55), font)
+        y = b[2]
+        if b[1] == 'center':
+            x = w//2-button.get_width()//2
+        else:
+            x = b[1]
+        button_dict[b[0]] = [screen.blit(button, (x,y)), (212,175,55)]
+    response = hover({key: value[0] for key, value in button_dict.items()}, mouse_pos, left_click)
+    hovered = None
+    if response:
+        word, state = response
+        if state == 'clicked':
+            return (True, word)
+##            if word == 'BACK':
+##                self.mode = 'menu'
+##            elif word == 'CONNECT':
+##                self.room_name = self.msg
+##                self.mode = 'room'
+##                self.msg = ''
+##                return True
+        elif state == 'hover':
+            hovered = word
+    if hovered:
+        for word, b in button_dict.items():
+            if word == hovered:
+                button = render_button(word, (255,255,255), font)
+                screen.blit(button, (b[0][0], b[0][1]))
+                break
+        return (False, hovered)
+    return (None, None)
 main = Main()
 main.draw_home()
 quit()
-            
-            
+        

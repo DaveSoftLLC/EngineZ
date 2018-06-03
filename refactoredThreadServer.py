@@ -102,7 +102,7 @@ class GameInstance:
 
 
 class Server:
-    def __init__(self, game, BUFFER_SIZE):
+    def __init__(self, BUFFER_SIZE):
         self.TCP_IP = ''  # ''159.203.163.149'
         self.TCP_PORT = 4545
         self.BUFFER_SIZE = BUFFER_SIZE  # Normally 1024, but we want fast response
@@ -113,6 +113,7 @@ class Server:
         self.rooms = {}
         self.game = GameMode(server=True)
         self.game_instances = {}
+        self.running = True
 
     def listen(self):
          while self.running:
@@ -125,12 +126,14 @@ class Server:
 
     def listen_client(self, conn, addr):
         print('thread')
-        data = conn.recv(self.BUFFER_SIZE)
+        data = pickle.loads(conn.recv(self.BUFFER_SIZE))
         mode = data['mode']
         room_name = data['room_name']
         if mode == 'join':
             if room_name not in self.rooms.keys():
                 conn.send(pickle.dumps('no_such_room'))
+                conn.close()
+        conn.send(pickle.dumps('all_good'))
         while self.running:
             try:
                 data = pickle.loads(conn.recv(self.BUFFER_SIZE))
@@ -152,7 +155,7 @@ class Server:
                     conn.send(msg)
             except Exception as E:
                 print(E)
-                self.remove(room_name)
+##                self.remove(room_name)
                 conn.close()
                 return
         conn.close()
@@ -162,11 +165,5 @@ class Server:
             del self.rooms[room]
         except:
             print('Room Not found: %s' %room)
-
-juniper = Server(g, BUFFER_SIZE)
-threading.Thread(target=juniper.listen).start()
-while juniper.running:
-    try:
-        juniper.check_damage()
-    except Exception as E:
-        print('Error Checking Bullets:', E)
+server = Server(BUFFER_SIZE)
+threading.Thread(target=server.listen).start()

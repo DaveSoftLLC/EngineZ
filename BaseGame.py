@@ -98,8 +98,26 @@ class Client:
                     screen.blit(transform.rotate(bullet_sprite, b[1]), (lx, ly))
                     #gunType.gun_Bullet(b[2],lx,ly,b[1],screen)
                     #g.screen.blit(lb, (lx, ly))
+    def draw_weapons(self,screen,pos):
+        p = self.player
+        #print(p.weapon_map)
+        for i in p.weapon_map:
+            if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \
+                        and pos[1] - screen.get_height() // 2 < i[1][1] < pos[1] + screen.get_height() // 2:
+                image = self.weapon_dict[i[0]].inventory_image
+                nx = i[1][0] - pos[0] + screen.get_width() // 2 \
+                         - image.get_width() // 2
+                ny = i[1][1] - pos[1] + screen.get_height() // 2 \
+                         - image.get_height() // 2
+                screen.blit(image,(nx,ny))
 
-    
+    def weapon_pickup(self,inventory):
+        p = self.player
+        for i in p.weapon_map:
+            if hypot(i[1][0]-25-p.pos[0],i[1][1]-25-p.pos[1]) <100:
+                inventory.add_item(self.weapon_dict[i[0]],p,p.weapon_map,i)
+                #del self.weapon_map[self.weapon_map.index(i)]
+                break
 
 class GameMode:
     def __init__(self,server=False):
@@ -129,11 +147,11 @@ class GameMode:
             self.weapon_dict = {"Shotgun":shotgun,"AR":assaultrifle,"Sniper":sniper}
             self.guns = [assaultrifle,shotgun,sniper,empty,empty,empty]
             #weapon_list = [n.name for n in self.guns]
-            self.weapon_map =[]
-            for i in range(20):
-                weapon = choice(list(self.weapon_dict))
-                wx,wy = (randint(100,11900),randint(100,7900))
-                self.weapon_map.append([weapon,(wx,wy),100])
+##            self.weapon_map =[]
+##            for i in range(20):
+##                weapon = choice(list(self.weapon_dict))
+##                wx,wy = (randint(100,11900),randint(100,7900))
+##                self.weapon_map.append([weapon,(wx,wy),100])
         else:
             self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
@@ -171,28 +189,28 @@ class GameMode:
             client.drone = 0
             self.current_actor = p
             self.droneB = False
-    def draw_weapons(self,screen,pos):
-        for i in self.weapon_map:
-            if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \
-                        and pos[1] - screen.get_height() // 2 < i[1][1] < pos[1] + screen.get_height() // 2:
-                image = self.weapon_dict[i[0]].inventory_image
-                nx = i[1][0] - pos[0] + screen.get_width() // 2 \
-                         - image.get_width() // 2
-                ny = i[1][1] - pos[1] + screen.get_height() // 2 \
-                         - image.get_height() // 2
-                screen.blit(image,(nx,ny))
-
-
-    def weapon_pickup(self,p,inventory):
-        for i in self.weapon_map:
-            if hypot(i[1][0]-25-p.pos[0],i[1][1]-25-p.pos[1]) <100:
-                inventory.add_item(self.weapon_dict[i[0]],p,self.weapon_map,i)
-                del self.weapon_map[self.weapon_map.index(i)]
-                break
+##    def draw_weapons(self,screen,pos):
+##        for i in self.weapon_map:
+##            if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \
+##                        and pos[1] - screen.get_height() // 2 < i[1][1] < pos[1] + screen.get_height() // 2:
+##                image = self.weapon_dict[i[0]].inventory_image
+##                nx = i[1][0] - pos[0] + screen.get_width() // 2 \
+##                         - image.get_width() // 2
+##                ny = i[1][1] - pos[1] + screen.get_height() // 2 \
+##                         - image.get_height() // 2
+##                screen.blit(image,(nx,ny))
+##
+##
+##    def weapon_pickup(self,p,inventory):
+##        for i in self.weapon_map:
+##            if hypot(i[1][0]-25-p.pos[0],i[1][1]-25-p.pos[1]) <100:
+##                inventory.add_item(self.weapon_dict[i[0]],p,self.weapon_map,i)
+##                del self.weapon_map[self.weapon_map.index(i)]
+##                break
                 
 class Player:
     def __init__(self, game, name, pos, speed, mode):
-        self.name = nameW
+        self.name = name
         self.pos = pos
         self.rotation = 90
         self.state = 0
@@ -203,8 +221,10 @@ class Player:
         self.gif_counter = 0
         self.del_bullets = []
         self.ammo = []
-        self.weapon_send = [0,0]#[weapon to remove, weapon to add]
+        self.weapon_send = []#[weapon to remove, weapon to add]
         self.type = mode
+        self.weapon_map = []
+        
 
     def move(self, direction, background, collisionmap, FPS, speed=None):
         if speed is None:
@@ -362,11 +382,9 @@ class Inventory:
         ammo = weaponm[weaponm.index(d)][2]
         inventoryF = [i.name for i in self.inventoryP]
         if  "Empty" in inventoryF:
-            p.weapon_send = [d,0]
+            p.weapon_send = [d]
             p.ammo[inventoryF.index("Empty")] = ammo
             self.inventoryP[inventoryF.index("Empty")] = item
-            
-            
             
         else:
             p.weapon_send = [d,[self.inventoryP[self.state].name,(p.pos),p.ammo[self.state]]]

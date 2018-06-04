@@ -55,7 +55,8 @@ while g.running:
             if keys[K_z]:
                 g.drone_click(g,p,client)
             if keys[K_e] and g.current_actor.type == 'player':
-                g.weapon_pickup(p,inventory)
+                #g.weapon_pickup(p,inventory)
+                client.weapon_pickup(inventory)
     m = mouse.get_pressed()
     mx, my = mouse.get_pos()
     
@@ -111,7 +112,8 @@ while g.running:
                 g.current_actor = p
                 g.drone_start = t.time()
                 g.droneB = False
-        g.draw_weapons(g.screen,g.current_actor.pos)
+        #g.draw_weapons(g.screen,g.current_actor.pos)
+        client.draw_weapons(g.screen,g.current_actor.pos)
         render_bullets(g, p, client, FPS)
         client.render_enemy_bullets(inventory.inventoryP[inventory.state],g.screen)
         inventory.draw_inventory(g.screen,p.ammo)

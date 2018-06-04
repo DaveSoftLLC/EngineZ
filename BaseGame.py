@@ -34,16 +34,19 @@ class Client:
         print('beginning transfer')
         while self.game.running:
             p = self.player
-            print(p.weapon_send)
             p.update_gif(self.sprites)
+            print(p.weapon_send,"before")
             binary = pickle.dumps(p)
             self.s.send(binary)
             data = self.s.recv(BUFFER_SIZE)
             data = pickle.loads(data)
             self.other_player_dict = data
+            if len(self.other_player_dict[p.name].weapon_send)>0 and self.other_player_dict[p.name].weapon_send[0] =="Sent":
+                p.weapon_send = []
+            print(p.weapon_send,"after") #should be blank
             p.weapon_map = self.other_player_dict[p.name].weapon_map
             p.health = self.other_player_dict[p.name].health
-            p.weapon_send = self.other_player_dict[p.name].weapon_send
+            
             for b in self.other_player_dict[p.name].del_bullets:
                 if b in p.bullets:
                     p.bullets.remove(b)

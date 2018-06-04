@@ -57,14 +57,15 @@ class Server:
                                 self.player_dict[key].health = value
                         #Remove and add weapons
                         print(self.player_dict[current_player].weapon_send)
+                        
                         if len(self.player_dict[current_player].weapon_send) > 0:
                             print("hi")
                             if len(self.player_dict[current_player].weapon_send) == 1:
                                 del self.weapon_map[self.weapon_map.index(self.player_dict[current_player].weapon_send[0])]
                             else:
-                                self.player_dict[current_player].weapon_send.append(self.player_dict[current_player].weapon_send[1])
+                                self.weapon_map.append(self.player_dict[current_player].weapon_send[1])
                                 del self.weapon_map[self.weapon_map.index(self.player_dict[current_player].weapon_send[0])]
-                        self.player_dict[current_player].weapon_send = []
+                            self.player_dict[current_player].weapon_send = ["Sent"]
                         self.player_dict[current_player].weapon_map = self.weapon_map
                         if current_player in del_bullets: #Disconnect, bullets will be deleted
                             self.player_dict[current_player].del_bullets += del_bullets[current_player]

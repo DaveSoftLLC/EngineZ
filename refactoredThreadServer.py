@@ -49,26 +49,28 @@ class Server:
                         decoded = pickle.loads(data)
                         current_player = decoded.name
                         self.player_dict[decoded.name] = decoded
+                        
                         if current_player not in self.player_health_dict.keys():
-                            self.player_health_dict[decoded.name] = 100
+                            self.player_health_dict[current_player] = 100
                         else:
                             for key, value in self.player_health_dict.items():
                                 self.player_dict[key].health = value
                         #Remove and add weapons
-                        if len(self.player_dict[decoded.name].weapon_send) > 0:
+                        print(self.player_dict[current_player].weapon_send)
+                        if len(self.player_dict[current_player].weapon_send) > 0:
                             print("hi")
-                            if len(self.player_dict[decoded.name].weapon_send) == 1:
-                                del self.weapon_map[self.weapon_map.index(self.player_dict[decoded.name].weapon_send[0])]
+                            if len(self.player_dict[current_player].weapon_send) == 1:
+                                del self.weapon_map[self.weapon_map.index(self.player_dict[current_player].weapon_send[0])]
                             else:
-                                self.player_dict[decoded.name].weapon_send.append(self.player_dict[decoded.name].weapon_send[1])
-                                del self.weapon_map[self.weapon_map.index(self.player_dict[decoded.name].weapon_send[0])]
-                        self.player_dict[decoded.name].weapon_send = []
-                        self.player_dict[decoded.name].weapon_map = self.weapon_map
+                                self.player_dict[current_player].weapon_send.append(self.player_dict[current_player].weapon_send[1])
+                                del self.weapon_map[self.weapon_map.index(self.player_dict[current_player].weapon_send[0])]
+                        self.player_dict[current_player].weapon_send = []
+                        self.player_dict[current_player].weapon_map = self.weapon_map
                         if current_player in del_bullets: #Disconnect, bullets will be deleted
                             self.player_dict[current_player].del_bullets += del_bullets[current_player]
                         del_bullets[current_player] = []
                         conn.send(pickle.dumps(self.player_dict))
-                        print("sent")
+                        #print("sent")
                     except Exception as E:
                             print("Error:", E)
                 else:

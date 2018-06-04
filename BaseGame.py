@@ -21,6 +21,7 @@ class Client:
         self.other_player_dict = dict()
         self.sprites = sprites
         self.drone = drone
+        
 
     def update_player(self, player):
         self.player = player
@@ -33,13 +34,16 @@ class Client:
         print('beginning transfer')
         while self.game.running:
             p = self.player
+            print(p.weapon_send)
             p.update_gif(self.sprites)
             binary = pickle.dumps(p)
             self.s.send(binary)
             data = self.s.recv(BUFFER_SIZE)
             data = pickle.loads(data)
             self.other_player_dict = data
+            p.weapon_map = self.other_player_dict[p.name].weapon_map
             p.health = self.other_player_dict[p.name].health
+            p.weapon_send = self.other_player_dict[p.name].weapon_send
             for b in self.other_player_dict[p.name].del_bullets:
                 if b in p.bullets:
                     p.bullets.remove(b)
@@ -104,7 +108,7 @@ class Client:
         for i in p.weapon_map:
             if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \
                         and pos[1] - screen.get_height() // 2 < i[1][1] < pos[1] + screen.get_height() // 2:
-                image = self.weapon_dict[i[0]].inventory_image
+                image = self.game.weapon_dict[i[0]].inventory_image
                 nx = i[1][0] - pos[0] + screen.get_width() // 2 \
                          - image.get_width() // 2
                 ny = i[1][1] - pos[1] + screen.get_height() // 2 \
@@ -115,7 +119,7 @@ class Client:
         p = self.player
         for i in p.weapon_map:
             if hypot(i[1][0]-25-p.pos[0],i[1][1]-25-p.pos[1]) <100:
-                inventory.add_item(self.weapon_dict[i[0]],p,p.weapon_map,i)
+                inventory.add_item(self.game.weapon_dict[i[0]],p,p.weapon_map,i)
                 #del self.weapon_map[self.weapon_map.index(i)]
                 break
 

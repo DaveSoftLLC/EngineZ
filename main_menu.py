@@ -3,6 +3,7 @@ import glob
 import multiprocessing as mp
 import queue
 from argon2 import PasswordHasher
+import authenticate
 
 def AAfilledRoundedRect(surface,rect,color,radius=0.4):
 
@@ -97,8 +98,19 @@ class ClientMatch:
                          'room_name':self.room_name,
                          'master':True}
     def authenticate(self, username, password):
-        self.name = username
-        return True
+        ph = PasswordHasher()
+        #username: pay2lose
+        #password: abacus
+        sql_request = authenticate.MySQLRequest('s03.jamesxu.ca',
+                                                'jamesxu',
+                                                'enginez123',
+                                                'enginez')
+        response = sql_request.select('users',username)
+        try:
+            return ph.verify(response, password)
+        except Exception as E:
+            print(E)
+            return False
 class Main:
     def __init__(self):
         self.screen = display.set_mode((1280,800))
@@ -201,7 +213,7 @@ class Main:
     def draw_home(self):
         screen = self.screen
         index = 0
-        self.load_images(800,810)
+        self.load_images(0,15)
         myClock = time.Clock()
         increment = 1
         change_screen = False
@@ -414,7 +426,6 @@ class Main:
         return box
     def draw_quit(self, left_click):
         self.running = False
-        quit()
     
 def render_button(text, box_color, font):
     render_text = font.render(text, True, (0,0,0))

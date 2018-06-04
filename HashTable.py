@@ -40,6 +40,7 @@ if __name__ == '__main__':
         if mode.lower() == 'insert':
             username = input('Enter a username: ')
             password = ph.hash(input('Enter a password: '))
+            print(password)
             obj = Row(username, password, 50)
             table.insert(obj)
         elif mode.lower() == 'login':

@@ -2,6 +2,7 @@ from BaseGame import *
 import glob
 import multiprocessing as mp
 import queue
+from argon2 import PasswordHasher
 
 def AAfilledRoundedRect(surface,rect,color,radius=0.4):
 

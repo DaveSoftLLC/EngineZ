@@ -35,7 +35,6 @@ class Client:
         while self.game.running:
             p = self.player
             p.update_gif(self.sprites)
-            print(p.weapon_send,"before")
             binary = pickle.dumps(p)
             self.s.send(binary)
             data = self.s.recv(BUFFER_SIZE)
@@ -43,7 +42,6 @@ class Client:
             self.other_player_dict = data
             if len(self.other_player_dict[p.name].weapon_send)>0 and self.other_player_dict[p.name].weapon_send[0] =="Sent":
                 p.weapon_send = []
-            print(p.weapon_send,"after") #should be blank
             p.weapon_map = self.other_player_dict[p.name].weapon_map
             p.health = self.other_player_dict[p.name].health
             
@@ -179,6 +177,11 @@ class GameMode:
                 health_color = (255, 0, 0)
             draw.rect(self.screen, 0, (20, 20, 300, 40), 2)
             draw.rect(self.screen, health_color, (20, 20, player.health / 100 * 300, 40))
+
+            #Minimap
+            minimap = transform.scale(self.background,(180,120))
+            self.screen.blit(minimap,(1050,50))
+            draw.circle(self.screen,(255,0,0),(int(1050+(px/12000)*180),int(50+(py/8000)*120)),3)
         except Exception as E:
             print("Error:", E)
 

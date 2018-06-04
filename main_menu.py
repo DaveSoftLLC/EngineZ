@@ -95,6 +95,9 @@ class ClientMatch:
             room_data = {'name':self.name,
                          'room_name':self.room_name,
                          'master':True}
+    def authenticate(self, username, password):
+        self.name = username
+        return True
 class Main:
     def __init__(self):
         self.screen = display.set_mode((1280,800))
@@ -108,10 +111,61 @@ class Main:
         self.mode_buttons = {}
         self.menu_font = font.Font('geonms-font.ttf', 32)
         self.title_font = font.Font('geonms-font.ttf', 72)
+        self.client = ClientMatch('NULL')
         self.mode = 'menu'
-        self.client = ClientMatch('pay2lose')
+        self.username = 'pay2lose'
+##        self.client = ClientMatch('pay2lose')
         self.room_data = None
         self.room_name = ''
+
+    def login_screen(self):
+        background = transform.smoothscale(image.load('nmsplanet.jpg').convert(), (1280,800))
+        mode = 'username'
+        input_dict = {'username': '', 'password': ''}
+        while self.running:
+            left_click = False
+            for e in event.get():
+                if e.type == QUIT:
+                    self.running = False
+                if e.type == MOUSEBUTTONDOWN:
+                    left_click = True
+                if e.type == KEYDOWN:
+                    if e.key == K_BACKSPACE:
+                        if len(input_dict[mode]) > 0:
+                            input_dict[mode] = input_dict[mode][:-1]#Delete a character when backspace is pressed
+                    elif e.key < 256:
+                        input_dict[mode] += e.unicode#Add letter to text
+            self.screen.blit(background, (0,0))
+            w, h = self.screen.get_size()
+            AAfilledRoundedRect(self.screen,(w//2-700//2,350,700,430),(53,121,169,100), radius=0.05)
+            mx, my = mouse.get_pos()
+            join_label = self.menu_font.render('LOGIN', True, (255,255,255))
+            label_text = {'LOGIN':(w//2-join_label.get_width()//2, 310),
+                          'USERNAME:': (300,375),
+                          'PASSWORD:': (300,550)}
+            button_list = [['LOGIN', 'center', 700]]
+            click, word = check_hover(self.screen, button_list, self.mode_buttons, (mx,my), left_click, self.menu_font)
+            if click:
+                if word == 'LOGIN':
+                    auth = self.client.authenticate(input_dict['username'], input_dict['password'])
+                    if auth:
+                        return self.draw_home()
+            for word, pos in label_text.items():
+                rendered = self.menu_font.render(word, True, (255,255,255))
+                self.screen.blit(rendered, pos)
+            username_box = self.input_box(input_dict['username'], 'geonms-font.ttf', 32, 500, 40)
+            password_box = self.input_box('*'*len(input_dict['password']), 'geonms-font.ttf', 32, 500, 40)
+            uw, uh = username_box.get_size()
+            pw, ph = password_box.get_size()
+            rendered_username = self.screen.blit(username_box, (w//2-uw//2, 435))
+            rendered_password = self.screen.blit(password_box, (w//2-pw//2, 600))
+            if rendered_username.collidepoint((mx,my)) and left_click:
+                mode = 'username'
+            elif rendered_password.collidepoint((mx,my)) and left_click:
+                mode = 'password'
+            display.flip()
+
+            
 
     def load_images(self, start, end):
         background = transform.smoothscale(image.load('nmsplanet.jpg').convert(), (1280,800))
@@ -224,6 +278,7 @@ class Main:
         if click:
             if word == 'BACK':
                 self.mode = 'menu'
+                self.msg = ''
             elif word == 'CONNECT':
                 self.mode_buttons = {}
                 self.room_name = self.msg
@@ -283,8 +338,33 @@ class Main:
         client = ClientMatch('temp')
         
         
-    def draw_create(self):
-        pass
+    def draw_create(self, left_click):
+        w, h = self.screen.get_size()
+        AAfilledRoundedRect(self.screen,(w//2-700//2,350,700,200),(53,121,169,100), radius=0.05)
+        mx, my = mouse.get_pos()
+        join_label = self.menu_font.render('CREATE ROOM', True, (255,255,255))
+        label_text = {'CREATE ROOM':(w//2-join_label.get_width()//2, 310),
+                      'ENTER ROOM NAME:': (300,375)}
+        button_list = [['CREATE', 'center', 500], ['BACK', 350, 500]]
+        click, word = check_hover(self.screen, button_list, self.mode_buttons, (mx,my), left_click, self.menu_font)
+        if click:
+            if word == 'BACK':
+                self.mode = 'menu'
+                self.msg = ''
+            elif word == 'CONNECT':
+                self.mode_buttons = {}
+                self.room_name = self.msg
+                self.mode = 'room'
+                threading.Thread(target=self.client.join_room, args=(self.msg,)).start()
+                self.msg = ''
+                return True
+        for word, pos in label_text.items():
+            rendered = self.menu_font.render(word, True, (255,255,255))
+            self.screen.blit(rendered, pos)
+        box = self.input_box(self.msg, 'geonms-font.ttf', 32, 500, 40)
+        bw, bh = box.get_size()
+        self.screen.blit(box, (w//2-bw//2, 435))
+        return False
 
     def draw_options(self):
         pass
@@ -331,6 +411,9 @@ class Main:
         rendered_msg = font.Font(font_name, justify(msg, start_size)).render(msg, True, (0,0,0))
         box.blit(rendered_msg, (5,0))
         return box
+    def draw_quit(self, left_click):
+        self.running = False
+        quit()
     
 def render_button(text, box_color, font):
     render_text = font.render(text, True, (0,0,0))
@@ -397,6 +480,6 @@ def player_bar(screen, rect, username, master, color, font):
     screen.blit(username_rendered, (tx+20, ty+th//2-h//2))
     screen.blit(status_rendered, (tx+400, ty+th//2-h//2))
 main = Main()
-main.draw_home()
+main.login_screen()
+##main.draw_home()
 quit()
-        

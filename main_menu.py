@@ -162,6 +162,8 @@ class Main:
                 if word == 'LOGIN':
                     auth = self.client.authenticate(input_dict['username'], input_dict['password'])
                     if auth:
+                        self.username = input_dict['username']
+                        self.client.name = self.username
                         return self.draw_home()
             for word, pos in label_text.items():
                 rendered = self.menu_font.render(word, True, (255,255,255))

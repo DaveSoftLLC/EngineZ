@@ -113,7 +113,6 @@ class Server:
         self.game = GameMode(server=True)
         self.game_instances = {}
         self.running = True
-        self.table = HashTable()
 
     def listen(self):
          while self.running:

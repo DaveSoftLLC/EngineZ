@@ -44,6 +44,7 @@ class Client:
                 p.weapon_send = []
             p.weapon_map = self.other_player_dict[p.name].weapon_map
             p.health = self.other_player_dict[p.name].health
+            p.storm = self.other_player_dict[p.name].storm
             
             for b in self.other_player_dict[p.name].del_bullets:
                 if b in p.bullets:
@@ -99,7 +100,7 @@ class Client:
 ##                        angle = b[1] + 90 - (3 - a) * 6
                     #lb = transform.rotate(gun.bulletSprite, b[1])
                     lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
-                    bullet_sprite = map_to_bullet(b[2], Game)
+                    bullet_sprite = map_to_bullet(b[2], screen)
                     screen.blit(transform.rotate(bullet_sprite, b[1]), (lx, ly))
                     #gunType.gun_Bullet(b[2],lx,ly,b[1],screen)
                     #g.screen.blit(lb, (lx, ly))
@@ -169,6 +170,11 @@ class GameMode:
                                                  py-self.screen.get_height()//2,
                                                  self.screen.get_width(), self.screen.get_height()))
             self.screen.blit(portion, (0, 0))
+            #Storm
+            if player.storm!=[]:
+                nx = player.storm[0][0]-player.pos[0]+self.screen.get_width()//2
+                ny = player.storm[0][1]-player.pos[1]+self.screen.get_height()//2
+                draw.circle(self.screen,(0,0,255),(nx,ny),player.storm[1],20)
             if player.health > 80:
                 health_color = (0, 255, 0)
             elif player.health > 40:
@@ -176,12 +182,12 @@ class GameMode:
             else:
                 health_color = (255, 0, 0)
             draw.rect(self.screen, 0, (20, 20, 300, 40), 2)
-            draw.rect(self.screen, health_color, (20, 20, player.health / 100 * 300, 40))
+            draw.rect(self.screen, health_color, (20, 20, int(player.health / 100 * 300), 40))
 
             #Minimap
             minimap = transform.scale(self.background,(180,120))
             self.screen.blit(minimap,(1050,50))
-            draw.circle(self.screen,(255,0,0),(int(1050+(px/12000)*180),int(50+(py/8000)*120)),3)
+            draw.circle(self.screen,(255,0,0),(int(1050+(px/12000)*180),int(50+(py/8000)*120)),2)
         except Exception as E:
             print("Error:", E)
 
@@ -234,6 +240,7 @@ class Player:
         self.weapon_send = []#[weapon to remove, weapon to add]
         self.type = mode
         self.weapon_map = []
+        self.storm = []
         
 
     def move(self, direction, background, collisionmap, FPS, speed=None):

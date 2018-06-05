@@ -20,8 +20,19 @@ class Server:
         self.send_dict = dict()
         self.game = game
         self.storm_time  = 30000000000000000
-        self.storm_pos = [randint(-100,11500),randint(-100,7500)]
-        self.storm_rad = [7000,4000,2500,1000,500,100]
+        self.storm_pos = []
+        self.storm_rad = [4000,2500,1000,500,100]
+        self.dam = 0
+        for a in range(len(self.storm_rad)):
+            if self.storm_rad[a] == 4000:
+                self.storm_pos.append([randint(-100,100),randint(-100,100)])
+            else:
+                print((self.storm_pos[a-1][0],self.storm_rad[a-1]))
+                print((self.storm_pos[a-1][1],self.storm_rad[a-1]))
+                x = randint(self.storm_pos[a-1][0],self.storm_pos[a-1][0]+self.storm_rad[a-1])
+                y = randint(self.storm_pos[a-1][1],self.storm_pos[a-1][1]+self.storm_rad[a-1])
+                self.storm_pos.append([x,y])
+        
         self.number_threads = 0
         self.stormB = True
         self.storm_state = 0
@@ -44,8 +55,9 @@ class Server:
               threading.Thread(target=self.listen_client, args=(conn, addr)).start()
               self.number_threads+=1
               if self.number_threads >0 and self.stormB:
-                  self.stormB = False
                   self.storm(True)
+                  self.stormB = False
+                  
               
 
     def listen_client(self, conn, addr):
@@ -76,6 +88,9 @@ class Server:
                                 self.weapon_map.append(self.player_dict[current_player].weapon_send[1])
                                 del self.weapon_map[self.weapon_map.index(self.player_dict[current_player].weapon_send[0])]
                             self.player_dict[current_player].weapon_send = ["Sent"]
+                        if self.stormB == False:
+                            self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state]]
+                            
                         self.player_dict[current_player].weapon_map = self.weapon_map
                         if current_player in del_bullets: #Disconnect, bullets will be deleted
                             self.player_dict[current_player].del_bullets += del_bullets[current_player]
@@ -95,6 +110,15 @@ class Server:
     def check_damage(self):
         g = self.game
         for name, obj in {k: v for k,v in self.player_dict.items()}.items():
+            if obj.storm !=[]:
+                x = self.storm_pos[self.storm_state][0]-obj.pos[0]
+                y = self.storm_pos[self.storm_state][1]-obj.pos[1]
+                if hypot(x,y)>self.storm_rad[self.storm_state] and t.time()-self.dam>1:
+                    self.dam = t.time()
+                    if self.player_health_dict[name] - 1 >= 0:
+                        self.player_health_dict[name] -= 1
+
+                    print("OUTSIDE STORM")
             for b in obj.bullets:
                 for p in [i for i in self.player_dict.values()]:
                     if name == p.name:
@@ -146,8 +170,13 @@ class Server:
         if start:
             self.storm_time = t.time()
         
-        if t.time()-self.storm_time>20:
+        if t.time()-self.storm_time>30:
+            self.storm_time = t.time()
+            self.storm_state += 1
+            
             print("THE STORM")
+        
+            
 juniper = Server(g, BUFFER_SIZE)
 threading.Thread(target=juniper.listen).start()
 while juniper.running:

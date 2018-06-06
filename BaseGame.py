@@ -143,6 +143,7 @@ class GameMode:
             self.droneB =False
             self.drone_start = 31
             self.current_actor = 0
+            self.surfaceALPHA = Surface((1280, 800), SRCALPHA)
             assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png').convert_alpha(),
                                5,image.load('Weapons/machinegun.png').convert_alpha(),0,0.15)
             shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png').convert_alpha(),
@@ -172,9 +173,11 @@ class GameMode:
             self.screen.blit(portion, (0, 0))
             #Storm
             if player.storm!=[]:
+                draw.rect(self.surfaceALPHA,(0,0,255,80),(0,0,1280,800))
                 nx = player.storm[0][0]-player.pos[0]+self.screen.get_width()//2
                 ny = player.storm[0][1]-player.pos[1]+self.screen.get_height()//2
-                draw.circle(self.screen,(0,0,255),(nx,ny),player.storm[1],20)
+                draw.circle(self.surfaceALPHA,(0,0,0,0),(nx,ny),player.storm[1])
+                self.screen.blit(self.surfaceALPHA,(0,0))
             if player.health > 80:
                 health_color = (0, 255, 0)
             elif player.health > 40:

@@ -21,11 +21,11 @@ class Server:
         self.game = game
         self.storm_time  = 30000000000000000
         self.storm_pos = []
-        self.storm_rad = [4000,2500,1000,500,100]
+        self.storm_rad = [3000,2500,1000,500,100]
         self.dam = 0
         for a in range(len(self.storm_rad)):
             if self.storm_rad[a] == 4000:
-                self.storm_pos.append([randint(-100,100),randint(-100,100)])
+                self.storm_pos.append([randint(3000,9000),randint(3000,5000)])
             else:
                 print((self.storm_pos[a-1][0],self.storm_rad[a-1]))
                 print((self.storm_pos[a-1][1],self.storm_rad[a-1]))

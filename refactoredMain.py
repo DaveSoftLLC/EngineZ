@@ -4,6 +4,12 @@ from random import randint
 from BaseGame import *
 g = GameMode()
 
+#Shotgun bullet range
+#Gun reload time
+#Storm show up on minimap
+
+
+
 inventory = Inventory(g.guns)
 dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
 

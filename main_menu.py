@@ -168,6 +168,10 @@ class Main:
                     auth = self.client.authenticate(input_dict['username'], input_dict['password'])
                     if auth:
                         self.username = input_dict['username']
+<<<<<<< HEAD
+=======
+                        self.client.name = self.username
+>>>>>>> 3bc042b1c7c30bd8f89a23672907d36382f4769f
                         return self.draw_home()
             for word, pos in label_text.items():
                 rendered = self.menu_font.render(word, True, (255,255,255))

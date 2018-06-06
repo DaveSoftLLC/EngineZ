@@ -19,12 +19,19 @@ class Server:
         self.instance = GameMode(server=True)
         self.send_dict = dict()
         self.game = game
-        self.storm_time  = 30000000000000000
+
+        #Storm
+        self.storm_time  = 30000000000000000 #Tim
+        self.storm_moving  = 6000000000000
+        self.storm_next = "idle"
         self.storm_pos = []
-        self.storm_rad = [3000,2500,1000,500,100]
+        self.storm_rad = [3000,2000,1000,500,100]
         self.dam = 0
+        self.number_threads = 0
+        self.stormB = True
+        self.storm_state = 0
         for a in range(len(self.storm_rad)):
-            if self.storm_rad[a] == 4000:
+            if self.storm_rad[a] == 3000:
                 self.storm_pos.append([randint(3000,9000),randint(3000,5000)])
             else:
                 print((self.storm_pos[a-1][0],self.storm_rad[a-1]))
@@ -33,9 +40,7 @@ class Server:
                 y = randint(self.storm_pos[a-1][1],self.storm_pos[a-1][1]+self.storm_rad[a-1])
                 self.storm_pos.append([x,y])
         
-        self.number_threads = 0
-        self.stormB = True
-        self.storm_state = 0
+        
         assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png'),5,image.load('Weapons/machinegun.png'),0,0.15)
         shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'),10,image.load('Weapons/shotgunb.png'), 6,0)
         sniper = Gun('Sniper',image.load('Weapons/heavyBullet.png'),25,image.load('Weapons/sniper.png'),1,0)
@@ -89,7 +94,7 @@ class Server:
                                 del self.weapon_map[self.weapon_map.index(self.player_dict[current_player].weapon_send[0])]
                             self.player_dict[current_player].weapon_send = ["Sent"]
                         if self.stormB == False:
-                            self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state]]
+                            self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state],self.storm_next]
                             
                         self.player_dict[current_player].weapon_map = self.weapon_map
                         if current_player in del_bullets: #Disconnect, bullets will be deleted
@@ -118,7 +123,7 @@ class Server:
                     if self.player_health_dict[name] - 1 >= 0:
                         self.player_health_dict[name] -= 1
 
-                    print("OUTSIDE STORM")
+                    #print("OUTSIDE STORM")
             for b in obj.bullets:
                 for p in [i for i in self.player_dict.values()]:
                     if name == p.name:
@@ -170,13 +175,32 @@ class Server:
         if start:
             self.storm_time = t.time()
         
-        if t.time()-self.storm_time>30:
+        if t.time()-self.storm_time>60:
             self.storm_time = t.time()
-            self.storm_state += 1
+            if self.storm_next == "idle":
+                self.storm_next = "moving"
+                self.storm_rad[self.storm_state]
+                self.x = int((self.storm_pos[self.storm_state][0]-self.storm_pos[self.storm_state+1][0])/(600))
+                self.y = int((self.storm_pos[self.storm_state][1]-self.storm_pos[self.storm_state+1][1])/(600))
+                print(self.x, self.y)
+                print(self.storm_pos)
+                self.r = (self.storm_rad[self.storm_state]-self.storm_rad[self.storm_state+1])/60
+                self.storm_moving = 0
+            
+            else:
+                self.storm_next = "idle"
+                self.storm_state += 1
             
             print("THE STORM")
-        
-            
+        if t.time()-self.storm_moving>.05 and self.storm_next == "moving":
+            self.storm_moving = t.time()
+            if (self.storm_state+1) != len(self.storm_rad) and self.storm_rad[self.storm_state] != self.storm_rad[self.storm_state+1]:
+                
+                self.storm_pos[self.storm_state][0]-=self.x
+                self.storm_pos[self.storm_state][1]-=self.y
+                self.storm_rad[self.storm_state]-= 1
+                #print(self.storm_rad,self.storm_pos)
+                #print("moving")
 juniper = Server(g, BUFFER_SIZE)
 threading.Thread(target=juniper.listen).start()
 while juniper.running:

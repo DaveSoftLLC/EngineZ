@@ -124,7 +124,7 @@ class Server:
               threading.Thread(target=self.listen_client, args=(conn, addr)).start()
 
     def listen_client(self, conn, addr):
-        print('thread')
+        print('room thread')
         data = pickle.loads(conn.recv(self.BUFFER_SIZE))
         name = data['name']
         mode = data['mode']
@@ -144,7 +144,7 @@ class Server:
                 room_name = data['room_name']
                 ready = data['ready']
                 self.rooms.setdefault(room_name, set()).add((name, ready, conn, addr))
-                start = any([r[1] for r in self.rooms[room_name]])
+                start = all([r[1] for r in self.rooms[room_name]])
                 if start:
                     msg = 'game_begin'
                     conn.send(pickle.dumps(msg))

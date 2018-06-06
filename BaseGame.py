@@ -100,7 +100,7 @@ class Client:
 ##                        angle = b[1] + 90 - (3 - a) * 6
                     #lb = transform.rotate(gun.bulletSprite, b[1])
                     lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
-                    bullet_sprite = map_to_bullet(b[2], screen)
+                    bullet_sprite = map_to_bullet(b[2], self.game)
                     screen.blit(transform.rotate(bullet_sprite, b[1]), (lx, ly))
                     #gunType.gun_Bullet(b[2],lx,ly,b[1],screen)
                     #g.screen.blit(lb, (lx, ly))

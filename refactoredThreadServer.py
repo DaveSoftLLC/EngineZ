@@ -14,16 +14,16 @@ class GameInstance:
         self.game = GameMode(server=True)
 
     def create_thread(self):
-        for c in self.clients.values():
+        for c in self.clients:
             conn, addr = (c[2], c[3])
-            threading.Thread(target=self.listen_client, args=(c, a)).start()
+            threading.Thread(target=self.listen_client, args=(conn, addr)).start()
         
     def listen_client(self, conn, addr):
         print('thread')
         current_player = ''
         while self.running:
             try:
-                data = conn.recv(self.BUFFER_SIZE)
+                data = conn.recv(BUFFER_SIZE)
                 if data:
                     try:
                         decoded = pickle.loads(data)
@@ -113,7 +113,6 @@ class Server:
         self.game = GameMode(server=True)
         self.game_instances = {}
         self.running = True
-        self.table = HashTable()
 
     def listen(self):
          while self.running:
@@ -145,13 +144,14 @@ class Server:
                 room_name = data['room_name']
                 ready = data['ready']
                 self.rooms.setdefault(room_name, set()).add((name, ready, conn, addr))
-                start = all([r[1] for r in self.rooms[room_name]])
-                if start and master:
+                start = any([r[1] for r in self.rooms[room_name]])
+                if start:
                     msg = 'game_begin'
                     conn.send(pickle.dumps(msg))
-                    instance = GameInstance(room_name, self.rooms[room_name])
-                    self.game_instances[room_name] = instance
-                    process = mp.Process(target=instance.create_thread).start()
+                    if room_name not in self.game_instances.keys():
+                        instance = GameInstance(room_name, self.rooms[room_name])
+                        self.game_instances[room_name] = instance
+                        process = mp.Process(target=instance.create_thread).start()
                     return True
                 else:
                     players = []
@@ -165,7 +165,8 @@ class Server:
                         self.rooms[room_name].remove(player)
                         return
         conn.close()
-
+    def collect_players():
+        pass
     def remove(self, room):
         try:
             del self.rooms[room]

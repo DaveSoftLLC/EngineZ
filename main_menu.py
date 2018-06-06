@@ -69,11 +69,11 @@ class ClientMatch:
             self.send_queue.put((False, None))
             print('not all good :(')
             return
-        
+        ready = False
         while self.running:
             room_data = {'name':self.name,
                          'room_name':room_name,
-                         'ready':False,
+                         'ready':ready,
                          'mode': 'join',
                          'master':False}
             self.s.send(pickle.dumps(room_data))
@@ -86,10 +86,13 @@ class ClientMatch:
                     self.s.close()
                     self.send_queue.put((False, None))
                     return
+                elif event == 'ready':
+                    ready = True
             if type(data) == list:
                 self.room = data
             elif data == 'game_begin':
-                self.send_queue.put((True, conn))
+                self.send_queue.put((True, self.s))
+                print('begin')
                 return
     def create_room(self):
         self.s.connect(TCP_IP, TCP_PORT)
@@ -107,7 +110,9 @@ class ClientMatch:
                                                 'enginez')
         response = sql_request.select('users',username)
         try:
-            return ph.verify(response, password)
+            if ph.verify(response, password):
+                self.name = username
+                return True
         except Exception as E:
             print(E)
             return False
@@ -162,6 +167,7 @@ class Main:
                 if word == 'LOGIN':
                     auth = self.client.authenticate(input_dict['username'], input_dict['password'])
                     if auth:
+                        self.username = input_dict['username']
                         return self.draw_home()
             for word, pos in label_text.items():
                 rendered = self.menu_font.render(word, True, (255,255,255))
@@ -334,14 +340,19 @@ class Main:
                             
                     
             elif type(data) == tuple:
+                print('tuple mode')
                 status, conn = data
                 if not status:
                     print(data)
                     click = True
                     word = 'BACK'
+                elif status:
+                    print('starting game')
+                    self.running = False
+
         if click:
             if word == 'READY':
-                pass
+                self.client.events.put('ready')
             elif word == 'BACK':
                 self.client.events.put('leave')
                 self.mode = 'JOIN'
@@ -495,3 +506,5 @@ main = Main()
 main.login_screen()
 ##main.draw_home()
 quit()
+import refactoredMain
+refactoredMain.main(main.client.s)

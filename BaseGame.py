@@ -12,11 +12,9 @@ BUFFER_SIZE = 4096
 
 
 class Client:
-    def __init__(self, player,drone, game, TCP_IP, TCP_PORT, sprites):
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def __init__(self, player,drone, game, conn, sprites):
+        self.s = conn
         self.player = player
-        self.TCP_IP = TCP_IP
-        self.TCP_PORT = TCP_PORT
         self.game = game
         self.other_player_dict = dict()
         self.sprites = sprites
@@ -29,7 +27,6 @@ class Client:
         self.drone = drone
         
     def get_data(self):
-        self.s.connect((self.TCP_IP,self.TCP_PORT))
         print('beginning transfer')
         while self.game.running:
             p = self.player

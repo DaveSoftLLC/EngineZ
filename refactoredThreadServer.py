@@ -94,8 +94,11 @@ class Server:
                                 del self.weapon_map[self.weapon_map.index(self.player_dict[current_player].weapon_send[0])]
                             self.player_dict[current_player].weapon_send = ["Sent"]
                         if self.stormB == False:
-                            self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state],self.storm_next]
-                            
+                            if (self.storm_state+1) != len(self.storm_rad):
+                                self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state],self.storm_next,self.storm_pos[self.storm_state+1],self.storm_rad[self.storm_state+1]]
+                            else:
+                                self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state],self.storm_next]
+                                
                         self.player_dict[current_player].weapon_map = self.weapon_map
                         if current_player in del_bullets: #Disconnect, bullets will be deleted
                             self.player_dict[current_player].del_bullets += del_bullets[current_player]
@@ -184,7 +187,8 @@ class Server:
                 self.y = int((self.storm_pos[self.storm_state][1]-self.storm_pos[self.storm_state+1][1])/(600))
                 print(self.x, self.y)
                 print(self.storm_pos)
-                self.r = (self.storm_rad[self.storm_state]-self.storm_rad[self.storm_state+1])/60
+                self.r = int((self.storm_rad[self.storm_state]-self.storm_rad[self.storm_state+1])/600)
+                print(self.r)
                 self.storm_moving = 0
             
             else:
@@ -192,13 +196,12 @@ class Server:
                 self.storm_state += 1
             
             print("THE STORM")
-        if t.time()-self.storm_moving>.05 and self.storm_next == "moving":
+        if t.time()-self.storm_moving>.1 and self.storm_next == "moving":
             self.storm_moving = t.time()
-            if (self.storm_state+1) != len(self.storm_rad) and self.storm_rad[self.storm_state] != self.storm_rad[self.storm_state+1]:
-                
-                self.storm_pos[self.storm_state][0]-=self.x
-                self.storm_pos[self.storm_state][1]-=self.y
-                self.storm_rad[self.storm_state]-= 1
+            if (self.storm_state+1) != len(self.storm_rad) and self.storm_rad[self.storm_state] >= self.storm_rad[self.storm_state+1]:
+                self.storm_pos[self.storm_state][0]-=self.x-1
+                self.storm_pos[self.storm_state][1]-=self.y-1
+                self.storm_rad[self.storm_state]-= self.r +1
                 #print(self.storm_rad,self.storm_pos)
                 #print("moving")
 juniper = Server(g, BUFFER_SIZE)

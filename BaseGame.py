@@ -191,6 +191,12 @@ class GameMode:
             minimap = transform.scale(self.background,(180,120))
             self.screen.blit(minimap,(1050,50))
             draw.circle(self.screen,(255,0,0),(int(1050+(px/12000)*180),int(50+(py/8000)*120)),2)
+            if player.storm!=[]:#Showing on minimap
+                if len(player.storm) == 5:
+                    draw.circle(self.screen,(0,0,255),(int(1050+(player.storm[0][0]/12000)*180),int(50+(player.storm[0][1]/8000)*120)),player.storm[1]//67,2)
+                    draw.circle(self.screen,(0,255,0),(int(1050+(player.storm[3][0]/12000)*180),int(50+(player.storm[3][1]/8000)*120)),player.storm[4]//67,2)
+                elif len(player.storm) == 3:
+                    draw.circle(self.screen,(0,0,255),(int(1050+player.storm[0][0]/12000*180),int(50+(player.storm[0][1]/8000)*120)),player.storm[1]//67,2)
         except Exception as E:
             print("Error:", E)
 

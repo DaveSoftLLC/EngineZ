@@ -123,5 +123,6 @@ def main(conn):
     quit()
 
 #testing branch merge
-
+if __name__ == '__main__':
+    main(socket.socket())
 

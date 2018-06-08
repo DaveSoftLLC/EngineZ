@@ -237,17 +237,20 @@ class Player:
 
     def fire(self, inventory, FPS):
         if inventory.inventoryP[inventory.state].name != 'Empty' and self.ammo[inventory.state]>0:
-            
+            try:
+                ratio = int(20/FPS*60)
+            except ZeroDivisionError:
+                ratio = 1
             px, py = self.pos
             self.ammo[inventory.state] -=1
             if inventory.inventoryP[inventory.state].spread > 1:
                 #print(inventory.inventoryP[inventory.state].spread)
                 for a in range(1,inventory.inventoryP[inventory.state].spread):
                     spread = self.rotation+90-(3-a)*6
-                    self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name, int(20/FPS*60)])
+                    self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name, ratio])
             else:
                 angle = self.rotation+90
-                self.bullets.append([(px+5*cos(radians(angle)), py-5*sin(radians(angle))), angle, inventory.inventoryP[inventory.state].name, int(20/FPS*60)])               
+                self.bullets.append([(px+5*cos(radians(angle)), py-5*sin(radians(angle))), angle, inventory.inventoryP[inventory.state].name, ratio])               
                 
     def render_player(self, sprites, game):
         sprite = transform.rotate(sprites[self.state][self.gif_counter // 10], self.rotation + 90)
@@ -293,7 +296,10 @@ def render_bullets(Game, player, client, FPS):
         no_collision = True
         px, py = player.pos
         bx, by = b[0]
-        delta = int(20/FPS*60)
+        try:
+            delta = int(20/FPS*60)
+        except ZeroDivisionError:
+            delta = 20
         nx = bx + delta*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
         ny = by - delta*sin(radians(b[1]))
         lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)#Position on screen

@@ -70,7 +70,9 @@ class ClientMatch:
             print('not all good :(')
             return
         ready = False
+        fps_clock = time.Clock()
         while self.running:
+            fps_clock.tick(50)
             room_data = {'name':self.name,
                          'room_name':room_name,
                          'ready':ready,
@@ -78,7 +80,7 @@ class ClientMatch:
                          'master':False}
             self.s.send(pickle.dumps(room_data))
             data = pickle.loads(self.s.recv(BUFFER_SIZE))
-            print(data)
+            print('server:', data)
             self.send_queue.put(data)
             if not self.events.empty():
                 event = self.events.get(block=False)
@@ -102,6 +104,8 @@ class ClientMatch:
                          'room_name':self.room_name,
                          'master':True}
     def authenticate(self, username, password):
+        self.name = username
+        return True
         ph = PasswordHasher()
         #username: pay2lose
         #password: abacus
@@ -134,7 +138,7 @@ class Main:
         self.mode = 'menu'
         self.username = 'pay2lose'
 ##        self.client = ClientMatch('pay2lose')
-        self.room_data = None
+        self.room_data = []
         self.room_name = ''
 
     def login_screen(self):
@@ -329,10 +333,11 @@ class Main:
         if not self.client.send_queue.empty():
             data = self.client.send_queue.get(block=False)
             if type(data) == list:
-                room_data = data
+                self.room_data = data
+                print(data)
 ##                screen, rect, username, master, color, font
-                for p in range(len(room_data)):
-                    username, status = room_data[p]
+                for p in range(len(data)):
+                    username, status = self.room_data[p]
                     rect = (bx+25,
                             by + 70 + p*60 + p*10,
                             bw-50,
@@ -350,7 +355,6 @@ class Main:
                 elif status:
                     print('starting game')
                     self.running = False
-                    quit()
 
         if click:
             if word == 'READY':
@@ -359,7 +363,6 @@ class Main:
                 self.client.events.put('leave')
                 self.mode = 'JOIN'
                 self.mode_buttons = {}
-        display.flip()
         room_members = []
         client = ClientMatch('temp')
         

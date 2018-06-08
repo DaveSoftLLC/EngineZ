@@ -21,7 +21,9 @@ class GameInstance:
     def listen_client(self, conn, addr):
         print('thread')
         current_player = ''
+        fps_clock = time.Clock()
         while self.running:
+            fps_clock.tick(30)
             try:
                 data = conn.recv(BUFFER_SIZE)
                 if data:
@@ -109,7 +111,7 @@ class Server:
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((self.TCP_IP, self.TCP_PORT))
         self.s.listen(1)
-        self.rooms = {'funroom':set()}
+        self.rooms = {'funroom':[]}
         self.game = GameMode(server=True)
         self.game_instances = {}
         self.running = True
@@ -119,7 +121,7 @@ class Server:
               print("Before looking")
               conn, addr = self.s.accept()
               print("After looking")
-              conn.settimeout(10)
+              conn.settimeout(60)
               STRUCT = ['room name', 'player list']
               threading.Thread(target=self.listen_client, args=(conn, addr)).start()
 
@@ -143,16 +145,25 @@ class Server:
                 master = data['master']
                 room_name = data['room_name']
                 ready = data['ready']
-                self.rooms.setdefault(room_name, set()).add((name, ready, conn, addr))
+                existing = False
+                for p in self.rooms[room_name]:
+                    if p[0] == name:
+                        existing = True
+                        p[1] = ready
+                        break
+                else:
+                    self.rooms.setdefault(room_name, []).append([name, ready, conn, addr])
                 start = all([r[1] for r in self.rooms[room_name]])
+                print(start)
                 if start:
                     msg = 'game_begin'
                     conn.send(pickle.dumps(msg))
-                    if room_name not in self.game_instances.keys():
-                        instance = GameInstance(room_name, self.rooms[room_name])
-                        self.game_instances[room_name] = instance
-                        process = mp.Process(target=instance.create_thread).start()
-                    return True
+                    if __name__ == '__main__':
+                        if room_name not in self.game_instances.keys():
+                            instance = GameInstance(room_name, self.rooms[room_name])
+                            self.game_instances[room_name] = instance
+                            process = mp.Process(target=instance.create_thread).start()
+                        return True
                 else:
                     players = []
                     for player in self.rooms[room_name]:

@@ -21,9 +21,9 @@ def scale_and_load(path, factor):
 def get_fps(old_time):
     return int(1/(t.time()-old_time))
 sprites = [image.load('Sprites/sprite1.png'), image.load('Sprites/sprite2.png'), image.load('Sprites/sprite3.png')]
-newSprites = [[scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/idle/*.png')],
-              [scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/move/*.png')],
-              [scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/shoot/*.png')]]
+newSprites = [[scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/move/test/*.png')],
+              [scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/move/test/*.png')],
+              [scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/move/test/*.png')]]
 
 droneSprite = [[scale_and_load(file, 2) for file in glob.glob('newSprites/drone/*.png')]]
 droneB = False

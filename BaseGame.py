@@ -302,7 +302,7 @@ class Player:
                 self.bullets.append([(px+5*cos(radians(angle)), py-5*sin(radians(angle))), angle, inventory.inventoryP[inventory.state].name, int(20/FPS*60)])               
                 
     def render_player(self, sprites, game):
-        sprite = transform.rotate(sprites[self.state][self.gif_counter // 10], self.rotation + 90)
+        sprite = transform.rotate(sprites[self.state][self.gif_counter//20%len(sprites[self.state])], self.rotation + 90)
         self.rect = game.screen.blit(sprite, (640 - sprite.get_width() // 2, 400 - sprite.get_height() // 2))
 
     def get_rect(self):
@@ -312,10 +312,7 @@ class Player:
         return self.pos
 
     def update_gif(self, sprites, server=False):
-        if self.gif_counter >= 10 * len(sprites[self.state]) - 1:
-            self.gif_counter = 0
-        elif not server:
-            self.gif_counter += 1
+        self.gif_counter += 1
 
 class Drone(Player):
     def draw_drone(Game,droneB,piclist,timer):

@@ -16,14 +16,15 @@ dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Backgrou
 collision = image.load('Background/rocks+hole.png').convert_alpha()
 def scale_and_load(path, factor):
     img = image.load(path).convert_alpha()
+    
     x, y = img.get_size()
     return transform.smoothscale(img, (int(x/factor), int(y/factor)))
 def get_fps(old_time):
     return int(1/(t.time()-old_time))
-sprites = [image.load('Sprites/sprite1.png'), image.load('Sprites/sprite2.png'), image.load('Sprites/sprite3.png')]
-newSprites = [[scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/move/test/*.png')],
-              [scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/move/test/*.png')],
-              [scale_and_load(file, 3) for file in glob.glob('newSprites/shotgun/move/test/*.png')]]
+
+newSprites = [[scale_and_load(file, 3) for file in glob.glob('Sprites/Idle/*.png')],
+              [scale_and_load(file, 3) for file in glob.glob('Sprites/Shoot/*.png')],
+              [scale_and_load(file, 3) for file in glob.glob('Sprites/Idle/*.png')]]
 
 droneSprite = [[scale_and_load(file, 2) for file in glob.glob('newSprites/drone/*.png')]]
 droneB = False
@@ -80,7 +81,8 @@ while g.running:
             p.state = 1
         else:
             p.speed = 10
-            p.state = 0
+            if m[0] == 0:
+                p.state = 0
 
         #UP
         if keys[K_w] and g.screen.get_height()//2<py-g.current_actor.speed:

@@ -17,13 +17,13 @@ class GameInstance:
         for c in self.clients:
             conn, addr = (c[2], c[3])
             threading.Thread(target=self.listen_client, args=(conn, addr)).start()
+        threading.Thread(target=self.check_damage).start()
         
     def listen_client(self, conn, addr):
         print('thread')
         current_player = ''
         fps_clock = time.Clock()
         while self.running:
-            fps_clock.tick(30)
             try:
                 data = conn.recv(BUFFER_SIZE)
                 if data:
@@ -137,6 +137,13 @@ class Server:
                 print(self.rooms.keys(), room_name)
                 conn.close()
                 return
+        elif mode == 'create':
+            if room_name in self.rooms.keys():
+                conn.send(pickle.dumps('room_exists'))
+                conn.close()
+                return
+            else:
+                self.rooms[room_name] = []
         conn.send(pickle.dumps('all_good'))
         while self.running:
             try:
@@ -158,12 +165,11 @@ class Server:
                 if start:
                     msg = 'game_begin'
                     conn.send(pickle.dumps(msg))
-                    if __name__ == '__main__':
-                        if room_name not in self.game_instances.keys():
-                            instance = GameInstance(room_name, self.rooms[room_name])
-                            self.game_instances[room_name] = instance
-                            process = mp.Process(target=instance.create_thread).start()
-                        return True
+                    if room_name not in self.game_instances.keys():
+                        instance = GameInstance(room_name, self.rooms[room_name])
+                        self.game_instances[room_name] = instance
+                        process = threading.Thread(target=instance.create_thread).start()
+                    return True
                 else:
                     players = []
                     for player in self.rooms[room_name]:

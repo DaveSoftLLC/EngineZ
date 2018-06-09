@@ -2,7 +2,7 @@ import glob
 from random import randint
 
 from BaseGame import *
-def main(conn):
+def main(conn, username):
     g = GameMode()
 
     inventory = Inventory(g.guns)
@@ -22,7 +22,7 @@ def main(conn):
 
     droneSprite = [[scale_and_load(file, 2) for file in glob.glob('newSprites/drone/*.png')]]
     droneB = False
-    p = Player(g, '%d' % (randint(1, 100)), (1200, 1200), 10, 'player')
+    p = Player(g, username, (1200, 1200), 10, 'player')
     p.ammo =[100 for i in range(len(g.guns))]
     client = Client(p,0,g, conn, newSprites)
     threading.Thread(target=client.get_data).start()

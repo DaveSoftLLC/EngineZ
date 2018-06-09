@@ -97,12 +97,52 @@ class ClientMatch:
                 self.send_queue.put((True, self.s))
                 print('begin')
                 return
-    def create_room(self):
-        self.s.connect(TCP_IP, TCP_PORT)
+    def create_room(self, room_name):
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        room_name = room_name
+        self.s.connect((TCP_IP, TCP_PORT))
+        print('room name', room_name)
+        room_data = {'name':self.name,
+             'room_name':room_name,
+             'ready':False,
+             'mode': 'create',
+             'master':False}
+        self.s.send(pickle.dumps(room_data))
+        data = pickle.loads(self.s.recv(BUFFER_SIZE))
+        if data != 'all_good':
+            self.s.close()
+            self.send_queue.put((False, None))
+            print('not all good :(')
+            return
+        ready = False
+        fps_clock = time.Clock()
         while self.running:
+            fps_clock.tick(50)
             room_data = {'name':self.name,
-                         'room_name':self.room_name,
-                         'master':True}
+                         'room_name':room_name,
+                         'ready':ready,
+                         'mode': 'join',
+                         'master':False}
+            self.s.send(pickle.dumps(room_data))
+            data = pickle.loads(self.s.recv(BUFFER_SIZE))
+            print('server:', data)
+            self.send_queue.put(data)
+            if not self.events.empty():
+                event = self.events.get(block=False)
+                if event == 'leave':
+                    print('leaving')
+                    self.s.close()
+                    self.send_queue.put((False, None))
+                    return
+                elif event == 'ready':
+                    ready = True
+            if type(data) == list:
+                self.room = data
+            elif data == 'game_begin':
+                self.send_queue.put((True, self.s))
+                print('begin')
+                return
+
     def authenticate(self, username, password):
         self.name = username
         return True
@@ -303,6 +343,7 @@ class Main:
             if word == 'BACK':
                 self.mode = 'menu'
                 self.msg = ''
+                self.mode_buttons = {}
             elif word == 'CONNECT':
                 self.mode_buttons = {}
                 self.room_name = self.msg
@@ -380,11 +421,11 @@ class Main:
             if word == 'BACK':
                 self.mode = 'menu'
                 self.msg = ''
-            elif word == 'CONNECT':
+            elif word == 'CREATE':
                 self.mode_buttons = {}
                 self.room_name = self.msg
                 self.mode = 'room'
-                threading.Thread(target=self.client.join_room, args=(self.msg,)).start()
+                threading.Thread(target=self.client.create_room, args=(self.msg,)).start()
                 self.msg = ''
                 return True
         for word, pos in label_text.items():
@@ -512,5 +553,6 @@ main.login_screen()
 ##main.draw_home()
 import refactoredMain
 s = main.client.s
+username = main.client.name
 main = None
-refactoredMain.main(s)
+refactoredMain.main(s, username)

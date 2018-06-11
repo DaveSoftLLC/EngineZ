@@ -2,6 +2,8 @@ from BaseGame import *
 import copy
 import multiprocessing as mp
 del_bullets = dict()
+g = GameMode(server=True)
+
 
 class GameInstance:
     def __init__(self, name, clients):
@@ -9,16 +11,60 @@ class GameInstance:
         self.player_dict = {}
         self.player_health_dict = {}
         self.running = True
+        self.instance = GameMode(server=True)
         self.send_dict = dict()
-        self.clients = clients
-        self.game = GameMode(server=True)
+        self.game = game
 
+        #Storm
+        self.storm_time  = 30000000000000000 #Tim
+        self.storm_moving  = 6000000000000
+        self.storm_next = "idle"
+        self.storm_pos = []
+        self.storm_rad = [3000,2000,1000,500,100]
+        self.dam = 0
+        self.number_threads = 0
+        self.stormB = True
+        self.storm_state = 0
+        for a in range(len(self.storm_rad)):
+            if self.storm_rad[a] == 3000:
+                self.storm_pos.append([randint(3000,9000),randint(3000,5000)])
+            else:
+                print((self.storm_pos[a-1][0],self.storm_rad[a-1]))
+                print((self.storm_pos[a-1][1],self.storm_rad[a-1]))
+                x = randint(self.storm_pos[a-1][0],self.storm_pos[a-1][0]+self.storm_rad[a-1])
+                y = randint(self.storm_pos[a-1][1],self.storm_pos[a-1][1]+self.storm_rad[a-1])
+                self.storm_pos.append([x,y])
     def create_thread(self):
         for c in self.clients:
             conn, addr = (c[2], c[3])
             threading.Thread(target=self.listen_client, args=(conn, addr)).start()
         threading.Thread(target=self.check_damage).start()
         
+        
+        assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png'),5,image.load('Weapons/machinegun.png'),0,0.15)
+        shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'),10,image.load('Weapons/shotgunb.png'), 6,0)
+        sniper = Gun('Sniper',image.load('Weapons/heavyBullet.png'),25,image.load('Weapons/sniper.png'),1,0)
+        self.weapon_dict = {"Shotgun":shotgun,"AR":assaultrifle,"Sniper":sniper}
+        self.weapon_map =[]
+        for i in range(20):
+            weapon = choice(list(self.weapon_dict))
+            wx,wy = (randint(100,11900),randint(100,7900))
+            self.weapon_map.append([weapon,(wx,wy),100])
+            #self.weapon_map will be sent along with player_dict, client will send weapon that they picked up, and the weapon they will drop (or none)
+    def listen(self):
+         while self.running:
+              print("Before looking")
+              conn, addr = self.s.accept()
+              print("After looking")
+              conn.settimeout(10)
+              threading.Thread(target=self.listen_client, args=(conn, addr)).start()
+              self.number_threads+=1
+              if self.number_threads >0 and self.stormB:
+                  self.storm(True)
+                  self.stormB = False
+                  
+              
+
     def listen_client(self, conn, addr):
         print('thread')
         current_player = ''
@@ -31,15 +77,34 @@ class GameInstance:
                         decoded = pickle.loads(data)
                         current_player = decoded.name
                         self.player_dict[decoded.name] = decoded
+                        
                         if current_player not in self.player_health_dict.keys():
-                            self.player_health_dict[decoded.name] = 100
+                            self.player_health_dict[current_player] = 100
                         else:
                             for key, value in self.player_health_dict.items():
                                 self.player_dict[key].health = value
+                        #Remove and add weapons
+                        #print(self.player_dict[current_player].weapon_send)
+                        
+                        if len(self.player_dict[current_player].weapon_send) > 0:
+                            if len(self.player_dict[current_player].weapon_send) == 1:
+                                del self.weapon_map[self.weapon_map.index(self.player_dict[current_player].weapon_send[0])]
+                            else:
+                                self.weapon_map.append(self.player_dict[current_player].weapon_send[1])
+                                del self.weapon_map[self.weapon_map.index(self.player_dict[current_player].weapon_send[0])]
+                            self.player_dict[current_player].weapon_send = ["Sent"]
+                        if self.stormB == False:
+                            if (self.storm_state+1) != len(self.storm_rad):
+                                self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state],self.storm_next,self.storm_pos[self.storm_state+1],self.storm_rad[self.storm_state+1]]
+                            else:
+                                self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state],self.storm_next]
+                                
+                        self.player_dict[current_player].weapon_map = self.weapon_map
                         if current_player in del_bullets: #Disconnect, bullets will be deleted
                             self.player_dict[current_player].del_bullets += del_bullets[current_player]
                         del_bullets[current_player] = []
                         conn.send(pickle.dumps(self.player_dict))
+                        #print("sent")
                     except Exception as E:
                             print("Error:", E)
                 else:
@@ -53,6 +118,15 @@ class GameInstance:
     def check_damage(self):
         g = self.game
         for name, obj in {k: v for k,v in self.player_dict.items()}.items():
+            if obj.storm !=[]:
+                x = self.storm_pos[self.storm_state][0]-obj.pos[0]
+                y = self.storm_pos[self.storm_state][1]-obj.pos[1]
+                if hypot(x,y)>self.storm_rad[self.storm_state] and t.time()-self.dam>1:
+                    self.dam = t.time()
+                    if self.player_health_dict[name] - 1 >= 0:
+                        self.player_health_dict[name] -= 1
+
+                    #print("OUTSIDE STORM")
             for b in obj.bullets:
                 for p in [i for i in self.player_dict.values()]:
                     if name == p.name:
@@ -100,6 +174,36 @@ class GameInstance:
             del del_bullets[player_name]
         except ValueError:
             pass
+    def storm(self,start = False):
+        if start:
+            self.storm_time = t.time()
+        
+        if t.time()-self.storm_time>60:
+            self.storm_time = t.time()
+            if self.storm_next == "idle":
+                self.storm_next = "moving"
+                self.storm_rad[self.storm_state]
+                self.x = int((self.storm_pos[self.storm_state][0]-self.storm_pos[self.storm_state+1][0])/(600))
+                self.y = int((self.storm_pos[self.storm_state][1]-self.storm_pos[self.storm_state+1][1])/(600))
+                print(self.x, self.y)
+                print(self.storm_pos)
+                self.r = int((self.storm_rad[self.storm_state]-self.storm_rad[self.storm_state+1])/600)
+                print(self.r)
+                self.storm_moving = 0
+            
+            else:
+                self.storm_next = "idle"
+                self.storm_state += 1
+            
+            print("THE STORM")
+        if t.time()-self.storm_moving>.1 and self.storm_next == "moving":
+            self.storm_moving = t.time()
+            if (self.storm_state+1) != len(self.storm_rad) and self.storm_rad[self.storm_state] >= self.storm_rad[self.storm_state+1]:
+                self.storm_pos[self.storm_state][0]-=self.x-1
+                self.storm_pos[self.storm_state][1]-=self.y-1
+                self.storm_rad[self.storm_state]-= self.r +1
+                #print(self.storm_rad,self.storm_pos)
+                #print("moving")
 
 
 class Server:

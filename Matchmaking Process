@@ -1,0 +1,75 @@
+Matchmaking Process:
+
+1. Client says either JOIN or CREATE
+
+If JOIN:
+	Client:
+		while True:
+			Client sends [JOIN, ROOM_NAME]
+			Client receives confirmation
+			If confirmed:
+				boolean variable for confirmed
+				exit loop
+			Or if user wants to leave:
+				Send leaving message
+				exit loop
+			Otherwise:
+				Tell user to retry
+		if confirmed:
+			wait in a room function()
+		Otherwise:
+			close connection
+
+	Server:
+		Assume connection has already been forked to a thread
+		while True:
+			Receive Client data
+			If room exists:
+				Send confirmation to user
+				FORMAT: [CONFIRMED_JOIN, room_name, other_players]
+				exit loop
+			Or if user is leaving:
+				exit loop
+			Otherwise:
+				Send client a retry message
+		if confirmed:
+			activate server-side waiting function()
+		close connection
+
+Or CREATE:
+	Client:
+		while True:
+			Client sends [CREATE, ROOM_NAME]
+			Client receives confirmation
+			If confirmed:
+				boolean variable for confirmed
+				exit loop
+			Or if user wants to leave:
+				Send leaving message
+				exit loop
+			Otherwise:
+				Tell user room already exists
+		if confirmed:
+			wait in a room function()
+		Otherwise:
+			close connection
+
+	Server:
+		Assume connection has already been forked to a thread
+		while True:
+			Receive Client data
+			If room doesnt exist:
+				Send confirmation to user
+				FORMAT: [CONFIRMED_CREATE, room_name, other_players]
+				exit loop
+			Or if user is leaving:
+				exit loop
+			Otherwise:
+				Send client a retry message
+		if confirmed:
+			activate server-side waiting function()
+		close connection
+2. Wait Function
+
+	Client:
+	

@@ -8,15 +8,13 @@ import time as t
 
 TCP_IP = '127.0.0.1'#'159.203.147.141'
 TCP_PORT = 4545
-BUFFER_SIZE = 5000
+BUFFER_SIZE = 4096
 
 
 class Client:
-    def __init__(self, player,drone, game, TCP_IP, TCP_PORT, sprites):
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def __init__(self, player,drone, game, conn, sprites):
+        self.s = conn
         self.player = player
-        self.TCP_IP = TCP_IP
-        self.TCP_PORT = TCP_PORT
         self.game = game
         self.other_player_dict = dict()
         self.sprites = sprites
@@ -30,7 +28,6 @@ class Client:
         self.drone = drone
         
     def get_data(self):
-        self.s.connect((self.TCP_IP,self.TCP_PORT))
         print('beginning transfer')
         while self.game.running:
             p = self.player
@@ -289,17 +286,20 @@ class Player:
 
     def fire(self, inventory, FPS):
         if inventory.inventoryP[inventory.state].name != 'Empty' and self.ammo[inventory.state]>0:
-            
+            try:
+                ratio = int(20/FPS*60)
+            except ZeroDivisionError:
+                ratio = 1
             px, py = self.pos
             self.ammo[inventory.state] -=1
             if inventory.inventoryP[inventory.state].spread > 1:
                 #print(inventory.inventoryP[inventory.state].spread)
                 for a in range(1,inventory.inventoryP[inventory.state].spread):
                     spread = self.rotation+90-(3-a)*6
-                    self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name, int(20/FPS*60)])
+                    self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name, ratio])
             else:
                 angle = self.rotation+90
-                self.bullets.append([(px+5*cos(radians(angle)), py-5*sin(radians(angle))), angle, inventory.inventoryP[inventory.state].name, int(20/FPS*60)])               
+                self.bullets.append([(px+5*cos(radians(angle)), py-5*sin(radians(angle))), angle, inventory.inventoryP[inventory.state].name, ratio])               
                 
     def render_player(self, sprites, game):
         sprite = transform.rotate(sprites[self.state][self.gif_counter//20%len(sprites[self.state])], self.rotation + 90)
@@ -342,7 +342,10 @@ def render_bullets(Game, player, client, FPS):
         no_collision = True
         px, py = player.pos
         bx, by = b[0]
-        delta = int(20/FPS*60)
+        try:
+            delta = int(20/FPS*60)
+        except ZeroDivisionError:
+            delta = 20
         nx = bx + delta*cos(radians(b[1]))#Position on entire map with the 20 pixel movement
         ny = by - delta*sin(radians(b[1]))
         lx, ly = (nx - px + Game.screen.get_width() // 2, ny - py + Game.screen.get_height() // 2)#Position on screen
@@ -358,16 +361,6 @@ def render_bullets(Game, player, client, FPS):
                     if o.name != player.name:
                         ox, oy = o.pos
                         if hypot(ox-cx, oy-cy) < 30:
-##                            other_sprite = transform.rotate(client.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
-##                            ox = ox - px + Game.screen.get_width() // 2 \
-##                                 - other_sprite.get_width() // 2
-##                            oy = oy - py + Game.screen.get_height() // 2 \
-##                                 - other_sprite.get_height() // 2
-##                            if hypot(ox-cx, oy-cy) < max(other_sprite.get_size()):
-##                                gunType.gun_Bullet(b[2],cx,cy,b[1],Game.screen)#What is this for? cx and cy are outside screen
-##                                
-##                                #bullet_sprite = transform.rotate(gunType.bulletSprite, b[1])
-##                                #Game.screen.blit(bullet_sprite, (cx, cy))
                             try:
                                 player.bullets.remove(b)
 

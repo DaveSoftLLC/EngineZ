@@ -15,6 +15,7 @@ class GameInstance:
         print("finish loading images")
         self.send_dict = dict()
         self.game = self.instance
+        self.clients = clients
 
         #Storm
         self.storm_time  = 30000000000000000 #Tim
@@ -76,6 +77,9 @@ class GameInstance:
         while self.running:
             try:
                 data = conn.recv(BUFFER_SIZE)
+                if data == pickle.dumps('leave'):
+                    print(current_player, 'is leaving')
+                    self.remove(current_player)
                 if data:
                     try:
                         decoded = pickle.loads(data)
@@ -123,14 +127,15 @@ class GameInstance:
         while self.running:
             g = self.game
             for name, obj in {k: v for k,v in self.player_dict.items()}.items():
-                if obj.storm !=[]:
+                try:
                     x = self.storm_pos[self.storm_state][0]-obj.pos[0]
                     y = self.storm_pos[self.storm_state][1]-obj.pos[1]
                     if hypot(x,y)>self.storm_rad[self.storm_state] and t.time()-self.dam>1:
                         self.dam = t.time()
                         if self.player_health_dict[name] - 1 >= 0:
                             self.player_health_dict[name] -= 1
-
+                except:
+                    pass
                         #print("OUTSIDE STORM")
                 for b in obj.bullets:
                     for p in [i for i in self.player_dict.values()]:

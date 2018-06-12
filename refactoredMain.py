@@ -73,17 +73,17 @@ def main(conn, username):
             g.current_actor.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
             px, py = g.current_actor.get_pos()
             #SPRINT only for player
-            if keys[K_LSHIFT] and m[0] == 1 and g.current_actor.type == 'player':
-                g.current_actor.speed = 6
-                g.current_actor.state = 2
+            if keys[K_LSHIFT] and m[0] == 1:
+                p.speed = 6
+                p.state = 1
             elif keys[K_LSHIFT]:
-                g.current_actor.speed = 14
-                g.current_actor.state = 1
-                print("shift")
+                p.speed = 14
+                p.state = 2
+                
             else:
-                g.current_actor.speed = 10
+                p.speed = 10
                 if m[0] == 0:
-                    g.current_actor.state = 1
+                    p.state = 0
 
             #UP
             if keys[K_w] and g.screen.get_height()//2<py-g.current_actor.speed:
@@ -100,7 +100,7 @@ def main(conn, username):
 
             if g.current_actor.type == 'player' and left_click and (t.time() - last_fire > 0.3 or (inventory.inventoryP[inventory.state].rate >0 and t.time() - last_fire > inventory.inventoryP[inventory.state].rate)):
                 last_fire = t.time()
-                p.state = 2
+                p.state = 1
                 p.fire(inventory, FPS)
 
 

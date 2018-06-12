@@ -30,7 +30,6 @@ class Client:
     def get_data(self):
         print('beginning transfer')
         while self.game.running:
-            print("trying")
             p = self.player
             p.update_gif(self.sprites)
             binary = pickle.dumps(p)
@@ -74,7 +73,7 @@ class Client:
             dx,dy = d.get_pos()
             if dx - g.screen.get_width() // 2 < px < dx + g.screen.get_width() //2 \
                         and dy - g.screen.get_height() // 2 < py < dy + g.screen.get_height() // 2:
-                    your_Player = transform.rotate(Psprite[p.state][p.gif_counter // 10], p.rotation + 90)
+                    your_Player = transform.rotate(Psprite[p.state][p.gif_counter//20%len(Psprite[p.state])], p.rotation + 90)
                     nx = px - dx + g.screen.get_width() // 2 \
                          - your_Player.get_width() // 2
                     ny = py - dy + g.screen.get_height() // 2 \

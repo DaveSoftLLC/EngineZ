@@ -15,6 +15,7 @@ class GameInstance:
         print("finish loading images")
         self.send_dict = dict()
         self.game = self.instance
+        self.clients = clients
 
         #Storm
         self.storm_time  = 30000000000000000 #Tim
@@ -27,7 +28,6 @@ class GameInstance:
         self.stormB = True
         self.storm_state = 0
         for a in range(len(self.storm_rad)):
-            print(a)
             if self.storm_rad[a] == 3000:
                 self.storm_pos.append([randint(3000,9000),randint(3000,5000)])
             else:
@@ -274,17 +274,11 @@ class Server:
                 if start:
                     msg = 'game_begin'
                     conn.send(pickle.dumps(msg))
-                    print("done sending")
-                    print(self.game_instances.keys())
                     if room_name not in self.game_instances.keys():
                         instance = GameInstance(room_name, self.rooms[room_name])
                         self.game_instances[room_name] = instance
-                        print(__name__,"name")
                         if __name__ == "__main__":
-                            print("name is main")
                             threading.Thread(target=instance.create_thread).start()
-                    else:
-                        print("notworking")
                     return True
                 else:
                     players = []

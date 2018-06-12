@@ -46,6 +46,7 @@ class Client:
             for b in self.other_player_dict[p.name].del_bullets:
                 if b in p.bullets:
                     p.bullets.remove(b)
+        self.s.send(pickle.dumps('leave'))
         self.s.close()
         
     def render_other_players(self,Psprite=None):
@@ -101,6 +102,7 @@ class Client:
                     screen.blit(transform.rotate(bullet_sprite, b[1]), (lx, ly))
                     #gunType.gun_Bullet(b[2],lx,ly,b[1],screen)
                     #g.screen.blit(lb, (lx, ly))
+                    
     def draw_weapons(self,screen,pos):
         p = self.player
         #print(p.weapon_map)

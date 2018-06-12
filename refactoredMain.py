@@ -13,7 +13,8 @@ def main(conn, username):
     inventory = Inventory(g.guns)
     dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
 
-    collision = image.load('Background/rocks+hole.png').convert_alpha()
+    #collision = image.load('Background/rocks+hole.png').convert_alpha()
+    #buildingcollision = image.load('Background/buildings.png').convert_alpha()
     def scale_and_load(path, factor):
         img = image.load(path).convert_alpha()
 
@@ -24,7 +25,7 @@ def main(conn, username):
 
     newSprites = [[scale_and_load(file, 3) for file in glob.glob('Sprites/Idle/*.png')],
                   [scale_and_load(file, 3) for file in glob.glob('Sprites/Shoot/*.png')],
-                  [scale_and_load(file, 3) for file in glob.glob('Sprites/Idle/*.png')]]
+                  [scale_and_load(file, 3) for file in glob.glob('Sprites/ShootIdle/*.png')]]
 
     droneSprite = [[scale_and_load(file, 2) for file in glob.glob('newSprites/drone/*.png')]]
     droneB = False
@@ -37,6 +38,34 @@ def main(conn, username):
     g.current_actor = p
     myClock = time.Clock()
     last_fire = 0
+    #Mouse Cursor
+    reticle = (               #sized 24x24
+      "        ........        ",
+      "      ..   ..   ..      ",
+      "     ..    ..    ..     ",
+      "    ..     ..     ..    ",
+      "   ..      ..      ..   ",
+      "  ..      oooo      ..  ",
+      " ..        ..        .. ",
+      "..         ..         ..",
+      "..         ..         ..",
+      "..         ..         ..",
+      "..   o    X..X    o   ..",
+      ".....o.....XX.....o.....",
+      ".....o.....XX.....o.....",
+      "..   o    X..X    o   ..",
+      "..         ..         ..",
+      "..         ..         ..",
+      "..         ..         ..",
+      " ..        ..        .. ",
+      "  ..      oooo      ..  ",
+      "   ..      ..      ..   ",
+      "    ..     ..     ..    ",
+      "     ..    ..    ..     ",
+      "      ..   ..   ..      ",
+      "        ........        ")#Took me 2 hours
+    datatuple,masktuple=cursors.compile(reticle,black='.',white='X',xor='o')#Compile the code
+    mouse.set_cursor((24,24),(12,12),datatuple,masktuple)
     while g.running:
         m = mouse.get_pressed()
         mx, my = mouse.get_pos()
@@ -75,33 +104,37 @@ def main(conn, username):
             #SPRINT only for player
             if keys[K_LSHIFT] and m[0] == 1:
                 p.speed = 6
-                p.state = 1
+                
             elif keys[K_LSHIFT]:
                 p.speed = 14
-                p.state = 2
+                
                 
             else:
                 p.speed = 10
-                if m[0] == 0:
-                    p.state = 0
+                
 
             #UP
             if keys[K_w] and g.screen.get_height()//2<py-g.current_actor.speed:
-                g.current_actor.move('UP', g.background, g.collisionmap, FPS)
+                g.current_actor.move('UP', g.background, g.collisionmap,g.buildingmap, FPS)
             #DOWN
             if keys[K_s] and py+g.current_actor.speed<g.background.get_height()-g.screen.get_height()//2:
-                g.current_actor.move('DOWN', g.background, g.collisionmap, FPS)
+                g.current_actor.move('DOWN', g.background, g.collisionmap,g.buildingmap, FPS)
             #LEFT
             if keys[K_a] and g.screen.get_width()//2<px-g.current_actor.speed:
-                g.current_actor.move('LEFT', g.background, g.collisionmap, FPS)
+                g.current_actor.move('LEFT', g.background, g.collisionmap,g.buildingmap, FPS)
             #RIGHT
             if keys[K_d] and px+g.current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
-                g.current_actor.move('RIGHT', g.background, g.collisionmap, FPS)
+                g.current_actor.move('RIGHT', g.background, g.collisionmap,g.buildingmap, FPS)
 
             if g.current_actor.type == 'player' and left_click and (t.time() - last_fire > 0.3 or (inventory.inventoryP[inventory.state].rate >0 and t.time() - last_fire > inventory.inventoryP[inventory.state].rate)):
                 last_fire = t.time()
-                p.state = 1
                 p.fire(inventory, FPS)
+                
+            if m[0] == 1 or m[2] ==1:
+                p.state = 1
+            else:
+                p.player_state(inventory)
+                
 
 
             g.draw_screen(g.current_actor)

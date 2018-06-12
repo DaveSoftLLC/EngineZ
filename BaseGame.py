@@ -159,6 +159,7 @@ class GameMode:
         else:
             self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
+        self.buildingmap = image.load('Background/buildings.png')
         self.running = True
         
     def draw_screen(self, player):
@@ -249,7 +250,7 @@ class Player:
         self.storm = []
         
 
-    def move(self, direction, background, collisionmap, FPS, speed=None):
+    def move(self, direction, background, collisionmap,buildingmap, FPS, speed=None):
         if speed is None:
             speed = self.speed
         speed = int(speed/FPS*60)
@@ -257,22 +258,22 @@ class Player:
         if direction == 'UP':
             nx,ny = (self.pos[0],self.pos[1] - speed)
             if 0 < ny :
-                if collisionmap.get_at((nx,ny))[3] == 0:
+                if collisionmap.get_at((nx,ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0:
                     self.pos = (nx,ny)
         elif direction == 'DOWN':
             nx, ny = (self.pos[0], self.pos[1] + speed)
             if ny < background.get_height():
-                if collisionmap.get_at((nx, ny))[3] == 0:
+                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0:
                     self.pos = (nx,ny)
         elif direction == 'LEFT':
             nx, ny = (self.pos[0] - speed, self.pos[1])
             if 0 < nx:
-                if collisionmap.get_at((nx, ny))[3] == 0:
+                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0:
                     self.pos = (nx,ny)
         elif direction == 'RIGHT':
             nx, ny = (self.pos[0] + speed, self.pos[1])
             if nx < background.get_width():
-                if collisionmap.get_at((nx, ny))[3] == 0:
+                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0:
                     self.pos = (nx,ny)
 
     def take_damage(self, amount):
@@ -314,6 +315,11 @@ class Player:
 
     def update_gif(self, sprites, server=False):
         self.gif_counter += 1
+    def player_state(self,inventory):
+        if inventory.inventoryP[inventory.state].name == "Empty":
+            self.state = 0
+        else:
+            self.state = 2
 
 class Drone(Player):
     def draw_drone(Game,droneB,piclist,timer):
@@ -355,7 +361,7 @@ def render_bullets(Game, player, client, FPS):
         if 0 < lx < Game.screen.get_width() and 0 < ly < Game.screen.get_height():
             hit_detected = False
             for cx, cy in interpolate:
-                if Game.collisionmap.get_at((int(cx), int(cy)))[3] != 0:
+                if Game.collisionmap.get_at((int(cx), int(cy)))[3] != 0 or Game.buildingmap.get_at((int(cx),int(cy)))[3] !=0:
                     no_collision = False
                     break
                 for o in client.other_player_dict.values():
@@ -364,7 +370,6 @@ def render_bullets(Game, player, client, FPS):
                         if hypot(ox-cx, oy-cy) < 30:
                             try:
                                 player.bullets.remove(b)
-
                             except ValueError:
                                 pass
                             hit_detected = True
@@ -431,7 +436,7 @@ class Inventory:
         Game.blit(self.inventoryP[self.state].inventory_image,(850+self.state*69,695))
         Game.blit(self.textFont.render(str(ammo[self.state]), True, (255,255,255)), (850+self.state*69,695))
         draw.rect(Game,(0,0,255),(850+self.state*69,695,70,70),2)
-        
+    
 class Gun:
     def __init__(self, name, bulletSprite, damage, inventory_image, spread,rate):
         self.name = name

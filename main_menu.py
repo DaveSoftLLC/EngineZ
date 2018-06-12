@@ -169,7 +169,6 @@ class Main:
         self.menu_text = ['JOIN', 'CREATE', 'OPTIONS', 'QUIT']
         self.function_text = ['room']
         self.menu_color = {key: (212,175,55) for key in self.menu_text}
-        self.menu_buttons = {w: None for w in self.menu_text}
         font.init()
         self.mode_buttons = {}
         self.menu_font = font.Font('geonms-font.ttf', 32)

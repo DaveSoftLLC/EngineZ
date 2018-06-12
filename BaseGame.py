@@ -34,12 +34,10 @@ class Client:
             p = self.player
             p.update_gif(self.sprites)
             binary = pickle.dumps(p)
-            print(binary)
             self.s.send(binary)
             data = self.s.recv(BUFFER_SIZE)
             data = pickle.loads(data)
             self.other_player_dict = data
-            print(data)
             if len(self.other_player_dict[p.name].weapon_send)>0 and self.other_player_dict[p.name].weapon_send[0] =="Sent":
                 p.weapon_send = []
             p.weapon_map = self.other_player_dict[p.name].weapon_map
@@ -255,7 +253,6 @@ class Player:
         
 
     def move(self, direction, background, collisionmap, FPS, speed=None):
-        print(self.speed)
         if speed is None:
             speed = self.speed
         speed = int(speed/FPS*60)

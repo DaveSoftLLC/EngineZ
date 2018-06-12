@@ -73,30 +73,30 @@ def main(conn, username):
             g.current_actor.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
             px, py = g.current_actor.get_pos()
             #SPRINT only for player
-            if keys[K_LSHIFT] and m[0] == 1:
-                p.speed = 6
-                p.state = 2
+            if keys[K_LSHIFT] and m[0] == 1 and g.current_actor.type == 'player':
+                g.current_actor.speed = 6
+                g.current_actor.state = 2
             elif keys[K_LSHIFT]:
-                p.speed = 14
-                p.state = 1
+                g.current_actor.speed = 14
+                g.current_actor.state = 1
+                print("shift")
             else:
-                p.speed = 10
+                g.current_actor.speed = 10
                 if m[0] == 0:
+                    g.current_actor.state = 1
 
-                    p.state = 0
-
-                #UP
-                if keys[K_w] and g.screen.get_height()//2<py-g.current_actor.speed:
-                    g.current_actor.move('UP', g.background, g.collisionmap, FPS)
-                #DOWN
-                if keys[K_s] and py+p.speed<g.background.get_height()-g.screen.get_height()//2:
-                    g.current_actor.move('DOWN', g.background, g.collisionmap, FPS)
-                #LEFT
-                if keys[K_a] and g.screen.get_width()//2<px-g.current_actor.speed:
-                    g.current_actor.move('LEFT', g.background, g.collisionmap, FPS)
-                #RIGHT
-                if keys[K_d] and px+g.current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
-                    g.current_actor.move('RIGHT', g.background, g.collisionmap, FPS)
+            #UP
+            if keys[K_w] and g.screen.get_height()//2<py-g.current_actor.speed:
+                g.current_actor.move('UP', g.background, g.collisionmap, FPS)
+            #DOWN
+            if keys[K_s] and py+g.current_actor.speed<g.background.get_height()-g.screen.get_height()//2:
+                g.current_actor.move('DOWN', g.background, g.collisionmap, FPS)
+            #LEFT
+            if keys[K_a] and g.screen.get_width()//2<px-g.current_actor.speed:
+                g.current_actor.move('LEFT', g.background, g.collisionmap, FPS)
+            #RIGHT
+            if keys[K_d] and px+g.current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
+                g.current_actor.move('RIGHT', g.background, g.collisionmap, FPS)
 
             if g.current_actor.type == 'player' and left_click and (t.time() - last_fire > 0.3 or (inventory.inventoryP[inventory.state].rate >0 and t.time() - last_fire > inventory.inventoryP[inventory.state].rate)):
                 last_fire = t.time()
@@ -135,5 +135,5 @@ def main(conn, username):
 
     #testing branch merge
     if __name__ == '__main__':
-    main(socket.socket())
+        main(socket.socket())
 

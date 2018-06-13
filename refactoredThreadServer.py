@@ -237,7 +237,7 @@ class Server:
         if mode == 'join':
             if room_name not in self.rooms.keys():
                 conn.send(pickle.dumps('no_such_room'))
-                print(self.rooms.keys(), room_name)
+                #print(self.rooms.keys(), room_name)
                 conn.close()
                 return
         elif mode == 'create':
@@ -265,13 +265,15 @@ class Server:
                 else:
                     self.rooms.setdefault(room_name, []).append([name, ready, conn, addr])
                 start = all([r[1] for r in self.rooms[room_name]])
-                print(start)
+                #print(start)
                 if start:
                     msg = 'game_begin'
                     conn.send(pickle.dumps(msg))
+                    print(self.game_instances.keys())
                     if room_name not in self.game_instances.keys():
                         instance = GameInstance(room_name, self.rooms[room_name])
                         self.game_instances[room_name] = instance
+                    
                     if __name__ == "__main__":
                         threading.Thread(target=instance.create_thread, args=(name,)).start()
                     return True

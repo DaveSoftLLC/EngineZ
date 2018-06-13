@@ -45,7 +45,7 @@ class Client:
             p.weapon_map = self.other_player_dict[p.name].weapon_map
             p.health = self.other_player_dict[p.name].health
             p.storm = self.other_player_dict[p.name].storm
-            print(p.health)
+            
             for b in self.other_player_dict[p.name].del_bullets:
                 if b in p.bullets:
                     p.bullets.remove(b)

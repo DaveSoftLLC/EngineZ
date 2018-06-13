@@ -3,7 +3,7 @@ import socket
 import threading
 from math import *
 from pygame import *
-from random import*
+from random import *
 import time as t
 
 TCP_IP = '127.0.0.1'#'159.203.147.141'

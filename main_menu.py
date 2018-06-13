@@ -145,7 +145,6 @@ class ClientMatch:
 
     def authenticate(self, username, password):
         self.name = username
-        return True
         ph = PasswordHasher()
         #username: pay2lose
         #password: abacus

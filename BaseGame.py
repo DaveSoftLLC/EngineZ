@@ -9,7 +9,10 @@ import time as t
 TCP_IP = '127.0.0.1'#'159.203.147.141'
 TCP_PORT = 4545
 BUFFER_SIZE = 4096
-
+def check_health(player):
+    if player.health <= 0:
+        return False
+    return True
 
 class Client:
     def __init__(self, player,drone, game, conn, sprites):
@@ -105,9 +108,14 @@ class GameMode:
             font.init()
             self.screen = display.set_mode(self.resolution)
             self.screen.fill((255,255,255))
-            self.textFont = font.SysFont("Arial", 25)
-            self.screen.blit(transform.smoothscale(image.load('TitleLogo.png'), (1280, 800)), (0, 0))
-            self.screen.blit(self.textFont.render('Loading Assets...', True, (0,0,0)), (590, 700))
+            self.title_font = font.Font('geonms-font.ttf', 72)
+            self.textFont = font.Font('geonms-font.ttf', 32)
+            background = transform.smoothscale(image.load('nmsplanet.jpg').convert(), (1280,800))
+            self.screen.blit(background, (0, 0))
+            title = self.title_font.render('outcast: the game', True, (255,255,255))
+            txt = self.textFont.render('loading', True, (255,255,255))
+            self.screen.blit(txt, (self.screen.get_width()//2-txt.get_width()//2, 550))
+            self.screen.blit(title, (self.screen.get_width()//2-title.get_width()//2, 100))
             display.flip()
             self.music = mixer.music.load("Outcast.wav")
             self.background = image.load('Background/MapFinal.png').convert()
@@ -228,12 +236,12 @@ class Player:
     def take_damage(self, amount):
         if self.health-amount > 0:
             self.health -= amount
-        else:
-            self.die()
             
-    def die(self):
+    def die(self, screen):
+        wasted = image.load('wasted.png').convert()
+        wasted = transform.smoothscale(wasted, (1280,800))
+        screen.blit(wasted, (0,0))
         print("dead")
-        pass
 
     def fire(self, inventory, FPS):
         if inventory.inventoryP[inventory.state].name != 'Empty' and self.ammo[inventory.state]>0:

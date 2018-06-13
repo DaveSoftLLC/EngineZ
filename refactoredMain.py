@@ -2,16 +2,83 @@ import glob
 from random import randint
 
 from BaseGame import *
-def main(conn, username):
-    g = GameMode()
+g = GameMode()
+title_font = font.Font('geonms-font.ttf', 72)
+menu_font = font.Font('geonms-font.ttf', 32)
+background = transform.smoothscale(image.load('nmsplanet.jpg').convert(), (1280,800))
+def AAfilledRoundedRect(surface,rect,color,radius=0.4):
 
+    """
+    AAfilledRoundedRect(surface,rect,color,radius=0.4)
+
+    surface : destination
+    rect    : rectangle
+    color   : rgb or rgba
+    radius  : 0 <= radius <= 1
+    """
+
+    rect         = Rect(rect)
+    color        = Color(*color)
+    alpha        = color.a
+    color.a      = 0
+    pos          = rect.topleft
+    rect.topleft = 0,0
+    rectangle    = Surface(rect.size,SRCALPHA)
+
+    circle       = Surface([min(rect.size)*3]*2,SRCALPHA)
+    draw.ellipse(circle,(0,0,0),circle.get_rect(),0)
+    circle       = transform.smoothscale(circle,[int(min(rect.size)*radius)]*2)
+
+    radius              = rectangle.blit(circle,(0,0))
+    radius.bottomright  = rect.bottomright
+    rectangle.blit(circle,radius)
+    radius.topright     = rect.topright
+    rectangle.blit(circle,radius)
+    radius.bottomleft   = rect.bottomleft
+    rectangle.blit(circle,radius)
+
+    rectangle.fill((0,0,0),rect.inflate(-radius.w,0))
+    rectangle.fill((0,0,0),rect.inflate(0,-radius.h))
+
+    rectangle.fill(color,special_flags=BLEND_RGBA_MAX)
+    rectangle.fill((255,255,255,alpha),special_flags=BLEND_RGBA_MIN)
+
+    return surface.blit(rectangle,pos)
+def loading_screen(percent, background):
+    for e in event.get():
+        if e.type == QUIT:
+            quit()
+    screen = g.screen
+    title = title_font.render('outcast: the game', True, (255,255,255))
+    msg = menu_font.render('loading', True, (255,255,255))
+    width = 500
+    height = 25
+    main_status_rect = (screen.get_width()//2-width//2,
+                        600,
+                        width,
+                        height)
+    progress_rect = (main_status_rect[0],
+                     main_status_rect[1], int(percent*500), height)
+##        screen.fill(0)
+    screen.blit(background, (0,0))
+    screen.blit(title, (screen.get_width()//2-title.get_width()//2, 100))
+    screen.blit(msg, (screen.get_width()//2-msg.get_width()//2, 550))
+    AAfilledRoundedRect(screen, main_status_rect, (255,255,255), 0.4)
+    AAfilledRoundedRect(screen, progress_rect, (53,121,169), 0.4)
+    display.flip()
+    
+def main(conn, username):
     inventory = Inventory(g.guns)
     dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
 
     collision = image.load('Background/rocks+hole.png').convert_alpha()
+    image_counter = [0]
     def scale_and_load(path, factor):
         img = image.load(path).convert_alpha()
         x, y = img.get_size()
+        
+        image_counter[0] += 1
+        loading_screen(image_counter[0]//44, background)
         return transform.smoothscale(img, (int(x/factor), int(y/factor)))
     def get_fps(old_time):
         return int(1/(t.time()-old_time))
@@ -119,10 +186,12 @@ def main(conn, username):
             Drone.draw_drone(g.screen,g.droneB,dronebuttonlist,(t.time()-g.drone_start))
             fps = fps_font.render(str(int(FPS)), True, (0,0,0))
             g.screen.blit(fps, (1200,10))
+            if not check_health(p):
+                p.die(g.screen)
         display.flip()
     quit()
 
 #testing branch merge
 if __name__ == '__main__':
-    main(socket.socket())
+    main(socket.socket(),'james')
 

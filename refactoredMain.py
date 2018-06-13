@@ -237,6 +237,7 @@ def main(conn, username):
             g.screen.blit(fps, (1200,10))
             if not check_health(p):
                 p.die(g.screen)
+            
         display.flip()
     quit()
 

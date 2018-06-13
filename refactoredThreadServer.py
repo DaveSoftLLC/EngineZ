@@ -16,38 +16,6 @@ class GameInstance:
         self.send_dict = dict()
         self.game = self.instance
         self.clients = clients
-
-        #Storm
-        self.storm_time  = 30000000000000000 #Tim
-        self.storm_moving  = 6000000000000
-        self.storm_next = "idle"
-        self.storm_pos = []
-        self.storm_rad = [6000,4000,3000,2000,1000,500]
-        self.dam = 0
-        self.stormB = True
-        self.storm_state = 0
-        for a in range(len(self.storm_rad)):
-            if self.storm_rad[a] == 6000:
-                self.storm_pos.append([6000,4000])
-            elif self.storm_rad[a] == 4000:
-                self.storm_pos.append([randint(3000,9000),randint(3000,5000)])
-            else:
-                print((self.storm_pos[a-1][0],self.storm_rad[a-1]))
-                print((self.storm_pos[a-1][1],self.storm_rad[a-1]))
-                x = randint(self.storm_pos[a-1][0]-self.storm_rad[a-1]-self.storm_rad[a]+200,self.storm_pos[a-1][0]+self.storm_rad[a-1]-self.storm_rad[a]-200)
-                y = randint(self.storm_pos[a-1][1]-self.storm_rad[a-1]-self.storm_rad[a]+200,self.storm_pos[a-1][1]+self.storm_rad[a-1]-self.storm_rad[a]-200)
-                self.storm_pos.append([x,y])
-        
-    def create_thread(self):
-        for c in self.clients:
-            conn, addr = (c[2], c[3])
-            threading.Thread(target=self.listen_client, args=(conn, addr)).start()
-        print("create thread")
-        self.storm(True)
-        threading.Thread(target=self.check_damage).start()
-        threading.Thread(target=self.storm).start()
-        
-        
         assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png'),5,image.load('Weapons/machinegun.png'),0,0.15)
         shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'),10,image.load('Weapons/shotgunb.png'), 6,0)
         sniper = Gun('Sniper',image.load('Weapons/heavyBullet.png'),25,image.load('Weapons/sniper.png'),1,0)
@@ -60,6 +28,39 @@ class GameInstance:
             wx,wy = (randint(100,11900),randint(100,7900))
             self.weapon_map.append([weapon,(wx,wy),100])
             #self.weapon_map will be sent along with player_dict, client will send weapon that they picked up, and the weapon they will drop (or none)
+        #Storm
+        self.storm_time  = 30000000000000000 #Tim
+        self.storm_moving  = 6000000000000
+        self.storm_next = "idle"
+        self.storm_pos = []
+        self.storm_rad = [6000,4000,3000,2000,1000,500]
+        self.dam = 0
+        self.stormB = True
+        self.storm_state = 0
+        self.storm(True)
+        for a in range(len(self.storm_rad)):
+            if self.storm_rad[a] == 6000:
+                self.storm_pos.append([6000,4000])
+            elif self.storm_rad[a] == 4000:
+                self.storm_pos.append([randint(3000,9000),randint(3000,5000)])
+            else:
+                print((self.storm_pos[a-1][0],self.storm_rad[a-1]))
+                print((self.storm_pos[a-1][1],self.storm_rad[a-1]))
+                x = randint(self.storm_pos[a-1][0]-self.storm_rad[a-1]-self.storm_rad[a]+200,self.storm_pos[a-1][0]+self.storm_rad[a-1]-self.storm_rad[a]-200)
+                y = randint(self.storm_pos[a-1][1]-self.storm_rad[a-1]-self.storm_rad[a]+200,self.storm_pos[a-1][1]+self.storm_rad[a-1]-self.storm_rad[a]-200)
+                self.storm_pos.append([x,y])
+        threading.Thread(target=self.check_damage).start()
+        threading.Thread(target=self.storm).start()
+    def create_thread(self):
+        for c in self.clients:
+            conn, addr = (c[2], c[3])
+            threading.Thread(target=self.listen_client, args=(conn, addr)).start()
+        print("create thread")
+        
+        
+        
+        
+        
      
               
 

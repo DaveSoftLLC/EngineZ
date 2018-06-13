@@ -55,7 +55,7 @@ class GameInstance:
         for c in self.clients:
             conn, addr = (c[2], c[3])
             threading.Thread(target=self.listen_client, args=(conn, addr)).start()
-        print("create thread")
+            print("create thread")
         
         
         
@@ -277,6 +277,7 @@ class Server:
                         instance = GameInstance(room_name, self.rooms[room_name])
                         self.game_instances[room_name] = instance
                         if __name__ == "__main__":
+                            print("CREATE ONCE")
                             threading.Thread(target=instance.create_thread).start()
                     return True
                 else:

@@ -56,13 +56,6 @@ class GameInstance:
             conn, addr = (c[2], c[3])
             threading.Thread(target=self.listen_client, args=(conn, addr)).start()
         print("create thread")
-        
-        
-        
-        
-        
-     
-              
 
     def listen_client(self, conn, addr):
         print('listen client')

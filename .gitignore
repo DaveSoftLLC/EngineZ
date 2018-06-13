@@ -1,2 +1,4 @@
 
 .DS_Store
+.cpython-36.pyc
+*.pyc

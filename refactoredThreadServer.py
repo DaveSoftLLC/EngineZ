@@ -59,13 +59,6 @@ class GameInstance:
             else:
                 return
             print("create thread")
-        
-        
-        
-        
-        
-     
-              
 
     def listen_client(self, conn, addr):
         print('listen client')
@@ -276,8 +269,9 @@ class Server:
                 if start:
                     msg = 'game_begin'
                     conn.send(pickle.dumps(msg))
-                    instance = GameInstance(room_name, self.rooms[room_name])
-                    self.game_instances[room_name] = instance
+                    if room_name not in self.game_instances.keys():
+                        instance = GameInstance(room_name, self.rooms[room_name])
+                        self.game_instances[room_name] = instance
                     if __name__ == "__main__":
                         threading.Thread(target=instance.create_thread, args=(name,)).start()
                     return True

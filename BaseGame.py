@@ -46,7 +46,6 @@ class Client:
             for b in self.other_player_dict[p.name].del_bullets:
                 if b in p.bullets:
                     p.bullets.remove(b)
-        self.s.send(pickle.dumps('leave'))
         self.s.close()
         
     def render_other_players(self,Psprite=None):
@@ -102,7 +101,6 @@ class Client:
                     screen.blit(transform.rotate(bullet_sprite, b[1]), (lx, ly))
                     #gunType.gun_Bullet(b[2],lx,ly,b[1],screen)
                     #g.screen.blit(lb, (lx, ly))
-                    
     def draw_weapons(self,screen,pos):
         p = self.player
         #print(p.weapon_map)
@@ -149,9 +147,10 @@ class GameMode:
                           10,image.load('Weapons/shotgunb.png').convert_alpha(), 6,0)
             sniper = Gun('Sniper',image.load('Weapons/heavyBullet.png').convert_alpha(),
                          25,image.load('Weapons/sniper.png').convert_alpha(),1,0)
+            rpg = Gun('RPG',image.load('Weapons/rocketammo.png').convert_alpha(),50,image.load('Weapons/rpg.png').convert_alpha(),1,0)
             empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
-            self.weapon_dict = {"Shotgun":shotgun,"AR":assaultrifle,"Sniper":sniper}
-            self.guns = [assaultrifle,shotgun,sniper,empty,empty,empty]
+            self.weapon_dict = {"Shotgun":shotgun,"AR":assaultrifle,"Sniper":sniper,"RPG":rpg}
+            self.guns = [assaultrifle,shotgun,sniper,rpg,empty,empty]
             #weapon_list = [n.name for n in self.guns]
 ##            self.weapon_map =[]
 ##            for i in range(20):

@@ -53,16 +53,11 @@ class GameInstance:
         threading.Thread(target=self.storm).start()
     def create_thread(self,username):
         for c in self.clients:
-<<<<<<< HEAD
             if c[0] == username:
                 conn, addr = (c[2], c[3])
                 threading.Thread(target=self.listen_client, args=(conn, addr)).start()
             else:
                 return
-=======
-            conn, addr = (c[2], c[3])
-            threading.Thread(target=self.listen_client, args=(conn, addr)).start()
-<<<<<<< HEAD
             print("create thread")
         
         
@@ -71,10 +66,6 @@ class GameInstance:
         
      
               
-=======
->>>>>>> d5971fea5d549f76e757f0bfc3d83e3ae1fc9c3b
-        print("create thread")
->>>>>>> c49479856d1f719fdeb0a7866811a5a2501a57bc
 
     def listen_client(self, conn, addr):
         print('listen client')
@@ -285,19 +276,10 @@ class Server:
                 if start:
                     msg = 'game_begin'
                     conn.send(pickle.dumps(msg))
-<<<<<<< HEAD
                     instance = GameInstance(room_name, self.rooms[room_name])
                     self.game_instances[room_name] = instance
                     if __name__ == "__main__":
                         threading.Thread(target=instance.create_thread, args=(name,)).start()
-=======
-                    if room_name not in self.game_instances.keys():
-                        instance = GameInstance(room_name, self.rooms[room_name])
-                        self.game_instances[room_name] = instance
-                        if __name__ == "__main__":
-                            print("CREATE ONCE")
-                            threading.Thread(target=instance.create_thread).start()
->>>>>>> d5971fea5d549f76e757f0bfc3d83e3ae1fc9c3b
                     return True
                 else:
                     players = []

@@ -228,7 +228,7 @@ class Server:
               print("Before looking")
               conn, addr = self.s.accept()
               print("After looking")
-              conn.settimeout(60)
+              conn.settimeout(180)
               STRUCT = ['room name', 'player list']
               threading.Thread(target=self.listen_client, args=(conn, addr)).start()
 

@@ -64,12 +64,12 @@ class Client:
                 ox, oy = o.get_pos()
                 if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() \
                         and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2:
-                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
+                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter //20%len(self.sprites[o.state])], o.rotation + 90)
                     nx = ox - px + g.screen.get_width() // 2 \
                          - other_sprite.get_width() // 2
                     ny = oy - py + g.screen.get_height() // 2 \
                          - other_sprite.get_height() // 2
-                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
+                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter //20%len(self.sprites[o.state])], o.rotation + 90)
                     g.screen.blit(other_sprite, (nx,ny))
         if Psprite: #displaying player
             px, py = p.get_pos()

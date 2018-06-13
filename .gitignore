@@ -2,3 +2,5 @@
 .DS_Store
 .cpython-36.pyc
 *.pyc
+__pycache__/BaseGame.cpython-36.pyc
+*.pyc

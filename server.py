@@ -144,7 +144,7 @@ class GameInstance:
                         counter = 0
                         for ix, iy in interpolate:
                             if (b[2] == 'rpg' and hypot(px- nx, py - ny)<60) or hypot(px - nx, py - ny) < 30:
-                                threading.Thread(target=serverRequest.modify, args=(name, 10)).start()
+                                threading.Thread(target=serverRequest.modify, args=(name, 1)).start()
                                 counter += 1
                                 print(counter, name)
                                 obj.bullets.remove(b)
@@ -152,11 +152,12 @@ class GameInstance:
                                     del_bullets[name] = [b]
                                 else:
                                     del_bullets[name].append(b)
-                                if self.player_health_dict[p.name] - self.weapon_dict[b[2]].damage >= 0:
+                                if self.player_health_dict[p.name] - self.weapon_dict[b[2]].damage > 0:
                                     self.player_health_dict[p.name] -= self.weapon_dict[b[2]].damage
 ##                                elif self.player_health_dict[p.name]<10:
 ##                                    self.player_health_dict[p.name] = 0
                                 else:
+                                    threading.Thread(target=serverRequest.modify, args=(name, 5)).start()
                                     self.player_health_dict[p.name] = 0
                                 break
 

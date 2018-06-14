@@ -292,6 +292,6 @@ class Server:
             del self.rooms[room]
         except:
             print('Room Not found: %s' %room)
-
-server = Server(BUFFER_SIZE)
-threading.Thread(target=server.listen).start()
+if __name__ == '__main__':
+    server = Server(BUFFER_SIZE)
+    threading.Thread(target=server.listen).start()

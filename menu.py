@@ -105,7 +105,7 @@ class ClientMatch:
              'room_name':room_name,
              'ready':False,
              'mode': 'create',
-             'master':False}
+             'master':True}
         self.s.send(pickle.dumps(room_data))
         data = pickle.loads(self.s.recv(BUFFER_SIZE))
         if data != 'all_good':
@@ -120,7 +120,7 @@ class ClientMatch:
                          'room_name':room_name,
                          'ready':ready,
                          'mode': 'join',
-                         'master':False}
+                         'master':True}
             self.s.send(pickle.dumps(room_data))
             data = pickle.loads(self.s.recv(BUFFER_SIZE))
             print('server:', data)
@@ -305,6 +305,7 @@ class Main:
                 increment *= -1
                 index += increment
             display.flip()
+        return 'exit','None'
 
     def draw_menu(self, left_click):
         mx, my = mouse.get_pos()

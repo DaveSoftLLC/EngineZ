@@ -4,7 +4,7 @@ import multiprocessing as mp
 import authenticate
 del_bullets = dict()
 g = GameMode(server=True)
-serverRequest = authenticate.MySQLRequest('jamesxu.ca','jamesxu','enginez123','enginez')
+serverRequest = authenticate.MySQLRequest('s03.jamesxu.ca','jamesxu','enginez123','enginez')
 
 class GameInstance:
     def __init__(self, name, clients):
@@ -154,6 +154,8 @@ class GameInstance:
                                     self.player_health_dict[p.name] -= 10
 ##                                elif self.player_health_dict[p.name]<10:
 ##                                    self.player_health_dict[p.name] = 0
+                                else:
+                                    self.player_health_dict[p.name] = 0
                                 break
 
     def take_damage(self, amount):

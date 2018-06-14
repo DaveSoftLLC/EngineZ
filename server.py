@@ -51,25 +51,23 @@ class GameInstance:
                 self.storm_pos.append([x,y])
         threading.Thread(target=self.check_damage).start()
         threading.Thread(target=self.storm).start()
-    def create_thread(self,username):
+    def create_thread(self):
         for c in self.clients:
-            if c[0] == username:
-                conn, addr = (c[2], c[3])
-                threading.Thread(target=self.listen_client, args=(conn, addr)).start()
-            else:
-                return
+            conn, addr = (c[2], c[3])
+            threading.Thread(target=self.listen_client, args=(conn, addr)).start()
             print("create thread")
-
     def listen_client(self, conn, addr):
         print('listen client')
         current_player = ''
         fps_clock = time.Clock()
-        while self.running:
+        running = True
+        while self.running and running:
             try:
                 data = conn.recv(BUFFER_SIZE)
                 if data == pickle.dumps('leave'):
                     print(current_player, 'is leaving')
                     self.remove(current_player)
+                    running = False
                 if data:
                     try:
                         decoded = pickle.loads(data)
@@ -97,7 +95,7 @@ class GameInstance:
                             self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state],self.storm_next]
                                 
                         self.player_dict[current_player].weapon_map = self.weapon_map
-                        if current_player in del_bullets: #Disconnect, bullets will be deleted
+                        if current_player in del_bullets:
                             self.player_dict[current_player].del_bullets += del_bullets[current_player]
                         del_bullets[current_player] = []
                         conn.send(pickle.dumps(self.player_dict))
@@ -110,7 +108,6 @@ class GameInstance:
                 print(E)
                 self.remove(current_player)
                 break
-        conn.close()
 
     def check_damage(self):
         while self.running:
@@ -139,9 +136,9 @@ class GameInstance:
                         if hypot(px-nx, py-ny) > 60:
                             continue
                         angle = b[1]
-##                        interpolate = [(nx - i * cos(radians(angle)),
-##                                        ny + i * sin(radians(angle))) for i in range(b[3])]
-                        interpolate = gameMath.interpolate(int(nx),int(ny),int(angle),int(b[3]))
+                        interpolate = [(nx - i * cos(radians(angle)),
+                                        ny + i * sin(radians(angle))) for i in range(b[3])]
+##                        interpolate = gameMath.interpolate(int(nx),int(ny),int(angle),int(b[3]))
                         counter = 0
                         for ix, iy in interpolate:
                             if hypot(px - nx, py - ny) < 30:
@@ -270,12 +267,11 @@ class Server:
                     msg = 'game_begin'
                     conn.send(pickle.dumps(msg))
                     print(self.game_instances.keys())
-                    if room_name not in self.game_instances.keys():
+                    if master:
+                        print('room not in game_instances\n')
                         instance = GameInstance(room_name, self.rooms[room_name])
                         self.game_instances[room_name] = instance
-                    
-                    if __name__ == "__main__":
-                        threading.Thread(target=instance.create_thread, args=(name,)).start()
+                        threading.Thread(target=instance.create_thread).start()
                     return True
                 else:
                     players = []

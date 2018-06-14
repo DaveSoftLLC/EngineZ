@@ -106,7 +106,7 @@ class ClientMatch:
              'room_name':room_name,
              'ready':False,
              'mode': 'create',
-             'master':False}
+             'master':True}
         self.s.send(pickle.dumps(room_data))
         data = pickle.loads(self.s.recv(BUFFER_SIZE))
         if data != 'all_good':
@@ -122,7 +122,7 @@ class ClientMatch:
                          'room_name':room_name,
                          'ready':ready,
                          'mode': 'join',
-                         'master':False}
+                         'master':True}
             self.s.send(pickle.dumps(room_data))
             data = pickle.loads(self.s.recv(BUFFER_SIZE))
             print('server:', data)
@@ -162,7 +162,7 @@ class ClientMatch:
             print(E,"test")
             return False
 class Main:
-    def __init__(self):
+    def __init__(self, auth=False):
         self.screen = display.set_mode((1280,800))
         self.background = []
         self.running = True
@@ -179,6 +179,9 @@ class Main:
 ##        self.client = ClientMatch('pay2lose')
         self.room_data = []
         self.room_name = ''
+        if auth:
+            self.username = auth
+            self.client.name = self.username
 
     def login_screen(self):
         background = transform.smoothscale(image.load('nmsplanet.jpg').convert(), (1280,800))
@@ -227,7 +230,7 @@ class Main:
             elif rendered_password.collidepoint((mx,my)) and left_click:
                 mode = 'password'
             display.flip()
-
+        return 'exit', 'no_auth'
             
 
     def load_images(self, start, end):
@@ -278,6 +281,7 @@ class Main:
             for e in event.get():
                 if e.type == QUIT:
                     self.running = False
+                    return 'exit', 'None'
                 if e.type == MOUSEBUTTONDOWN:
                     left_click = True
                 if e.type == KEYDOWN:
@@ -296,6 +300,8 @@ class Main:
                     self.mode = menu
             else:
                 ui = eval(mode_function[self.mode])(left_click)
+                if ui == "game_begin":
+                    return "game", self
             index += increment
             if index == len(self.background) or index == 0:
                 increment *= -1
@@ -395,6 +401,7 @@ class Main:
                 elif status:
                     print('starting game')
                     self.running = False
+                    return "game_begin"
 
         if click:
             if word == 'READY':
@@ -482,6 +489,7 @@ class Main:
         return box
     def draw_quit(self, left_click):
         self.running = False
+        return 'exit', 'None'
     
 def render_button(text, box_color, font):
     render_text = font.render(text, True, (0,0,0))
@@ -547,11 +555,11 @@ def player_bar(screen, rect, username, master, color, font):
     h = username_rendered.get_height()
     screen.blit(username_rendered, (tx+20, ty+th//2-h//2))
     screen.blit(status_rendered, (tx+400, ty+th//2-h//2))
-main = Main()
-main.login_screen()
-##main.draw_home()
-import refactoredMain
-s = main.client.s
-username = main.client.name
-main = None
-refactoredMain.main(s, username)
+##main = Main()
+##main.login_screen()
+####main.draw_home()
+##import refactoredMain
+##s = main.client.s
+##username = main.client.name
+##main = None
+##refactoredMain.main(s, username)

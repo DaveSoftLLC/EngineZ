@@ -67,7 +67,10 @@ def loading_screen(percent, background):
     AAfilledRoundedRect(screen, progress_rect, (53,121,169), 0.4)
     display.flip()
     
-def main(conn, username):
+def main(menu_obj):
+    conn, username = (menu_obj.client.s, menu_obj.client.name)
+    global g
+    g = GameMode()
     inventory = Inventory(g.guns)
     dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
 
@@ -166,6 +169,8 @@ def main(conn, username):
                 if keys[K_e] and g.current_actor.type == 'player':
                     #g.weapon_pickup(p,inventory)
                     client.weapon_pickup(inventory)
+                elif e.key == K_ESCAPE:
+                    running = False
         m = mouse.get_pressed()
         mx, my = mouse.get_pos()
 
@@ -237,9 +242,11 @@ def main(conn, username):
             g.screen.blit(fps, (1200,10))
             if not check_health(p):
                 p.die(g.screen)
-            
+                client.s.send(pickle.dumps("leaving"))
+                g.running = False
         display.flip()
-    quit()
+    client.s.close()
+    return 'menu', p.name
 
 #testing branch merge
 if __name__ == '__main__':

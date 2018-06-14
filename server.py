@@ -41,13 +41,9 @@ class GameInstance:
         for a in range(len(self.storm_rad)):
             if self.storm_rad[a] == 6000:
                 self.storm_pos.append([6000,4000])
-            elif self.storm_rad[a] == 4000:
-                self.storm_pos.append([randint(3000,9000),randint(3000,5000)])
             else:
-                print((self.storm_pos[a-1][0],self.storm_rad[a-1]))
-                print((self.storm_pos[a-1][1],self.storm_rad[a-1]))
-                x = randint(self.storm_pos[a-1][0]-self.storm_rad[a-1]-self.storm_rad[a]+200,self.storm_pos[a-1][0]+self.storm_rad[a-1]-self.storm_rad[a]-200)
-                y = randint(self.storm_pos[a-1][1]-self.storm_rad[a-1]-self.storm_rad[a]+200,self.storm_pos[a-1][1]+self.storm_rad[a-1]-self.storm_rad[a]-200)
+                x = randint(self.storm_pos[a-1][0]-(self.storm_rad[a-1]-self.storm_rad[a])+200,self.storm_pos[a-1][0]+(self.storm_rad[a-1]-self.storm_rad[a])-200)
+                y = randint(self.storm_pos[a-1][1]-(self.storm_rad[a-1]-self.storm_rad[a])+200,self.storm_pos[a-1][1]+(self.storm_rad[a-1]-self.storm_rad[a])-200)
                 self.storm_pos.append([x,y])
         threading.Thread(target=self.check_damage).start()
         threading.Thread(target=self.storm).start()
@@ -181,25 +177,28 @@ class GameInstance:
                     if self.storm_next == "idle":
                         self.storm_next = "moving"
                         self.storm_rad[self.storm_state]
-                        self.x = int((self.storm_pos[self.storm_state][0]-self.storm_pos[self.storm_state+1][0])/(600))
-                        self.y = int((self.storm_pos[self.storm_state][1]-self.storm_pos[self.storm_state+1][1])/(600))
+                        self.x = ((self.storm_pos[self.storm_state+1][0]-self.storm_pos[self.storm_state][0])/(600))
+                        self.y = ((self.storm_pos[self.storm_state+1][1]-self.storm_pos[self.storm_state][1])/(600))
                         print(self.x, self.y)
                         print(self.storm_pos)
-                        self.r = int((self.storm_rad[self.storm_state]-self.storm_rad[self.storm_state+1])/600)
+                        self.r = ((self.storm_rad[self.storm_state]-self.storm_rad[self.storm_state+1])/600)
                         print(self.r)
                         self.storm_moving = 0
                     
                     else:
                         self.storm_next = "idle"
-                        self.storm_state += 1
+                        if self.storm_state+1 != len(self.storm_rad):
+                            self.storm_state += 1
+                        else:
+                            self.storm_next = "done"
                     
                     print("THE STORM")
                 if t.time()-self.storm_moving>.1 and self.storm_next == "moving":
                     self.storm_moving = t.time()
                     if (self.storm_state+1) != len(self.storm_rad) and self.storm_rad[self.storm_state] >= self.storm_rad[self.storm_state+1]:
-                        self.storm_pos[self.storm_state][0]-=self.x-1
-                        self.storm_pos[self.storm_state][1]-=self.y-1
-                        self.storm_rad[self.storm_state]-= self.r +1
+                        self.storm_pos[self.storm_state][0]+=self.x
+                        self.storm_pos[self.storm_state][1]+=self.y
+                        self.storm_rad[self.storm_state]-= self.r
                         #print(self.storm_rad,self.storm_pos)
                         #print("moving")
 

@@ -184,9 +184,9 @@ class GameMode:
             #Storm
             if player.storm!=[]:
                 draw.rect(self.surfaceALPHA,(0,0,255,80),(0,0,1280,800))
-                nx = player.storm[0][0]-player.pos[0]+self.screen.get_width()//2
-                ny = player.storm[0][1]-player.pos[1]+self.screen.get_height()//2
-                draw.circle(self.surfaceALPHA,(0,0,0,0),(nx,ny),player.storm[1])
+                nx = int(player.storm[0][0]-player.pos[0]+self.screen.get_width()//2)
+                ny = int(player.storm[0][1]-player.pos[1]+self.screen.get_height()//2)
+                draw.circle(self.surfaceALPHA,(0,0,0,0),(nx,ny),int(player.storm[1]))
                 self.screen.blit(self.surfaceALPHA,(0,0))
             if player.health > 80:
                 health_color = (0, 255, 0)
@@ -203,10 +203,10 @@ class GameMode:
             draw.circle(self.screen,(255,0,0),(int(1050+(px/12000)*180),int(50+(py/8000)*120)),2)
             if player.storm!=[]:#Showing on minimap
                 if len(player.storm) == 5:
-                    draw.circle(self.screen,(0,0,255),(int(1050+(player.storm[0][0]/12000)*180),int(50+(player.storm[0][1]/8000)*120)),player.storm[1]//67,2)
-                    draw.circle(self.screen,(0,255,0),(int(1050+(player.storm[3][0]/12000)*180),int(50+(player.storm[3][1]/8000)*120)),player.storm[4]//67,2)
+                    draw.circle(self.screen,(0,0,255),(int(1050+(player.storm[0][0]/12000)*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
+                    draw.circle(self.screen,(0,255,0),(int(1050+(player.storm[3][0]/12000)*180),int(50+(player.storm[3][1]/8000)*120)),int(player.storm[4]//67),2)
                 elif len(player.storm) == 3:
-                    draw.circle(self.screen,(0,0,255),(int(1050+player.storm[0][0]/12000*180),int(50+(player.storm[0][1]/8000)*120)),player.storm[1]//67,2)
+                    draw.circle(self.screen,(0,0,255),(int(1050+player.storm[0][0]/12000*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
         except Exception as E:
             print("Error:", E)
 

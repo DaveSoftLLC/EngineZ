@@ -9,6 +9,7 @@ serverRequest = authenticate.MySQLRequest('s03.jamesxu.ca','jamesxu','enginez123
 class GameInstance:
     def __init__(self, name, clients):
         'name: str; clients = [(conn,addr)]'
+        self.game_end = False
         self.player_dict = {}
         self.player_health_dict = {}
         self.running = True
@@ -48,6 +49,7 @@ class GameInstance:
                 self.storm_pos.append([x,y])
         threading.Thread(target=self.check_damage).start()
         threading.Thread(target=self.storm).start()
+        threading.Thread(target-self.check_win).start()
     def create_thread(self):
         for c in self.clients:
             conn, addr = (c[2], c[3])
@@ -108,6 +110,22 @@ class GameInstance:
                 self.remove(current_player)
                 break
 
+    def check_win(self):
+        done = False
+        while not done:
+            if len(self.clients) == len(self.player_dict.keys()):
+                done = True
+        while self.running:
+            if len(self.player_dict.keys()) == 1:
+                self.running = False
+                player = list(self.player_dict.values())[0].name
+                for p in self.clients:
+                    if p[0] == player:
+                        p[2].send(pickle.dumps('winner'))
+                threading.Thread(target=serverRequest.modify, args=(name, 25)).start()
+        self.running = False
+        self.game_end = True
+
     def check_damage(self):
         while self.running:
             g = self.game
@@ -144,7 +162,7 @@ class GameInstance:
                         counter = 0
                         for ix, iy in interpolate:
                             if (b[2] == 'rpg' and hypot(px- nx, py - ny)<60) or hypot(px - nx, py - ny) < 30:
-                                threading.Thread(target=serverRequest.modify, args=(name, 10)).start()
+                                threading.Thread(target=serverRequest.modify, args=(name, 1)).start()
                                 counter += 1
                                 print(counter, name)
                                 obj.bullets.remove(b)
@@ -152,11 +170,12 @@ class GameInstance:
                                     del_bullets[name] = [b]
                                 else:
                                     del_bullets[name].append(b)
-                                if self.player_health_dict[p.name] - self.weapon_dict[b[2]].damage >= 0:
+                                if self.player_health_dict[p.name] - self.weapon_dict[b[2]].damage > 0:
                                     self.player_health_dict[p.name] -= self.weapon_dict[b[2]].damage
 ##                                elif self.player_health_dict[p.name]<10:
 ##                                    self.player_health_dict[p.name] = 0
                                 else:
+                                    threading.Thread(target=serverRequest.modify, args=(name, 5)).start()
                                     self.player_health_dict[p.name] = 0
                                 break
 
@@ -227,6 +246,17 @@ class Server:
         self.game_instances = {}
         self.running = True
 
+    def clean(self):
+        while self.running:
+            rooms = dict(zip(self.rooms.keys(),self.rooms.values()))
+            games = dict(zip(self.game_instances.keys(),self.game_instances.values()))
+            for room in rooms.keys():
+                if len(self.rooms[room]) == 0:
+                    del self.rooms[room]
+            for game, obj in games.items():
+                if obj.game_end:
+                    del self.game_instances[game]
+    
     def listen(self):
          while self.running:
               print("Before looking")
@@ -248,8 +278,13 @@ class Server:
                 #print(self.rooms.keys(), room_name)
                 conn.close()
                 return
+            elif len(self.rooms[room_name].values()) >= 5:
+                conn.send(pickle.dumps('no_such_room'))
+                #print(self.rooms.keys(), room_name)
+                conn.close()
+                return
         elif mode == 'create':
-            if room_name in self.rooms.keys():
+            if room_name in self.rooms.keys() or room_name in self.game_instances.keys():
                 conn.send(pickle.dumps('room_exists'))
                 conn.close()
                 return
@@ -306,3 +341,4 @@ class Server:
 if __name__ == '__main__':
     server = Server(BUFFER_SIZE)
     threading.Thread(target=server.listen).start()
+    threading.Thread(target=server.clean).start()

@@ -39,6 +39,9 @@ class Client:
             self.s.send(binary)
             data = self.s.recv(BUFFER_SIZE)
             data = pickle.loads(data)
+            if data == 'winner':
+                self.game.running = False
+                return
             self.other_player_dict = data
             if len(self.other_player_dict[p.name].weapon_send)>0 and self.other_player_dict[p.name].weapon_send[0] =="Sent":
                 p.weapon_send = []
@@ -49,7 +52,6 @@ class Client:
             for b in self.other_player_dict[p.name].del_bullets:
                 if b in p.bullets:
                     p.bullets.remove(b)
-        self.s.close()
         
     def render_other_players(self,Psprite=None):
         p = self.player

@@ -196,7 +196,7 @@ class GameInstance:
                     
                     else:
                         self.storm_next = "idle"
-                        if self.storm_state+1 != len(self.storm_rad):
+                        if self.storm_state+2 != len(self.storm_rad):
                             self.storm_state += 1
                         else:
                             print("storm iz done")

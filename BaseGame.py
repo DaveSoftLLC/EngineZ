@@ -274,23 +274,29 @@ class Player:
         
         if direction == 'UP':
             nx,ny = (self.pos[0],self.pos[1] - speed)
+            if building and openbuilding.get_at((nx,ny))[3] == 0:
+                building = False
             if 0 < ny :
-                if collisionmap.get_at((nx,ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != ((150,72,15,255))):
+                if collisionmap.get_at((nx,ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != wall):
                     self.pos = (nx,ny)
         elif direction == 'DOWN':
             nx, ny = (self.pos[0], self.pos[1] + speed)
+            if building and openbuilding.get_at((nx,ny))[3] == 0:
+                building = False
             if ny < background.get_height():
-                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != ((150,72,15,255))):
+                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != wall):
                     self.pos = (nx,ny)
         elif direction == 'LEFT':
             nx, ny = (self.pos[0] - speed, self.pos[1])
+            if building and openbuilding.get_at((nx,ny))[3] == 0:
+                building = False
             if 0 < nx:
-                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != ((150,72,15,255))):
+                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != wall):
                     self.pos = (nx,ny)
         elif direction == 'RIGHT':
             nx, ny = (self.pos[0] + speed, self.pos[1])
             if nx < background.get_width():
-                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != ((150,72,15,255))):
+                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != wall):
                     self.pos = (nx,ny)
 
     def take_damage(self, amount):
@@ -431,7 +437,7 @@ class Inventory:
             p.ammo[self.state] = ammo
             
     def remove_item(self,p):
-        if self.inventoryP[self.state] == "Empty":
+        if self.inventoryP[self.state].name == "Empty":
             pass
         else:
             p.weapon_send = [0,[self.inventoryP[self.state].name,(p.pos),p.ammo[self.state]]]

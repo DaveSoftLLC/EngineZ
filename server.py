@@ -200,7 +200,8 @@ class GameInstance:
                         if self.storm_state+1 != len(self.storm_rad):
                             self.storm_state += 1
                         else:
-                            self.storm_next = "done"
+                            print("storm iz done")
+                            break
                     
                     print("THE STORM")
                 if t.time()-self.storm_moving>.1 and self.storm_next == "moving":

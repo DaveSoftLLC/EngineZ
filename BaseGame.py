@@ -9,7 +9,10 @@ import time as t
 TCP_IP = '127.0.0.1'#'159.203.147.141'
 TCP_PORT = 4545
 BUFFER_SIZE = 4096
-
+def check_health(player):
+    if player.health <= 0:
+        return False
+    return True
 
 class Client:
     def __init__(self, player,drone, game, conn, sprites):
@@ -19,6 +22,7 @@ class Client:
         self.other_player_dict = dict()
         self.sprites = sprites
         self.drone = drone
+        
 
     def update_player(self, player):
         self.player = player
@@ -36,7 +40,12 @@ class Client:
             data = self.s.recv(BUFFER_SIZE)
             data = pickle.loads(data)
             self.other_player_dict = data
+            if len(self.other_player_dict[p.name].weapon_send)>0 and self.other_player_dict[p.name].weapon_send[0] =="Sent":
+                p.weapon_send = []
+            p.weapon_map = self.other_player_dict[p.name].weapon_map
             p.health = self.other_player_dict[p.name].health
+            p.storm = self.other_player_dict[p.name].storm
+            
             for b in self.other_player_dict[p.name].del_bullets:
                 if b in p.bullets:
                     p.bullets.remove(b)
@@ -55,19 +64,19 @@ class Client:
                 ox, oy = o.get_pos()
                 if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() \
                         and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2:
-                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
+                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter //20%len(self.sprites[o.state])], o.rotation + 90)
                     nx = ox - px + g.screen.get_width() // 2 \
                          - other_sprite.get_width() // 2
                     ny = oy - py + g.screen.get_height() // 2 \
                          - other_sprite.get_height() // 2
-                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter // 10], o.rotation + 90)
+                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter //20%len(self.sprites[o.state])], o.rotation + 90)
                     g.screen.blit(other_sprite, (nx,ny))
         if Psprite: #displaying player
             px, py = p.get_pos()
             dx,dy = d.get_pos()
             if dx - g.screen.get_width() // 2 < px < dx + g.screen.get_width() //2 \
                         and dy - g.screen.get_height() // 2 < py < dy + g.screen.get_height() // 2:
-                    your_Player = transform.rotate(Psprite[p.state][p.gif_counter // 10], p.rotation + 90)
+                    your_Player = transform.rotate(Psprite[p.state][p.gif_counter//20%len(Psprite[p.state])], p.rotation + 90)
                     nx = px - dx + g.screen.get_width() // 2 \
                          - your_Player.get_width() // 2
                     ny = py - dy + g.screen.get_height() // 2 \
@@ -95,6 +104,26 @@ class Client:
                     screen.blit(transform.rotate(bullet_sprite, b[1]), (lx, ly))
                     #gunType.gun_Bullet(b[2],lx,ly,b[1],screen)
                     #g.screen.blit(lb, (lx, ly))
+    def draw_weapons(self,screen,pos):
+        p = self.player
+        #print(p.weapon_map)
+        for i in p.weapon_map:
+            if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \
+                        and pos[1] - screen.get_height() // 2 < i[1][1] < pos[1] + screen.get_height() // 2:
+                image = self.game.weapon_dict[i[0]].inventory_image
+                nx = i[1][0] - pos[0] + screen.get_width() // 2 \
+                         - image.get_width() // 2
+                ny = i[1][1] - pos[1] + screen.get_height() // 2 \
+                         - image.get_height() // 2
+                screen.blit(image,(nx,ny))
+
+    def weapon_pickup(self,inventory):
+        p = self.player
+        for i in p.weapon_map:
+            if hypot(i[1][0]-25-p.pos[0],i[1][1]-25-p.pos[1]) <100:
+                inventory.add_item(self.game.weapon_dict[i[0]],p,p.weapon_map,i)
+                #del self.weapon_map[self.weapon_map.index(i)]
+                break
 
 class GameMode:
     def __init__(self,server=False):
@@ -105,33 +134,41 @@ class GameMode:
             font.init()
             self.screen = display.set_mode(self.resolution)
             self.screen.fill((255,255,255))
-            self.textFont = font.SysFont("Arial", 25)
-            self.screen.blit(transform.smoothscale(image.load('TitleLogo.png'), (1280, 800)), (0, 0))
-            self.screen.blit(self.textFont.render('Loading Assets...', True, (0,0,0)), (590, 700))
+            self.title_font = font.Font('geonms-font.ttf', 72)
+            self.textFont = font.Font('geonms-font.ttf', 32)
+            background = transform.smoothscale(image.load('nmsplanet.jpg').convert(), (1280,800))
+            self.screen.blit(background, (0, 0))
+            title = self.title_font.render('outcast: the game', True, (255,255,255))
+            txt = self.textFont.render('loading', True, (255,255,255))
+            self.screen.blit(txt, (self.screen.get_width()//2-txt.get_width()//2, 550))
+            self.screen.blit(title, (self.screen.get_width()//2-title.get_width()//2, 100))
             display.flip()
             self.music = mixer.music.load("Outcast.wav")
             self.background = image.load('Background/MapFinal.png').convert()
             self.droneB =False
             self.drone_start = 31
             self.current_actor = 0
+            self.surfaceALPHA = Surface((1280, 800), SRCALPHA)
             assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png').convert_alpha(),
                                5,image.load('Weapons/machinegun.png').convert_alpha(),0,0.15)
             shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png').convert_alpha(),
                           10,image.load('Weapons/shotgunb.png').convert_alpha(), 6,0)
             sniper = Gun('Sniper',image.load('Weapons/heavyBullet.png').convert_alpha(),
                          25,image.load('Weapons/sniper.png').convert_alpha(),1,0)
+            rpg = Gun('RPG',image.load('Weapons/rocketammo.png').convert_alpha(),50,image.load('Weapons/rpg.png').convert_alpha(),1,0)
             empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
-            self.weapon_dict = {"Shotgun":shotgun,"AR":assaultrifle,"Sniper":sniper}
-            self.guns = [assaultrifle,shotgun,sniper,empty,empty,empty]
+            self.weapon_dict = {"Shotgun":shotgun,"AR":assaultrifle,"Sniper":sniper,"RPG":rpg}
+            self.guns = [assaultrifle,shotgun,sniper,rpg,empty,empty]
             #weapon_list = [n.name for n in self.guns]
-            self.weapon_map =[]
-            for i in range(20):
-                weapon = choice(list(self.weapon_dict))
-                wx,wy = (randint(100,11900),randint(100,7900))
-                self.weapon_map.append([weapon,(wx,wy),100])
+##            self.weapon_map =[]
+##            for i in range(20):
+##                weapon = choice(list(self.weapon_dict))
+##                wx,wy = (randint(100,11900),randint(100,7900))
+##                self.weapon_map.append([weapon,(wx,wy),100])
         else:
             self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
+        self.buildingmap = image.load('Background/buildings.png')
         self.running = True
         
     def draw_screen(self, player):
@@ -141,6 +178,13 @@ class GameMode:
                                                  py-self.screen.get_height()//2,
                                                  self.screen.get_width(), self.screen.get_height()))
             self.screen.blit(portion, (0, 0))
+            #Storm
+            if player.storm!=[]:
+                draw.rect(self.surfaceALPHA,(0,0,255,80),(0,0,1280,800))
+                nx = player.storm[0][0]-player.pos[0]+self.screen.get_width()//2
+                ny = player.storm[0][1]-player.pos[1]+self.screen.get_height()//2
+                draw.circle(self.surfaceALPHA,(0,0,0,0),(nx,ny),player.storm[1])
+                self.screen.blit(self.surfaceALPHA,(0,0))
             if player.health > 80:
                 health_color = (0, 255, 0)
             elif player.health > 40:
@@ -148,7 +192,18 @@ class GameMode:
             else:
                 health_color = (255, 0, 0)
             draw.rect(self.screen, 0, (20, 20, 300, 40), 2)
-            draw.rect(self.screen, health_color, (20, 20, player.health / 100 * 300, 40))
+            draw.rect(self.screen, health_color, (20, 20, int(player.health / 100 * 300), 40))
+
+            #Minimap
+            minimap = transform.scale(self.background,(180,120))
+            self.screen.blit(minimap,(1050,50))
+            draw.circle(self.screen,(255,0,0),(int(1050+(px/12000)*180),int(50+(py/8000)*120)),2)
+            if player.storm!=[]:#Showing on minimap
+                if len(player.storm) == 5:
+                    draw.circle(self.screen,(0,0,255),(int(1050+(player.storm[0][0]/12000)*180),int(50+(player.storm[0][1]/8000)*120)),player.storm[1]//67,2)
+                    draw.circle(self.screen,(0,255,0),(int(1050+(player.storm[3][0]/12000)*180),int(50+(player.storm[3][1]/8000)*120)),player.storm[4]//67,2)
+                elif len(player.storm) == 3:
+                    draw.circle(self.screen,(0,0,255),(int(1050+player.storm[0][0]/12000*180),int(50+(player.storm[0][1]/8000)*120)),player.storm[1]//67,2)
         except Exception as E:
             print("Error:", E)
 
@@ -166,24 +221,24 @@ class GameMode:
             client.drone = 0
             self.current_actor = p
             self.droneB = False
-    def draw_weapons(self,screen,pos):
-        for i in self.weapon_map:
-            if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \
-                        and pos[1] - screen.get_height() // 2 < i[1][1] < pos[1] + screen.get_height() // 2:
-                image = self.weapon_dict[i[0]].inventory_image
-                nx = i[1][0] - pos[0] + screen.get_width() // 2 \
-                         - image.get_width() // 2
-                ny = i[1][1] - pos[1] + screen.get_height() // 2 \
-                         - image.get_height() // 2
-                screen.blit(image,(nx,ny))
-
-
-    def weapon_pickup(self,p,inventory):
-        for i in self.weapon_map:
-            if hypot(i[1][0]-25-p.pos[0],i[1][1]-25-p.pos[1]) <100:
-                inventory.add_item(self.weapon_dict[i[0]],p,self.weapon_map[self.weapon_map.index(i)][2],self.weapon_map)
-                del self.weapon_map[self.weapon_map.index(i)]
-                break
+##    def draw_weapons(self,screen,pos):
+##        for i in self.weapon_map:
+##            if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \
+##                        and pos[1] - screen.get_height() // 2 < i[1][1] < pos[1] + screen.get_height() // 2:
+##                image = self.weapon_dict[i[0]].inventory_image
+##                nx = i[1][0] - pos[0] + screen.get_width() // 2 \
+##                         - image.get_width() // 2
+##                ny = i[1][1] - pos[1] + screen.get_height() // 2 \
+##                         - image.get_height() // 2
+##                screen.blit(image,(nx,ny))
+##
+##
+##    def weapon_pickup(self,p,inventory):
+##        for i in self.weapon_map:
+##            if hypot(i[1][0]-25-p.pos[0],i[1][1]-25-p.pos[1]) <100:
+##                inventory.add_item(self.weapon_dict[i[0]],p,self.weapon_map,i)
+##                del self.weapon_map[self.weapon_map.index(i)]
+##                break
                 
 class Player:
     def __init__(self, game, name, pos, speed, mode):
@@ -198,42 +253,47 @@ class Player:
         self.gif_counter = 0
         self.del_bullets = []
         self.ammo = []
+        self.weapon_send = []#[weapon to remove, weapon to add]
         self.type = mode
+        self.weapon_map = []
+        self.storm = []
+        
 
-    def move(self, direction, background, collisionmap, FPS, speed=None):
+    def move(self, direction, background, collisionmap,buildingmap, FPS, speed=None):
         if speed is None:
             speed = self.speed
         speed = int(speed/FPS*60)
+        
         if direction == 'UP':
             nx,ny = (self.pos[0],self.pos[1] - speed)
             if 0 < ny :
-                if collisionmap.get_at((nx,ny))[3] == 0:
+                if collisionmap.get_at((nx,ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0:
                     self.pos = (nx,ny)
         elif direction == 'DOWN':
             nx, ny = (self.pos[0], self.pos[1] + speed)
             if ny < background.get_height():
-                if collisionmap.get_at((nx, ny))[3] == 0:
+                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0:
                     self.pos = (nx,ny)
         elif direction == 'LEFT':
             nx, ny = (self.pos[0] - speed, self.pos[1])
             if 0 < nx:
-                if collisionmap.get_at((nx, ny))[3] == 0:
+                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0:
                     self.pos = (nx,ny)
         elif direction == 'RIGHT':
             nx, ny = (self.pos[0] + speed, self.pos[1])
             if nx < background.get_width():
-                if collisionmap.get_at((nx, ny))[3] == 0:
+                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0:
                     self.pos = (nx,ny)
 
     def take_damage(self, amount):
         if self.health-amount > 0:
             self.health -= amount
-        else:
-            self.die()
             
-    def die(self):
+    def die(self, screen):
+        wasted = image.load('wasted.png').convert()
+        wasted = transform.smoothscale(wasted, (1280,800))
+        screen.blit(wasted, (0,0))
         print("dead")
-        pass
 
     def fire(self, inventory, FPS):
         if inventory.inventoryP[inventory.state].name != 'Empty' and self.ammo[inventory.state]>0:
@@ -253,7 +313,7 @@ class Player:
                 self.bullets.append([(px+5*cos(radians(angle)), py-5*sin(radians(angle))), angle, inventory.inventoryP[inventory.state].name, ratio])               
                 
     def render_player(self, sprites, game):
-        sprite = transform.rotate(sprites[self.state][self.gif_counter // 10], self.rotation + 90)
+        sprite = transform.rotate(sprites[self.state][self.gif_counter//20%len(sprites[self.state])], self.rotation + 90)
         self.rect = game.screen.blit(sprite, (640 - sprite.get_width() // 2, 400 - sprite.get_height() // 2))
 
     def get_rect(self):
@@ -263,10 +323,12 @@ class Player:
         return self.pos
 
     def update_gif(self, sprites, server=False):
-        if self.gif_counter >= 10 * len(sprites[self.state]) - 1:
-            self.gif_counter = 0
-        elif not server:
-            self.gif_counter += 1
+        self.gif_counter += 1
+    def player_state(self,inventory):
+        if inventory.inventoryP[inventory.state].name == "Empty":
+            self.state = 0
+        else:
+            self.state = 2
 
 class Drone(Player):
     def draw_drone(Game,droneB,piclist,timer):
@@ -308,7 +370,7 @@ def render_bullets(Game, player, client, FPS):
         if 0 < lx < Game.screen.get_width() and 0 < ly < Game.screen.get_height():
             hit_detected = False
             for cx, cy in interpolate:
-                if Game.collisionmap.get_at((int(cx), int(cy)))[3] != 0:
+                if Game.collisionmap.get_at((int(cx), int(cy)))[3] != 0 or Game.buildingmap.get_at((int(cx),int(cy)))[3] !=0:
                     no_collision = False
                     break
                 for o in client.other_player_dict.values():
@@ -317,7 +379,6 @@ def render_bullets(Game, player, client, FPS):
                         if hypot(ox-cx, oy-cy) < 30:
                             try:
                                 player.bullets.remove(b)
-
                             except ValueError:
                                 pass
                             hit_detected = True
@@ -347,16 +408,21 @@ class Inventory:
         self.textFont = font.SysFont("Arial", 22)
         self.empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
 
-    def add_item(self,item,p,ammo,weaponm):
-        print(ammo)
+    def add_item(self,item,p,weaponm,d):
+        #inventory.add_item(self.weapon_dict[i[0]],p,self.weapon_map[self.weapon_map.index(i)][2],self.weapon_map)
+        ammo = weaponm[weaponm.index(d)][2]
         inventoryF = [i.name for i in self.inventoryP]
         if  "Empty" in inventoryF:
+            p.weapon_send = [d]
             p.ammo[inventoryF.index("Empty")] = ammo
             self.inventoryP[inventoryF.index("Empty")] = item
+            
         else:
+            p.weapon_send = [d,[self.inventoryP[self.state].name,(p.pos),p.ammo[self.state]]]
             weaponm.append([self.inventoryP[self.state].name,(p.pos),p.ammo[self.state]])
             self.inventoryP[self.state] = item
             p.ammo[self.state] = ammo
+            
     
     def switch(self,scroll):
         if scroll == "RIGHT":
@@ -379,7 +445,7 @@ class Inventory:
         Game.blit(self.inventoryP[self.state].inventory_image,(850+self.state*69,695))
         Game.blit(self.textFont.render(str(ammo[self.state]), True, (255,255,255)), (850+self.state*69,695))
         draw.rect(Game,(0,0,255),(850+self.state*69,695,70,70),2)
-        
+    
 class Gun:
     def __init__(self, name, bulletSprite, damage, inventory_image, spread,rate):
         self.name = name

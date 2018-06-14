@@ -1,9 +1,10 @@
 from BaseGame import *
 import copy
 import multiprocessing as mp
+import authenticate
 del_bullets = dict()
 g = GameMode(server=True)
-
+serverRequest = authenticate.MySQLRequest('jamesxu.ca','jamesxu','enginez123','enginez')
 
 class GameInstance:
     def __init__(self, name, clients):
@@ -142,6 +143,7 @@ class GameInstance:
                         counter = 0
                         for ix, iy in interpolate:
                             if hypot(px - nx, py - ny) < 30:
+                                serverRequest.modify(name, 10)
                                 counter += 1
                                 print(counter, name)
                                 obj.bullets.remove(b)

@@ -37,7 +37,22 @@ class MySQLRequest:
                     %(table,username,hashed_password))
         db.commit()
         db.close()
+    def modify(self,username,score):
+        db = sql.connect(host=self.host,
+                         user=self.username,
+                         password=self.password,
+                         db=self.database)
+        cur = db.cursor()
+        cur.execute("SELECT highscore FROM users WHERE username='%s';" %username)
+        if cur.rowcount != 1:
+            raise ValueError('Username not Found/Unique')
+        old_score = cur.fetchall()[0][0]
+        cur.execute("UPDATE users SET highscore = %d WHERE username = '%s';" %(old_score+score,username))
+        db.commit()
+        db.close()
+        
+        
 if __name__ == '__main__':
     d = MySQLRequest('159.203.101.135', 'jamesxu', 'enginez123', 'enginez')
 ##    print(d.select('users','pay2lose'))
-    d.insert('users','testing','admin')
+    d.modify('pay2lose',100)

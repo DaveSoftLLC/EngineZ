@@ -72,6 +72,7 @@ class ClientMatch:
         ready = False
         fps_clock = time.Clock()
         while self.running:
+            fps_clock.tick(50)
             room_data = {'name':self.name,
                          'room_name':room_name,
                          'ready':ready,
@@ -116,6 +117,7 @@ class ClientMatch:
         ready = False
         fps_clock = time.Clock()
         while self.running:
+            fps_clock.tick(50)
             room_data = {'name':self.name,
                          'room_name':room_name,
                          'ready':ready,

@@ -151,6 +151,8 @@ class GameInstance:
                                     del_bullets[name].append(b)
                                 if self.player_health_dict[p.name] - 10 >= 0:
                                     self.player_health_dict[p.name] -= 10
+##                                elif self.player_health_dict[p.name]<10:
+##                                    self.player_health_dict[p.name] = 0
                                 break
 
     def take_damage(self, amount):

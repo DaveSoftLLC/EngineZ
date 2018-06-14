@@ -159,6 +159,8 @@ class GameMode:
             empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
             self.weapon_dict = {"Shotgun":shotgun,"AR":assaultrifle,"Sniper":sniper,"RPG":rpg}
             self.guns = [assaultrifle,shotgun,sniper,rpg,empty,empty]
+            self.buildingmap = image.load('Background/buildings.png').convert_alpha()
+            self.building = False
             #weapon_list = [n.name for n in self.guns]
 ##            self.weapon_map =[]
 ##            for i in range(20):
@@ -168,7 +170,7 @@ class GameMode:
         else:
             self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
-        self.buildingmap = image.load('Background/buildings.png')
+        
         self.openbuilding = image.load('Background/openbuilding.png')
         self.running = True
         
@@ -223,7 +225,8 @@ class GameMode:
             self.current_actor = p
             self.droneB = False
     def open_door(self,p):
-        if openbuilding.get_at((p.pos[0],p.pos[1]))[3] != 0:
+        if self.openbuilding.get_at((p.pos[0],p.pos[1]))[3] != 0:
+            self.building = True
             print("open")
 ##    def draw_weapons(self,screen,pos):
 ##        for i in self.weapon_map:
@@ -263,7 +266,7 @@ class Player:
         self.storm = []
         
 
-    def move(self, direction, background, collisionmap,buildingmap, FPS, speed=None):
+    def move(self, direction, background, collisionmap,buildingmap,openbuilding, FPS,building, speed=None):
         wall = ((150,72,15))
         if speed is None:
             speed = self.speed
@@ -272,22 +275,22 @@ class Player:
         if direction == 'UP':
             nx,ny = (self.pos[0],self.pos[1] - speed)
             if 0 < ny :
-                if collisionmap.get_at((nx,ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0:
+                if collisionmap.get_at((nx,ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != ((150,72,15,255))):
                     self.pos = (nx,ny)
         elif direction == 'DOWN':
             nx, ny = (self.pos[0], self.pos[1] + speed)
             if ny < background.get_height():
-                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0:
+                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != ((150,72,15,255))):
                     self.pos = (nx,ny)
         elif direction == 'LEFT':
             nx, ny = (self.pos[0] - speed, self.pos[1])
             if 0 < nx:
-                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0:
+                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != ((150,72,15,255))):
                     self.pos = (nx,ny)
         elif direction == 'RIGHT':
             nx, ny = (self.pos[0] + speed, self.pos[1])
             if nx < background.get_width():
-                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0:
+                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != ((150,72,15,255))):
                     self.pos = (nx,ny)
 
     def take_damage(self, amount):

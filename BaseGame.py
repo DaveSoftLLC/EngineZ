@@ -169,6 +169,7 @@ class GameMode:
             self.background = image.load('Background/MapFinal.png')
         self.collisionmap = image.load('Background/rocks+hole.png')
         self.buildingmap = image.load('Background/buildings.png')
+        self.openbuilding = image.load('Background/openbuilding.png')
         self.running = True
         
     def draw_screen(self, player):
@@ -260,6 +261,7 @@ class Player:
         
 
     def move(self, direction, background, collisionmap,buildingmap, FPS, speed=None):
+        wall = ((150,72,15))
         if speed is None:
             speed = self.speed
         speed = int(speed/FPS*60)

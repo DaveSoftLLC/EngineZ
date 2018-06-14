@@ -289,7 +289,7 @@ class Server:
                 conn.close()
                 return
             else:
-                self.rooms[room_name] = []
+                self.rooms[room_name] = [(data['name'],data['ready'],conn,addr)]
                 
         conn.send(pickle.dumps('all_good'))
         while self.running:

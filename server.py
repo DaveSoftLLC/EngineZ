@@ -139,7 +139,7 @@ class GameInstance:
                         counter = 0
                         for ix, iy in interpolate:
                             if hypot(px - nx, py - ny) < 30:
-                                serverRequest.modify(name, 10)
+                                threading.Thread(target=serverRequest.modify, args=(name, 10)).start()
                                 counter += 1
                                 print(counter, name)
                                 obj.bullets.remove(b)

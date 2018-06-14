@@ -72,7 +72,6 @@ class ClientMatch:
         ready = False
         fps_clock = time.Clock()
         while self.running:
-            fps_clock.tick(50)
             room_data = {'name':self.name,
                          'room_name':room_name,
                          'ready':ready,
@@ -106,7 +105,7 @@ class ClientMatch:
              'room_name':room_name,
              'ready':False,
              'mode': 'create',
-             'master':True}
+             'master':False}
         self.s.send(pickle.dumps(room_data))
         data = pickle.loads(self.s.recv(BUFFER_SIZE))
         if data != 'all_good':
@@ -117,12 +116,11 @@ class ClientMatch:
         ready = False
         fps_clock = time.Clock()
         while self.running:
-            fps_clock.tick(50)
             room_data = {'name':self.name,
                          'room_name':room_name,
                          'ready':ready,
                          'mode': 'join',
-                         'master':True}
+                         'master':False}
             self.s.send(pickle.dumps(room_data))
             data = pickle.loads(self.s.recv(BUFFER_SIZE))
             print('server:', data)
@@ -378,30 +376,29 @@ class Main:
         click, word = check_hover(self.screen, button_list, self.mode_buttons, (mx,my), left_click, self.menu_font)
         if not self.client.send_queue.empty():
             data = self.client.send_queue.get(block=False)
-            if type(data) == list:
-                self.room_data = data
-                print(data)
+            self.room_data = data
+        if type(self.room_data) == list:
+            print(self.room_data)
 ##                screen, rect, username, master, color, font
-                for p in range(len(data)):
-                    username, status = self.room_data[p]
-                    rect = (bx+25,
-                            by + 70 + p*60 + p*10,
-                            bw-50,
-                            60)
-                    player_bar(self.screen, rect, username, status, (128,128,128), self.menu_font)
-                            
-                    
-            elif type(data) == tuple:
-                print('tuple mode')
-                status, conn = data
-                if not status:
-                    print(data)
-                    click = True
-                    word = 'BACK'
-                elif status:
-                    print('starting game')
-                    self.running = False
-                    return "game_begin"
+            for p in range(len(self.room_data)):
+                username, status = self.room_data[p]
+                rect = (bx+25,
+                        by + 70 + p*60 + p*10,
+                        bw-50,
+                        60)
+                player_bar(self.screen, rect, username, status, (128,128,128), self.menu_font)
+                
+        elif type(self.room_data) == tuple:
+            print('tuple mode')
+            status, conn = self.room_data
+            if not status:
+                print(self.room_data)
+                click = True
+                word = 'BACK'
+            elif status:
+                print('starting game')
+                self.running = False
+                return "game_begin"
 
         if click:
             if word == 'READY':

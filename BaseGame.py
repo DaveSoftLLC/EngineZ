@@ -222,6 +222,9 @@ class GameMode:
             client.drone = 0
             self.current_actor = p
             self.droneB = False
+    def open_door(self,p):
+        if openbuilding.get_at((p.pos[0],p.pos[1]))[3] != 0:
+            print("open")
 ##    def draw_weapons(self,screen,pos):
 ##        for i in self.weapon_map:
 ##            if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \

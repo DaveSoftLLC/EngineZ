@@ -115,33 +115,33 @@ def main(menu_obj):
     myClock = time.Clock()
     last_fire = 0
     #Mouse Cursor
-    reticle = (               #sized 24x24
-      "        ........        ",
-      "      ..   ..   ..      ",
-      "     ..    ..    ..     ",
-      "    ..     ..     ..    ",
-      "   ..      ..      ..   ",
-      "  ..      oooo      ..  ",
-      " ..        ..        .. ",
-      "..         ..         ..",
-      "..         ..         ..",
-      "..         ..         ..",
-      "..   o    X..X    o   ..",
-      ".....o.....XX.....o.....",
-      ".....o.....XX.....o.....",
-      "..   o    X..X    o   ..",
-      "..         ..         ..",
-      "..         ..         ..",
-      "..         ..         ..",
-      " ..        ..        .. ",
-      "  ..      oooo      ..  ",
-      "   ..      ..      ..   ",
-      "    ..     ..     ..    ",
-      "     ..    ..    ..     ",
-      "      ..   ..   ..      ",
-      "        ........        ")#Took me 2 hours
-    datatuple,masktuple=cursors.compile(reticle,black='.',white='X',xor='o')#Compile the code
-    mouse.set_cursor((24,24),(12,12),datatuple,masktuple)
+##    reticle = (               #sized 24x24
+##      "        ........        ",
+##      "      ..   ..   ..      ",
+##      "     ..    ..    ..     ",
+##      "    ..     ..     ..    ",
+##      "   ..      ..      ..   ",
+##      "  ..      oooo      ..  ",
+##      " ..        ..        .. ",
+##      "..         ..         ..",
+##      "..         ..         ..",
+##      "..         ..         ..",
+##      "..   o    X..X    o   ..",
+##      ".....o.....XX.....o.....",
+##      ".....o.....XX.....o.....",
+##      "..   o    X..X    o   ..",
+##      "..         ..         ..",
+##      "..         ..         ..",
+##      "..         ..         ..",
+##      " ..        ..        .. ",
+##      "  ..      oooo      ..  ",
+##      "   ..      ..      ..   ",
+##      "    ..     ..     ..    ",
+##      "     ..    ..    ..     ",
+##      "      ..   ..   ..      ",
+##      "        ........        ")#Took me 2 hours
+##    datatuple,masktuple=cursors.compile(reticle,black='.',white='X',xor='o')#Compile the code
+##    mouse.set_cursor((24,24),(12,12),datatuple,masktuple)
     while g.running:
         m = mouse.get_pressed()
         mx, my = mouse.get_pos()
@@ -169,6 +169,10 @@ def main(menu_obj):
                 if keys[K_e] and g.current_actor.type == 'player':
                     #g.weapon_pickup(p,inventory)
                     client.weapon_pickup(inventory)
+                if keys[K_f] and g.current_actor.type == 'player':
+                    g.open_door(p)
+                    
+                #open door
                 elif e.key == K_ESCAPE:
                     running = False
         m = mouse.get_pressed()

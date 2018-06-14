@@ -18,9 +18,9 @@ class GameInstance:
         self.game = self.instance
         self.clients = clients
         assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png'),5,image.load('Weapons/machinegun.png'),0,0.15)
-        shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'),10,image.load('Weapons/shotgunb.png'), 6,0)
+        shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png'),5,image.load('Weapons/shotgunb.png'), 6,0)
         sniper = Gun('Sniper',image.load('Weapons/heavyBullet.png'),25,image.load('Weapons/sniper.png'),1,0)
-        rpg = Gun('RPG',image.load('Weapons/rocketammo.png'),50,image.load('Weapons/rpg.png'),1,0)
+        rpg = Gun('RPG',image.load('Weapons/rocketammo.png'),20,image.load('Weapons/rpg.png'),1,0)
         self.weapon_dict = {"Shotgun":shotgun,"AR":assaultrifle,"Sniper":sniper,"RPG":rpg}
         self.weapon_map =[]
         
@@ -80,9 +80,11 @@ class GameInstance:
                         #print(self.player_dict[current_player].weapon_send)
                         
                         if len(self.player_dict[current_player].weapon_send) > 0:
-                            if len(self.player_dict[current_player].weapon_send) == 1:
+                            if self.player_dict[current_player].weapon_send[1] == 0:#Picking up weapon
                                 del self.weapon_map[self.weapon_map.index(self.player_dict[current_player].weapon_send[0])]
-                            else:
+                            elif self.player_dict[current_player].weapon_send[0] == 0:#dropping weapon
+                                self.weapon_map.append(self.player_dict[current_player].weapon_send[1])
+                            else:#Picking up and dropping
                                 self.weapon_map.append(self.player_dict[current_player].weapon_send[1])
                                 del self.weapon_map[self.weapon_map.index(self.player_dict[current_player].weapon_send[0])]
                             self.player_dict[current_player].weapon_send = ["Sent"]
@@ -141,7 +143,7 @@ class GameInstance:
 ##                        interpolate = gameMath.interpolate(int(nx),int(ny),int(angle),int(b[3]))
                         counter = 0
                         for ix, iy in interpolate:
-                            if hypot(px - nx, py - ny) < 30:
+                            if (b[2] == 'rpg' and hypot(px- nx, py - ny)<60) or hypot(px - nx, py - ny) < 30:
                                 threading.Thread(target=serverRequest.modify, args=(name, 10)).start()
                                 counter += 1
                                 print(counter, name)
@@ -150,8 +152,8 @@ class GameInstance:
                                     del_bullets[name] = [b]
                                 else:
                                     del_bullets[name].append(b)
-                                if self.player_health_dict[p.name] - 10 >= 0:
-                                    self.player_health_dict[p.name] -= 10
+                                if self.player_health_dict[p.name] - self.weapon_dict[b[2]].damage >= 0:
+                                    self.player_health_dict[p.name] -= self.weapon_dict[b[2]].damage
 ##                                elif self.player_health_dict[p.name]<10:
 ##                                    self.player_health_dict[p.name] = 0
                                 else:

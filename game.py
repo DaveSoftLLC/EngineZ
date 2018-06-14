@@ -171,6 +171,8 @@ def main(menu_obj):
                     client.weapon_pickup(inventory)
                 if keys[K_f] and g.current_actor.type == 'player':
                     g.open_door(p)
+                if keys[K_g] and g.current_actor.type == 'player':
+                    inventory.remove_item(p)
                     
                 #open door
                 elif e.key == K_ESCAPE:

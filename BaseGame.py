@@ -421,17 +421,21 @@ class Inventory:
         ammo = weaponm[weaponm.index(d)][2]
         inventoryF = [i.name for i in self.inventoryP]
         if  "Empty" in inventoryF:
-            p.weapon_send = [d]
+            p.weapon_send = [d,0]
             p.ammo[inventoryF.index("Empty")] = ammo
             self.inventoryP[inventoryF.index("Empty")] = item
-            
         else:
             p.weapon_send = [d,[self.inventoryP[self.state].name,(p.pos),p.ammo[self.state]]]
-            weaponm.append([self.inventoryP[self.state].name,(p.pos),p.ammo[self.state]])
+            #weaponm.append([self.inventoryP[self.state].name,(p.pos),p.ammo[self.state]])
             self.inventoryP[self.state] = item
             p.ammo[self.state] = ammo
             
-    
+    def remove_item(self,p):
+        if self.inventoryP[self.state] == "Empty":
+            pass
+        else:
+            p.weapon_send = [0,[self.inventoryP[self.state].name,(p.pos),p.ammo[self.state]]]
+            self.inventoryP[self.state] = self.empty
     def switch(self,scroll):
         if scroll == "RIGHT":
             if len(self.inventoryP) == self.state+1:

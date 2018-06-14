@@ -109,7 +109,10 @@ class GameInstance:
     def check_damage(self):
         while self.running:
             g = self.game
-            for name, obj in {k: v for k,v in self.player_dict.items()}.items():
+            name = list(self.player_dict.keys())
+            obj = list(self.player_dict.values())
+            players = dict(zip(name,obj))
+            for name, obj in players:
                 try:
                     x = self.storm_pos[self.storm_state][0]-obj.pos[0]
                     y = self.storm_pos[self.storm_state][1]-obj.pos[1]

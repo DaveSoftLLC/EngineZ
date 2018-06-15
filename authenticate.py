@@ -1,9 +1,13 @@
-from argon2 import PasswordHasher
-import MySQLdb as sql
+#James Xu
+#MySQL library
+#Works in conjunction with DigitalOcean server
+from argon2 import PasswordHasher #password hashing lib (won some competition)
+import MySQLdb as sql #lower level mysql lib
 
 
 class MySQLRequest:
     def __init__(self, host, username, password, database):
+        'Sends MySQL requests'
         self.host = host
         self.username = username
         self.password = password
@@ -31,8 +35,6 @@ class MySQLRequest:
                          db=self.database)
         cur = db.cursor()
         hashed_password = ph.hash(password)
-##        print("INSERT INTO %s (username,password_hash,highscore) VALUES ('%s','%s',0)"
-##                    %(table,username,hashed_password))
         cur.execute("INSERT INTO %s (username,password_hash,highscore) VALUES ('%s','%s',0)"
                     %(table,username,hashed_password))
         db.commit()

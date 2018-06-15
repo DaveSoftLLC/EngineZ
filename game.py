@@ -1,7 +1,9 @@
-import glob
-from random import randint
-
-from BaseGame import *
+#James Xu and Zhehai Zhang
+#Actual Game
+import glob #find files
+from random import randint #random selection
+ 
+from BaseGame import * #Main classes
 g = GameMode()
 title_font = font.Font('geonms-font.ttf', 72)
 menu_font = font.Font('geonms-font.ttf', 32)
@@ -177,23 +179,16 @@ def main(menu_obj):
                     #g.weapon_pickup(p,inventory)
                     client.weapon_pickup(inventory) #Pickup weapon
                 if keys[K_f] and g.current_actor.type == 'player':
-<<<<<<< HEAD
                     g.open_door(p) #Enter buildings
                 if keys[K_g] and g.current_actor.type == 'player':
                     inventory.remove_item(p) #Drop items
                     
-=======
-                    p.open_door(openbuilding)
-                if keys[K_g] and g.current_actor.type == 'player':
-                    inventory.remove_item(p)
->>>>>>> df384e14753577e77ee9318908ed7e9f81633d30
                 #open door
                 elif e.key == K_ESCAPE:
                     running = False #Alternative 'exit' key
 
         keys = key.get_pressed()
         old_time = t.time()
-<<<<<<< HEAD
         g.current_actor.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
         px, py = g.current_actor.get_pos()
         #SPRINT only for player
@@ -229,46 +224,6 @@ def main(menu_obj):
             p.state = 1
         else:
             p.player_state(inventory)
-            
-=======
-        if 1:
-            g.current_actor.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
-            px, py = g.current_actor.get_pos()
-            #SPRINT only for player
-            if keys[K_LSHIFT] and m[0] == 1:
-                p.speed = 6
-                
-            elif keys[K_LSHIFT]:
-                p.speed = 14
-                
-                
-            else:
-                p.speed = 10
-                
-
-            #UP
-            if keys[K_w] and g.screen.get_height()//2<py-g.current_actor.speed:
-                g.current_actor.move('UP', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
-            #DOWN
-            if keys[K_s] and py+g.current_actor.speed<g.background.get_height()-g.screen.get_height()//2:
-                g.current_actor.move('DOWN', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
-            #LEFT
-            if keys[K_a] and g.screen.get_width()//2<px-g.current_actor.speed:
-                g.current_actor.move('LEFT', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
-            #RIGHT
-            if keys[K_d] and px+g.current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
-                g.current_actor.move('RIGHT', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
-
-            if g.current_actor.type == 'player' and left_click and (t.time() - last_fire > 0.3 or (inventory.inventoryP[inventory.state].rate >0 and t.time() - last_fire > inventory.inventoryP[inventory.state].rate)):
-                last_fire = t.time()
-                p.fire(inventory, FPS)
-                
-            if m[0] == 1 or m[2] ==1:
-                p.state = 1
-            else:
-                p.player_state(inventory)
-                
->>>>>>> df384e14753577e77ee9318908ed7e9f81633d30
 
 
         g.draw_screen(g.current_actor)

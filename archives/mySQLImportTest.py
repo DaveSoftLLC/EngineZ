@@ -1,2 +1,0 @@
-import mysqlTest
-print('yay')

@@ -1,0 +1,2 @@
+import mysqlTest
+print('yay')

@@ -2,7 +2,7 @@
 #include <cmath>
 #include <vector>
 using namespace std;
-
+/* NOT ACTUALLY USED */
 struct Rect
 {
     int x;

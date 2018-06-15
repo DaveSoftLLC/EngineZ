@@ -240,7 +240,7 @@ class GameInstance:
                         if self.storm_state+2 != len(self.storm_rad):
                             self.storm_state += 1
                         else:
-                            print("storm iz done")
+                            print("storm is done")
                             break
                     
                     print("THE STORM")
@@ -274,7 +274,7 @@ class Server:
         while self.running:
             fpsClock.tick(2)#run slowly to avoid CPU hogging
             rooms = dict(zip(list(self.rooms.keys()),list(self.rooms.values())))
-            games = dict(zip(list(self.game_instances.keys()),list(self.game_instances.values()))) #zip it all up to prevent size change during iter errors
+            games = dict(zip(list(self.game_instances.keys()),list(self.game_instances.values()))) #zip it all up to prevent: size change during iter errors
             for room in rooms.keys():
                 if len(self.rooms[room]) == 0:
                     print(room, self.rooms)
@@ -351,14 +351,14 @@ class Server:
                 else:
                     players = []#list to send
                     for player in self.rooms[room_name]:
-                        players.append(player[:2])
+                        players.append(player[:2])#Only send in name and ready, because conn and addr arent useful and can't be serialized
                     msg = pickle.dumps(players)
                     conn.send(msg)
             except Exception as E:
                 print(E)
                 for player in self.rooms[room_name]:
                     if player[0] == name:
-                        self.rooms[room_name].remove(player)#Try and delete from rooms
+                        self.rooms[room_name].remove(player)#Try and delete from rooms if player has sudden disconnect errors
                         return
         conn.close()
 

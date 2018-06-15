@@ -35,7 +35,9 @@ def main(menu_obj):
     newSprites = [[scale_and_load(file, 3) for file in glob.glob('Sprites/Idle/*.png')],
                   [scale_and_load(file, 3) for file in glob.glob('Sprites/Shoot/*.png')],
                   [scale_and_load(file, 3) for file in glob.glob('Sprites/ShootIdle/*.png')]]
-
+    ESprites = [[scale_and_load(file, 3) for file in glob.glob('Sprites/EIdle/*.png')],
+                  [scale_and_load(file, 3) for file in glob.glob('Sprites/EShoot/*.png')],
+                  [scale_and_load(file, 3) for file in glob.glob('Sprites/EShootIdle/*.png')]]
     droneSprite = [[scale_and_load(file, 2) for file in glob.glob('newSprites/drone/*.png')]]
 
     explode = [scale_and_load(file, 2) for file in glob.glob('Weapons/Rocket/*.png')]
@@ -121,15 +123,6 @@ def main(menu_obj):
         else:
             p.player_state(inventory)
 
-        g.current_actor.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
-        px, py = g.current_actor.get_pos()
-        #SPRINT only for player
-        if keys[K_LSHIFT] and m[0] == 1:
-            p.speed = 6
-        elif keys[K_LSHIFT]:
-            p.speed = 14
-        else:
-            p.speed = 10
         g.draw_screen(g.current_actor)
         if g.current_actor.type == 'player': #Player object specific functions
             p.update_gif(newSprites) #Update player GIFS

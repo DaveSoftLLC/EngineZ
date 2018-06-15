@@ -144,6 +144,7 @@ def main(menu_obj):
         client.draw_weapons(g.screen,g.current_actor.pos) #Draw weapons on the ground
         render_bullets(g, p, client, FPS) #Draw in player bullets
         client.render_enemy_bullets(inventory.inventoryP[inventory.state],g.screen) #Draw in enemy bullets
+        p.rocket_animation(g.screen,explode)
         inventory.draw_inventory(g.screen,p.ammo) #Draw in inventory
         Drone.draw_drone(g.screen,g.droneB,dronebuttonlist,(t.time()-g.drone_start)) #Draw in drone button
         fps = fps_font.render(str(int(FPS)), True, (0,0,0)) 

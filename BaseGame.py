@@ -361,7 +361,7 @@ class Player:
         for i in self.rgif:
             if i[0][0][0] - screen.get_width() // 2 < p.pos[0] < i[0][0][0] + screen.get_width() //2 \
                         and i[0][0][1] - screen.get_height() // 2 < p.pos[1] < i[0][0][1] + screen.get_height() // 2:
-                bullet_sprite = anim[i[1]//20%len(anim)]
+                bullet_sprite = anim[i[1]//10%len(anim)]
                 print(bullet_sprite,i[0][0])
                 lx, ly = (i[0][0][0] - self.pos[0] + screen.get_width() // 2, i[0][0][1] - self.pos[1] + screen.get_height() // 2)
                 screen.blit(bullet_sprite, (lx,ly))

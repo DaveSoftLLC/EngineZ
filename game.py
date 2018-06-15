@@ -79,7 +79,7 @@ def main(menu_obj):
                     #g.weapon_pickup(p,inventory)
                     client.weapon_pickup(inventory) #Pickup weapon
                 if keys[K_f] and g.current_actor.type == 'player':
-                    p.open_door(openbuiding) #Enter buildings
+                    p.open_door(g.openbuilding) #Enter buildings
                 if keys[K_g] and g.current_actor.type == 'player':
                     inventory.remove_item(p) #Drop items
                 #open door
@@ -156,13 +156,15 @@ def main(menu_obj):
         fps = fps_font.render(str(int(FPS)), True, (0,0,0)) 
         g.screen.blit(fps, (1200,10)) #Draw in FPS
         if not check_health(p): #Check if player is dead
-            client.s.send(pickle.dumps("leaving"))
+            client.s.send(pickle.dumps("leave"))
             p.die(g.screen) #drawing in dead screen
             g.running = False
             time.wait(500)
             client.done = True
 
         display.flip()
+    print("exit")
+    client.s.send(pickle.dumps("leave"))
     client.s.close()
     while not client.done: #Wait for client object to display victory page
         pass

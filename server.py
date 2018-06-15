@@ -126,6 +126,7 @@ class GameInstance:
         while self.running:
             if len(self.player_dict.keys()) == 1:#Check if there is only one player left
                 self.running = False
+                print(list(self.player_dict.values())[0])
                 player = list(self.player_dict.values())[0].name
                 for p in self.clients:
                     if p[0] == player:

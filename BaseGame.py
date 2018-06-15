@@ -47,11 +47,12 @@ class Client:
             data = pickle.loads(data)
             if data == 'winner': #Win process
                 self.game.running = False #Shutoff game loop
+                print('winner winner turkey lunch')
                 win = image.load('Background/victory.png')
                 self.game.screen.blit(win, (1280//2-win.get_width()//2, #Blit in screen middle
                                       800//2-win.get_height()//2))
                 display.flip()
-                time.wait(1000)
+                time.wait(500)
                 self.done = True
                 return
             self.other_player_dict = data

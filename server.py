@@ -1,3 +1,6 @@
+#James Xu and Zhehai Zhang
+#Outcast: The Game
+#Server Code
 from BaseGame import *
 import copy
 import multiprocessing as mp
@@ -269,6 +272,8 @@ class Server:
             for game, obj in games.items():
                 if obj.game_end:
                     del self.game_instances[game]
+                if game in self.rooms.keys():
+                    del self.rooms[game]
     
     def listen(self):
         'Listen for connections'

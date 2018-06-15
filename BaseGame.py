@@ -52,7 +52,7 @@ class Client:
                 self.game.screen.blit(win, (1280//2-win.get_width()//2, #Blit in screen middle
                                       800//2-win.get_height()//2))
                 display.flip()
-                time.wait(500)
+                time.wait(1000)
                 self.done = True
                 return
             self.other_player_dict = data

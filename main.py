@@ -1,3 +1,6 @@
+#James Xu and Zhehai Zhang
+#Outcast: The Game
+#Game Launcher
 import game
 import menu
 import pygame as pg

@@ -113,11 +113,20 @@ def main(menu_obj):
                   [scale_and_load(file, 3) for file in glob.glob('Sprites/ShootIdle/*.png')]]
 
     droneSprite = [[scale_and_load(file, 2) for file in glob.glob('newSprites/drone/*.png')]]
+
+    explode = [scale_and_load(file, 2) for file in glob.glob('Weapons/Rocket/*.png')]
+    droneB = False
+    p = Player(g, username, (1200, 1200), 10, 'player')
+    p.ammo =[100 for i in range(len(g.guns))]
+    client = Client(p,0,g, conn, newSprites)
+    threading.Thread(target=client.get_data).start()
+
     droneB = False#Drone on/off boolean
     p = Player(g, username, (1200, 1200), 10, 'player')#Main player instance
     p.ammo =[100 for i in range(len(g.guns))]#Fill existing guns to the brim
     client = Client(p,0,g, conn, newSprites)#Networking object to communicate with server
     threading.Thread(target=client.get_data).start()#Connect to server
+
     drone_start = 31 #Drone can be used first (30 seconds)
     fps_font = font.SysFont('Arial',18)
     g.current_actor = p
@@ -182,7 +191,10 @@ def main(menu_obj):
                     g.open_door(p) #Enter buildings
                 if keys[K_g] and g.current_actor.type == 'player':
                     inventory.remove_item(p) #Drop items
-                    
+
+                    p.open_door(openbuilding)
+                if keys[K_g] and g.current_actor.type == 'player':
+                    inventory.remove_item(p)
                 #open door
                 elif e.key == K_ESCAPE:
                     running = False #Alternative 'exit' key
@@ -225,8 +237,79 @@ def main(menu_obj):
         else:
             p.player_state(inventory)
 
+        g.current_actor.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
+        px, py = g.current_actor.get_pos()
+        #SPRINT only for player
+        if keys[K_LSHIFT] and m[0] == 1:
+            p.speed = 6
+            
+        elif keys[K_LSHIFT]:
+            p.speed = 14
+            
+            
+        else:
+            p.speed = 10
+            
 
-        g.draw_screen(g.current_actor)
+        #UP
+        if keys[K_w] and g.screen.get_height()//2<py-g.current_actor.speed:
+            g.current_actor.move('UP', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
+        #DOWN
+        if keys[K_s] and py+g.current_actor.speed<g.background.get_height()-g.screen.get_height()//2:
+            g.current_actor.move('DOWN', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
+        #LEFT
+        if keys[K_a] and g.screen.get_width()//2<px-g.current_actor.speed:
+            g.current_actor.move('LEFT', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
+        #RIGHT
+        if keys[K_d] and px+g.current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
+            g.current_actor.move('RIGHT', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
+
+        if g.current_actor.type == 'player' and left_click and (t.time() - last_fire > 0.3 or (inventory.inventoryP[inventory.state].rate >0 and t.time() - last_fire > inventory.inventoryP[inventory.state].rate)):
+            last_fire = t.time()
+            p.fire(inventory, FPS)
+            
+        if m[0] == 1 or m[2] ==1:
+            p.state = 1
+        else:
+            p.player_state(inventory)
+                
+
+
+
+            g.draw_screen(g.current_actor)
+            if g.current_actor.type == 'player':
+                p.update_gif(newSprites)
+                p.render_player(newSprites, g)
+                client.render_other_players()
+                client.update_player(p)
+            else:
+                client.render_other_players(newSprites)
+                client.update_drone(g.drone)
+                g.drone.update_gif(droneSprite)
+                g.drone.render_player(droneSprite, g)
+                #If time runs out
+                if t.time()-g.drone_start >10:
+                    client.drone = 0
+                    g.current_actor = p
+                    g.drone_start = t.time()
+                    g.droneB = False
+            #g.draw_weapons(g.screen,g.current_actor.pos)
+            client.draw_weapons(g.screen,g.current_actor.pos)
+            render_bullets(g, p, client, FPS)
+            client.render_enemy_bullets(inventory.inventoryP[inventory.state],g.screen)
+            inventory.draw_inventory(g.screen,p.ammo)
+            Drone.draw_drone(g.screen,g.droneB,dronebuttonlist,(t.time()-g.drone_start))
+            if len(p.rgif)>0:
+                p.rocket_animation(g.screen,explode)
+                
+            fps = fps_font.render(str(int(FPS)), True, (0,0,0))
+            g.screen.blit(fps, (1200,10))
+            if not check_health(p):
+                p.die(g.screen)
+                client.s.send(pickle.dumps("leaving"))
+                g.running = False
+
+        g.draw_screen(g.current_actor,p)
         if g.current_actor.type == 'player': #Player object specific functions
             p.update_gif(newSprites) #Update player GIFS
             p.render_player(newSprites, g) #Draw player
@@ -258,6 +341,7 @@ def main(menu_obj):
             g.running = False
             time.wait(500)
             client.done = True
+
         display.flip()
     client.s.close()
     while not client.done: #Wait for client object to display victory page

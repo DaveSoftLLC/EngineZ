@@ -55,16 +55,27 @@ class Client:
                 self.done = True
                 return
             self.other_player_dict = data
-            if len(self.other_player_dict[p.name].weapon_send)>0 and self.other_player_dict[p.name].weapon_send[0] =="Sent":
+            if len(self.other_player_dict[p.name].weapon_send)>0 and self.other_player_dict[p.name].weapon_send[0] =="Sent": #If weapon send isn't blank, and weapon send has been updated,
+                #a.k.a sent, then it's safe to empty list
                 p.weapon_send = []
+            #Updating weapons on the floor, player health, and the storm position
             p.weapon_map = self.other_player_dict[p.name].weapon_map
             p.health = self.other_player_dict[p.name].health
             p.storm = self.other_player_dict[p.name].storm
             
+            #Rocket gif animation for explosion on players
+            for b in self.other_player_dict[p.name].del_bullets:
+                if b[2] == 'RPG':
+                    p.rgif.append([b,0])
+
             for b in self.other_player_dict[p.name].del_bullets: #Remove bullets that belong to current player
+
                 if b in p.bullets:
+                    
                     p.bullets.remove(b)
-        
+                    
+                        
+
     def render_other_players(self,Psprite=None):
         'Blit in other players'
         p = self.player
@@ -90,13 +101,14 @@ class Client:
             px, py = p.get_pos()
             dx,dy = d.get_pos()
             if dx - g.screen.get_width() // 2 < px < dx + g.screen.get_width() //2 \
-                        and dy - g.screen.get_height() // 2 < py < dy + g.screen.get_height() // 2:
-                    your_Player = transform.rotate(Psprite[p.state][p.gif_counter//20%len(Psprite[p.state])], p.rotation + 90)
-                    nx = px - dx + g.screen.get_width() // 2 \
+                        and dy - g.screen.get_height() // 2 < py < dy + g.screen.get_height() // 2:#Checks if your player is on screen
+                    your_Player = transform.rotate(Psprite[p.state][p.gif_counter//20%len(Psprite[p.state])], p.rotation + 90)#p.gif_counter is integer division by 20,
+                    #if slows gif counter down. It is then modded by length of list of images to prevent index out of range
+                    nx = px - dx + g.screen.get_width() // 2 \ #Converts universal position to screen
                          - your_Player.get_width() // 2
                     ny = py - dy + g.screen.get_height() // 2 \
                          - your_Player.get_height() // 2
-                    g.screen.blit(your_Player, (nx,ny))
+                    g.screen.blit(your_Player, (nx,ny)) 
                     
     def render_enemy_bullets(self, gun,screen):
         'Draw in enemy bullets'
@@ -179,14 +191,9 @@ class GameMode:
             self.weapon_dict = {"Shotgun":shotgun,"AR":assaultrifle,"Sniper":sniper,"RPG":rpg}
             self.guns = [assaultrifle,shotgun,sniper,rpg,empty,empty]
             #--------------------------------------------------------------------------------------------------------------------------
+            #Entering and leaving buildings
             self.buildingmap = image.load('Background/buildings.png').convert_alpha()
             self.building = False
-            #weapon_list = [n.name for n in self.guns]
-##            self.weapon_map =[]
-##            for i in range(20):
-##                weapon = choice(list(self.weapon_dict))
-##                wx,wy = (randint(100,11900),randint(100,7900))
-##                self.weapon_map.append([weapon,(wx,wy),100])
         else:
             #Background is needed for server-side authentication
             self.background = image.load('Background/MapFinal.png')
@@ -194,39 +201,63 @@ class GameMode:
         self.openbuilding = image.load('Background/openbuilding.png') #Building interiors
         self.running = True
         
-    def draw_screen(self, player):
+
+    def draw_screen(self, player,p):
         'Draw in game UI and background'
         px,py = player.get_pos()
         portion = self.background.subsurface(Rect(px-self.screen.get_width()//2,  #Subsurfaced portion of 12K x 8K image
                                              py-self.screen.get_height()//2,
                                              self.screen.get_width(), self.screen.get_height()))
         self.screen.blit(portion, (0, 0))#First thing to blit
-        #Storm
-        if player.storm!=[]:
-            draw.rect(self.surfaceALPHA,(0,0,255,80),(0,0,1280,800)) #Cover over for storm
-            nx = int(player.storm[0][0]-player.pos[0]+self.screen.get_width()//2) #Game coords to screen coords
-            ny = int(player.storm[0][1]-player.pos[1]+self.screen.get_height()//2)
-            draw.circle(self.surfaceALPHA,(0,0,0,0),(nx,ny),int(player.storm[1])) #Draw in massive storm circle
-            self.screen.blit(self.surfaceALPHA,(0,0))
-        if player.health > 80: #Different colors for different health levels
-            health_color = (0, 255, 0)
-        elif player.health > 40:
-            health_color = (255, 255, 0)
-        else:
-            health_color = (255, 0, 0)
-        draw.rect(self.screen, 0, (20, 20, 300, 40), 2) #Base bar
-        draw.rect(self.screen, health_color, (20, 20, int(player.health / 100 * 300), 40)) #Health amount bar
 
-        #Minimap
-        minimap = transform.scale(self.background,(180,120)) #scale down map size for minimap
-        self.screen.blit(minimap,(1050,50))
-        draw.circle(self.screen,(255,0,0),(int(1050+(px/12000)*180),int(50+(py/8000)*120)),2)
-        if player.storm!=[]:#If storm exists
-            if len(player.storm) == 5:
-                draw.circle(self.screen,(0,0,255),(int(1050+(player.storm[0][0]/12000)*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
-                draw.circle(self.screen,(0,255,0),(int(1050+(player.storm[3][0]/12000)*180),int(50+(player.storm[3][1]/8000)*120)),int(player.storm[4]//67),2)
-            elif len(player.storm) == 3:
-                draw.circle(self.screen,(0,0,255),(int(1050+player.storm[0][0]/12000*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
+        try:
+            px,py = player.get_pos()
+            portion = self.background.subsurface(Rect(px-self.screen.get_width()//2,
+                                                 py-self.screen.get_height()//2,
+                                                 self.screen.get_width(), self.screen.get_height()))
+            self.screen.blit(portion, (0, 0))
+            #Storm
+            if player.storm!=[] or player.type == 'drone':
+                if player.type != 'drone':
+                    draw.rect(self.surfaceALPHA,(0,0,255,80),(0,0,1280,800))
+                    nx = int(player.storm[0][0]-player.pos[0]+self.screen.get_width()//2)
+                    ny = int(player.storm[0][1]-player.pos[1]+self.screen.get_height()//2)
+                    draw.circle(self.surfaceALPHA,(0,0,0,0),(nx,ny),int(player.storm[1]))
+                    self.screen.blit(self.surfaceALPHA,(0,0))
+                else:
+                    draw.rect(self.surfaceALPHA,(0,0,255,80),(0,0,1280,800))
+                    nx = int(p.storm[0][0]-player.pos[0]+self.screen.get_width()//2)
+                    ny = int(p.storm[0][1]-player.pos[1]+self.screen.get_height()//2)
+                    draw.circle(self.surfaceALPHA,(0,0,0,0),(nx,ny),int(p.storm[1]))
+                    self.screen.blit(self.surfaceALPHA,(0,0))
+
+            if player.health > 80:
+                health_color = (0, 255, 0)
+            elif player.health > 40:
+                health_color = (255, 255, 0)
+            else:
+                health_color = (255, 0, 0)
+            draw.rect(self.screen, 0, (20, 20, 300, 40), 2)
+            draw.rect(self.screen, health_color, (20, 20, int(player.health / 100 * 300), 40))
+
+            #Minimap
+            minimap = transform.scale(self.background,(180,120))
+            self.screen.blit(minimap,(1050,50))
+            draw.circle(self.screen,(255,0,0),(int(1050+(px/12000)*180),int(50+(py/8000)*120)),2)
+            if player.storm!=[]:#Showing on minimap
+                if len(player.storm) == 5:
+                    draw.circle(self.screen,(0,0,255),(int(1050+(player.storm[0][0]/12000)*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
+                    draw.circle(self.screen,(0,255,0),(int(1050+(player.storm[3][0]/12000)*180),int(50+(player.storm[3][1]/8000)*120)),int(player.storm[4]//67),2)
+                elif len(player.storm) == 3:
+                    draw.circle(self.screen,(0,0,255),(int(1050+player.storm[0][0]/12000*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
+            elif player.type == 'drone':
+                if len(p.storm) == 5:
+                    draw.circle(self.screen,(0,0,255),(int(1050+(p.storm[0][0]/12000)*180),int(50+(p.storm[0][1]/8000)*120)),int(p.storm[1]//67),2)
+                    draw.circle(self.screen,(0,255,0),(int(1050+(p.storm[3][0]/12000)*180),int(50+(p.storm[3][1]/8000)*120)),int(p.storm[4]//67),2)
+                elif len(p.storm) == 3:
+                    draw.circle(self.screen,(0,0,255),(int(1050+p.storm[0][0]/12000*180),int(50+(p.storm[0][1]/8000)*120)),int(p.storm[1]//67),2)
+        except Exception as E:
+            print("Error:", E)
 
     def drone_click(self,g,p,client):
         'Activate drone and process action'
@@ -244,12 +275,6 @@ class GameMode:
             client.drone = 0
             self.current_actor = p
             self.droneB = False
-            #----------------------
-    def open_door(self,p):
-        'Opens building interiors'
-        if self.openbuilding.get_at((p.pos[0],p.pos[1]))[3] != 0: #If position isn't transparent on mask
-            self.building = True
-            print("open")
                 
 class Player:
     def __init__(self, game, name, pos, speed, mode):
@@ -266,11 +291,12 @@ class Player:
         self.del_bullets = [] #Bullets instructed by server to be deleted
         self.ammo = [] #List of ammo for each of the guns in the inventory
         self.weapon_send = []#[weapon to remove, weapon to add]
-        self.type = mode #Attribute of either player or drone
-        self.weapon_map = [] #List of weapons on the ground
-        self.storm = [] #Storm
-        self.building = False #Whether or not building interiors are shown
-
+        self.type = mode
+        self.weapon_map = []
+        self.storm = []
+        self.building = False
+        self.rocket_b = []
+        self.rgif = []
     def move(self, direction, background, collisionmap,buildingmap,openbuilding, FPS, speed=None):
         'Moves player in direction while validating that move'
         wall = ((150,72,15))
@@ -343,9 +369,23 @@ class Player:
                 
     def render_player(self, sprites, game):
         'Draw in the player'
-        sprite = transform.rotate(sprites[self.state][self.gif_counter//20%len(sprites[self.state])], self.rotation + 90) #Rotated Sprite
-        self.rect = game.screen.blit(sprite, (640 - sprite.get_width() // 2, 400 - sprite.get_height() // 2)) #Set player rect to equal this
-
+        sprite = transform.rotate(sprites[self.state][self.gif_counter//20%len(sprites[self.state])], self.rotation + 90)
+        self.rect = game.screen.blit(sprite, (640 - sprite.get_width() // 2, 400 - sprite.get_height() // 2))
+    def rocket_animation(self,screen,anim):
+        'Rocket Animations'
+        print(self.rgif)
+        for i in self.rgif:
+            if i[0][0][0] - screen.get_width() // 2 < p.pos[0] < i[0][0][0] + screen.get_width() //2 \
+                        and i[0][0][1] - screen.get_height() // 2 < p.pos[1] < i[0][0][1] + screen.get_height() // 2:
+                bullet_sprite = anim[i[1]//20%len(anim)]
+                print(bullet_sprite,i[0][0])
+                lx, ly = (i[0][0][0] - self.pos[0] + screen.get_width() // 2, i[0][0][1] - self.pos[1] + screen.get_height() // 2)
+                screen.blit(bullet_sprite, (lx,ly))
+            if i[1] <30:
+                self.rgif[self.rgif.index(i)][1]+=1
+            else:
+                del self.rgif[self.rgif.index(i)]
+            
     def get_rect(self):
         'Return player rect'
         return self.rect
@@ -378,10 +418,6 @@ class Drone(Player):
             dronebutton = piclist[1]
             Game.blit(textFont.render(str(round(10-timer,2)), True, (255,255,255)), (35, 770))
         Game.blit(dronebutton,(20,700))
-    ##########
-    #To put in:
-    #Trees that can be broken down (randint tree rect)
-    #The Storm
     
 def map_to_bullet(name,game):
     'Return bulletsprite for name of the gun through linear search'

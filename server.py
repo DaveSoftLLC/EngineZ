@@ -168,10 +168,12 @@ class GameInstance:
                         interpolate = [(nx - i * cos(radians(angle)),
                                         ny + i * sin(radians(angle))) for i in range(b[3])] #Interpolate gaps between each +20ish on pos
 ##                        interpolate = gameMath.interpolate(int(nx),int(ny),int(angle),int(b[3]))
-                        for ix, iy in interpolate: #Loop through interpolated pixels
-                            if (b[2] == 'rpg' and hypot(px- nx, py - ny)<60) or hypot(px - nx, py - ny) < 30: #Check if bullet roughly hits player
-                                threading.Thread(target=serverRequest.modify, args=(name, 1)).start()#Add points for each hit
-                                obj.bullets.remove(b)#Delete bullet so it isnt touched again
+                        for ix, iy in interpolate:
+                            if hypot(px - nx, py - ny) < 30:
+                                threading.Thread(target=serverRequest.modify, args=(name, 1)).start()
+                                counter += 1
+                                print(counter, name)
+                                obj.bullets.remove(b)
                                 if name not in del_bullets.keys():
                                     del_bullets[name] = [b]#Add this bullet to del bullets if player isnt in del bulets
                                 else:#If already in, append it instead

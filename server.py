@@ -1,5 +1,6 @@
 #James Xu and Zhehai Zhang
 #Outcast: The Game
+#June 15th, 2018
 #Server Code
 from BaseGame import *
 import copy

@@ -1,4 +1,5 @@
 #James Xu and Zhehai Zhang
+#June 15, 2018
 #Actual Game
 import glob #find files
 from random import randint #random selection

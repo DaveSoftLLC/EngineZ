@@ -35,7 +35,9 @@ def main(menu_obj):
     newSprites = [[scale_and_load(file, 3) for file in glob.glob('Sprites/Idle/*.png')],
                   [scale_and_load(file, 3) for file in glob.glob('Sprites/Shoot/*.png')],
                   [scale_and_load(file, 3) for file in glob.glob('Sprites/ShootIdle/*.png')]]
-
+    ESprites = [[scale_and_load(file, 3) for file in glob.glob('Sprites/EIdle/*.png')],
+                  [scale_and_load(file, 3) for file in glob.glob('Sprites/EShoot/*.png')],
+                  [scale_and_load(file, 3) for file in glob.glob('Sprites/EShootIdle/*.png')]]
     droneSprite = [[scale_and_load(file, 2) for file in glob.glob('newSprites/drone/*.png')]]
 
     explode = [scale_and_load(file, 2) for file in glob.glob('Weapons/Rocket/*.png')]
@@ -43,7 +45,7 @@ def main(menu_obj):
     droneB = False#Drone on/off boolean
     p = Player(g, username, (1200, 1200), 10, 'player')#Main player instance
     p.ammo =[100 for i in range(len(g.guns))]#Fill existing guns to the brim
-    client = Client(p,0,g, conn, newSprites)#Networking object to communicate with server
+    client = Client(p,0,g, conn, ESprites)#Networking object to communicate with server
     threading.Thread(target=client.get_data).start()#Connect to server
 
     drone_start = 31 #Drone can be used first (30 seconds)
@@ -121,15 +123,6 @@ def main(menu_obj):
         else:
             p.player_state(inventory)
 
-        g.current_actor.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
-        px, py = g.current_actor.get_pos()
-        #SPRINT only for player
-        if keys[K_LSHIFT] and m[0] == 1:
-            p.speed = 6
-        elif keys[K_LSHIFT]:
-            p.speed = 14
-        else:
-            p.speed = 10
         g.draw_screen(g.current_actor)
         if g.current_actor.type == 'player': #Player object specific functions
             p.update_gif(newSprites) #Update player GIFS
@@ -151,6 +144,7 @@ def main(menu_obj):
         client.draw_weapons(g.screen,g.current_actor.pos) #Draw weapons on the ground
         render_bullets(g, p, client, FPS) #Draw in player bullets
         client.render_enemy_bullets(inventory.inventoryP[inventory.state],g.screen) #Draw in enemy bullets
+        p.rocket_animation(g.screen,explode)
         inventory.draw_inventory(g.screen,p.ammo) #Draw in inventory
         Drone.draw_drone(g.screen,g.droneB,dronebuttonlist,(t.time()-g.drone_start)) #Draw in drone button
         fps = fps_font.render(str(int(FPS)), True, (0,0,0)) 

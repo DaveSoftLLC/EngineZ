@@ -213,42 +213,35 @@ class GameMode:
                                              py-self.screen.get_height()//2,
                                              self.screen.get_width(), self.screen.get_height()))
         self.screen.blit(portion, (0, 0))#First thing to blit
+    
+        #Storm
+        if player.storm!=[]:
+            draw.rect(self.surfaceALPHA,(0,0,255,80),(0,0,1280,800))
+            nx = int(player.storm[0][0]-player.pos[0]+self.screen.get_width()//2)
+            ny = int(player.storm[0][1]-player.pos[1]+self.screen.get_height()//2)
+            draw.circle(self.surfaceALPHA,(0,0,0,0),(nx,ny),int(player.storm[1]))
+            self.screen.blit(self.surfaceALPHA,(0,0))
 
-        try:
-            px,py = player.get_pos()
-            portion = self.background.subsurface(Rect(px-self.screen.get_width()//2,
-                                                 py-self.screen.get_height()//2,
-                                                 self.screen.get_width(), self.screen.get_height()))
-            self.screen.blit(portion, (0, 0))
-            #Storm
-            if player.storm!=[]:
-                draw.rect(self.surfaceALPHA,(0,0,255,80),(0,0,1280,800))
-                nx = int(player.storm[0][0]-player.pos[0]+self.screen.get_width()//2)
-                ny = int(player.storm[0][1]-player.pos[1]+self.screen.get_height()//2)
-                draw.circle(self.surfaceALPHA,(0,0,0,0),(nx,ny),int(player.storm[1]))
-                self.screen.blit(self.surfaceALPHA,(0,0))
+        if player.health > 80:
+            health_color = (0, 255, 0)
+        elif player.health > 40:
+            health_color = (255, 255, 0)
+        else:
+            health_color = (255, 0, 0)
+        draw.rect(self.screen, 0, (20, 20, 300, 40), 2)
+        draw.rect(self.screen, health_color, (20, 20, int(player.health / 100 * 300), 40))
 
-            if player.health > 80:
-                health_color = (0, 255, 0)
-            elif player.health > 40:
-                health_color = (255, 255, 0)
-            else:
-                health_color = (255, 0, 0)
-            draw.rect(self.screen, 0, (20, 20, 300, 40), 2)
-            draw.rect(self.screen, health_color, (20, 20, int(player.health / 100 * 300), 40))
+        #Minimap
+        minimap = transform.scale(self.background,(180,120))
+        self.screen.blit(minimap,(1050,50))
+        draw.circle(self.screen,(255,0,0),(int(1050+(px/12000)*180),int(50+(py/8000)*120)),2)
+        if player.storm!=[]:#Showing on minimap
+            if len(player.storm) == 5:
+                draw.circle(self.screen,(0,0,255),(int(1050+(player.storm[0][0]/12000)*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
+                draw.circle(self.screen,(0,255,0),(int(1050+(player.storm[3][0]/12000)*180),int(50+(player.storm[3][1]/8000)*120)),int(player.storm[4]//67),2)
+            elif len(player.storm) == 3:
+                draw.circle(self.screen,(0,0,255),(int(1050+player.storm[0][0]/12000*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
 
-            #Minimap
-            minimap = transform.scale(self.background,(180,120))
-            self.screen.blit(minimap,(1050,50))
-            draw.circle(self.screen,(255,0,0),(int(1050+(px/12000)*180),int(50+(py/8000)*120)),2)
-            if player.storm!=[]:#Showing on minimap
-                if len(player.storm) == 5:
-                    draw.circle(self.screen,(0,0,255),(int(1050+(player.storm[0][0]/12000)*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
-                    draw.circle(self.screen,(0,255,0),(int(1050+(player.storm[3][0]/12000)*180),int(50+(player.storm[3][1]/8000)*120)),int(player.storm[4]//67),2)
-                elif len(player.storm) == 3:
-                    draw.circle(self.screen,(0,0,255),(int(1050+player.storm[0][0]/12000*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
-        except Exception as E:
-            print("Error:", E)
 
     def drone_click(self,g,p,client):
         'Activate drone and process action'
@@ -368,7 +361,7 @@ class Player:
         for i in self.rgif:
             if i[0][0][0] - screen.get_width() // 2 < p.pos[0] < i[0][0][0] + screen.get_width() //2 \
                         and i[0][0][1] - screen.get_height() // 2 < p.pos[1] < i[0][0][1] + screen.get_height() // 2:
-                bullet_sprite = anim[i[1]//20%len(anim)]
+                bullet_sprite = anim[i[1]//10%len(anim)]
                 print(bullet_sprite,i[0][0])
                 lx, ly = (i[0][0][0] - self.pos[0] + screen.get_width() // 2, i[0][0][1] - self.pos[1] + screen.get_height() // 2)
                 screen.blit(bullet_sprite, (lx,ly))

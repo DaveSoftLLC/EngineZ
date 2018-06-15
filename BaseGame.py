@@ -1,3 +1,6 @@
+#James Xu and Zhehai Zhang
+#Outcast: The Game
+#File of classes used in both client and server
 import pickle #IO serialization
 import socket #Networking
 import threading #SImultaneous Code

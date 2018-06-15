@@ -5,10 +5,10 @@ import game
 import menu
 import pygame as pg
 import sys
-running = True
-main = menu.Main()
-mode = 'login'
-username = ''
+running = True #Main flag to determine running
+main = menu.Main() #Menu object
+mode = 'login' #Used to select and transfer between modes
+username = '' #Remembers username when user has logged in already
 while running:
     if mode.lower() == 'login':
         mode, data = main.login_screen()

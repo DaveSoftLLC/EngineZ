@@ -1,6 +1,6 @@
 #include <Python.h>
 #include <math.h>
-
+/* UNUSED, Couldn't compile for Windows :( */
 static PyObject* interpolate(PyObject* self, PyObject* args) {
     const Py_ssize_t tl = 2;
     const Py_ssize_t ll = 0;
@@ -11,8 +11,8 @@ static PyObject* interpolate(PyObject* self, PyObject* args) {
     PyObject* pos_list = PyList_New(ll);
     for (int i = 0; i < distance; i++) {
         double x = -i * cos(angle * M_PI / 180);
-        double y = -i * sin(angle * M_PI / 180);
-    PyObject *pos = Py_BuildValue("(ff)", x, y);
+        double y =  i * sin(angle * M_PI / 180);
+        PyObject *pos = Py_BuildValue("(ff)", x, y);
         PyList_Append(pos_list, pos);
     }
     return pos_list;

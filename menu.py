@@ -1,10 +1,14 @@
+#James Xu and Zhehai Zhang
+#Outcast: The Game
+#Main menu classes
 from BaseGame import *
 import glob 
 import queue
 from argon2 import PasswordHasher
-import authenticate
+import authenticate #Used for authentication
 
 def AAfilledRoundedRect(surface,rect,color,radius=0.4):
+    #FUNCTION IS FROM https://www.pygame.org/project-AAfilledRoundedRect-2349-.html
 
     """
     AAfilledRoundedRect(surface,rect,color,radius=0.4)
@@ -117,7 +121,7 @@ class ClientMatch:
             return
         ready = False
         fps_clock = time.Clock()
-        #Rest is same as self.join_room()
+        #Rest is same as self.join_room()-------------
         while self.running:
             fps_clock.tick(30)
             room_data = {'name':self.name,
@@ -127,7 +131,6 @@ class ClientMatch:
                          'master':True}
             self.s.send(pickle.dumps(room_data))
             data = pickle.loads(self.s.recv(BUFFER_SIZE))
-            print('server:', data)
             self.send_queue.put(data)
             if not self.events.empty():
                 event = self.events.get(block=False)
@@ -144,14 +147,14 @@ class ClientMatch:
                 self.send_queue.put((True, self.s))
                 print('begin')
                 return
-
+        #---------------------------------------------
     def authenticate(self, username, password):
         'Authenticate user based on MySQL database'
         self.name = username
         return True
         ph = PasswordHasher() #Create a passwordhasher object to hash passwords
-        #username: pay2lose
-        #password: abacus
+        #username: pay2lose, testing, rmckenzie
+        #password: abacus, admin, ccc
         sql_request = authenticate.MySQLRequest('s03.jamesxu.ca',
                                                 'jamesxu',
                                                 'enginez123',
@@ -461,7 +464,7 @@ class Main:
         'Renders a button'
         render_text = self.menu_font.render(text, True, (0,0,0))
         w, h = render_text.get_size()
-        button_surf = Surface((w+24,h+6)) #Slightly padded box
+        button_surf = Surface((w+24,h+6)) #Slightly padded box to look better
         button_surf.fill(box_color)
         button_surf.blit(render_text, (12,3))
         return button_surf
@@ -503,7 +506,7 @@ class Main:
         return 'exit', 'None'
     
 def render_button(text, box_color, font):
-    'Renders a button'
+    'Renders a button in given color and font'
     render_text = font.render(text, True, (0,0,0))
     w, h = render_text.get_size()
     button_surf = Surface((w+24,h+6))
@@ -554,8 +557,8 @@ def check_hover(screen, buttons, button_dict, mouse_pos, left_click, font):
     return (None, None) #Return None if nothiing happened
 
 def player_bar(screen, rect, username, master, color, font):
-    #Bar containing player info
     'screen, rect, username, master, color, font'
+    #Bar containing player info
     draw.rect(screen, color, rect)
     tx, ty, tw, th = rect #rect sizes
     synonyms = {True: 'Ready', False: 'Waiting'} #maps true and false to words

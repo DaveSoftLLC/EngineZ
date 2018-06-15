@@ -1,4 +1,4 @@
-
+#UNUSED, REPLACED BY MYSQL
 class Row:
     def __init__(self, username, password, high_score):
         self.username = username

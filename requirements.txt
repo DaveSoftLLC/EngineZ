@@ -1,0 +1,4 @@
+mysqlclient
+argon2_cffi
+pygame
+

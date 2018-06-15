@@ -151,7 +151,6 @@ class ClientMatch:
     def authenticate(self, username, password):
         'Authenticate user based on MySQL database'
         self.name = username
-        return True
         ph = PasswordHasher() #Create a passwordhasher object to hash passwords
         #username: pay2lose, testing, rmckenzie
         #password: abacus, admin, ccc

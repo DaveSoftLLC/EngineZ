@@ -45,7 +45,7 @@ def main(menu_obj):
     droneB = False#Drone on/off boolean
     p = Player(g, username, (1200, 1200), 10, 'player')#Main player instance
     p.ammo =[100 for i in range(len(g.guns))]#Fill existing guns to the brim
-    client = Client(p,0,g, conn, newSprites)#Networking object to communicate with server
+    client = Client(p,0,g, conn, ESprites)#Networking object to communicate with server
     threading.Thread(target=client.get_data).start()#Connect to server
 
     drone_start = 31 #Drone can be used first (30 seconds)

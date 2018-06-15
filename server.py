@@ -38,15 +38,15 @@ class GameInstance:
             self.weapon_map.append([weapon,(wx,wy),100])
             #self.weapon_map will be sent along with player_dict, client will send weapon that they picked up, and the weapon they will drop (or none)
         #Storm
-        self.storm_time  = 30000000000000000 #Tim
+        #Storm time is large to prevent the next storm from happening
+        self.storm_time  = 30000000000000000
+        #Storm moving is to regulate the movement of the storm
         self.storm_moving  = 6000000000000
+        #State decides when storm will be idle, and when it'll be moving
         self.storm_next = "idle"
+        #Storing all the storm positions and radius beforehand
         self.storm_pos = []
         self.storm_rad = [6000,4000,3000,2000,1000,500]
-        self.dam = 0
-        self.stormB = True
-        self.storm_state = 0
-        self.storm(True)
         for a in range(len(self.storm_rad)):
             if self.storm_rad[a] == 6000:
                 self.storm_pos.append([6000,4000])
@@ -54,7 +54,20 @@ class GameInstance:
                 x = randint(self.storm_pos[a-1][0]-(self.storm_rad[a-1]-self.storm_rad[a])+200,self.storm_pos[a-1][0]+(self.storm_rad[a-1]-self.storm_rad[a])-200)
                 y = randint(self.storm_pos[a-1][1]-(self.storm_rad[a-1]-self.storm_rad[a])+200,self.storm_pos[a-1][1]+(self.storm_rad[a-1]-self.storm_rad[a])-200)
                 self.storm_pos.append([x,y])
+<<<<<<< HEAD
+        #Boolean for starting storm once everyone is ready
+        self.stormB = True
+        #Deals damage to players at a steady pace
+        self.dam = 0
+        #Access storm_pos and storm_rad index positions
+        self.storm_state = 0
+        #True initializes storm
+        self.storm(True)
+        
+        #Start server processing logic
+=======
         #start server processing logic in seperate threads
+>>>>>>> 9ec30ca8dc5001eab849edb78eb9bda7141e21d7
         threading.Thread(target=self.check_damage).start()
         threading.Thread(target=self.storm).start()
         threading.Thread(target=self.check_win).start()
@@ -93,21 +106,32 @@ class GameInstance:
                         if len(self.player_dict[current_player].weapon_send) > 0:
                             if self.player_dict[current_player].weapon_send[1] == 0:#Picking up weapon
                                 del self.weapon_map[self.weapon_map.index(self.player_dict[current_player].weapon_send[0])]
-                            elif self.player_dict[current_player].weapon_send[0] == 0:#dropping weapon
+                            elif self.player_dict[current_player].weapon_send[0] == 0:#Dropping weapon
                                 self.weapon_map.append(self.player_dict[current_player].weapon_send[1])
                             else:#Picking up and dropping
                                 self.weapon_map.append(self.player_dict[current_player].weapon_send[1])
                                 del self.weapon_map[self.weapon_map.index(self.player_dict[current_player].weapon_send[0])]
+                            #Tells player that the weapon transfer has been confirmed so it is safe to clear weapon_send (we don't want to keep on adding or removing the same item)
                             self.player_dict[current_player].weapon_send = ["Sent"]
+                        self.player_dict[current_player].weapon_map = self.weapon_map
+                        #Storm    
                         if (self.storm_state+1) != len(self.storm_rad):
                             self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state],self.storm_next,self.storm_pos[self.storm_state+1],self.storm_rad[self.storm_state+1]]
-                        else:
+                        else:#If it's the last storm, there won't be another so no next storm is sent
                             self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state],self.storm_next]
+<<<<<<< HEAD
+                        
+                        if current_player in del_bullets:#Sends deleted bullets to the player so that the player can remove those bullets
+                            self.player_dict[current_player].del_bullets += del_bullets[current_player]
+                        del_bullets[current_player] = []
+                        #Send connection
+=======
                                 
                         self.player_dict[current_player].weapon_map = self.weapon_map
                         if current_player in del_bullets: #Notify client of bullets marked for deletion
                             self.player_dict[current_player].del_bullets += del_bullets[current_player]
                         del_bullets[current_player] = [] #Don't send the same bullets twice
+>>>>>>> 9ec30ca8dc5001eab849edb78eb9bda7141e21d7
                         conn.send(pickle.dumps(self.player_dict))
                         #print("sent")
                     except Exception as E:

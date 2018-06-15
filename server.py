@@ -54,6 +54,7 @@ class GameInstance:
                 x = randint(self.storm_pos[a-1][0]-(self.storm_rad[a-1]-self.storm_rad[a])+200,self.storm_pos[a-1][0]+(self.storm_rad[a-1]-self.storm_rad[a])-200)
                 y = randint(self.storm_pos[a-1][1]-(self.storm_rad[a-1]-self.storm_rad[a])+200,self.storm_pos[a-1][1]+(self.storm_rad[a-1]-self.storm_rad[a])-200)
                 self.storm_pos.append([x,y])
+<<<<<<< HEAD
         #Boolean for starting storm once everyone is ready
         self.stormB = True
         #Deals damage to players at a steady pace
@@ -64,6 +65,9 @@ class GameInstance:
         self.storm(True)
         
         #Start server processing logic
+=======
+        #start server processing logic in seperate threads
+>>>>>>> 9ec30ca8dc5001eab849edb78eb9bda7141e21d7
         threading.Thread(target=self.check_damage).start()
         threading.Thread(target=self.storm).start()
         threading.Thread(target=self.check_win).start()
@@ -115,11 +119,19 @@ class GameInstance:
                             self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state],self.storm_next,self.storm_pos[self.storm_state+1],self.storm_rad[self.storm_state+1]]
                         else:#If it's the last storm, there won't be another so no next storm is sent
                             self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state],self.storm_next]
+<<<<<<< HEAD
                         
                         if current_player in del_bullets:#Sends deleted bullets to the player so that the player can remove those bullets
                             self.player_dict[current_player].del_bullets += del_bullets[current_player]
                         del_bullets[current_player] = []
                         #Send connection
+=======
+                                
+                        self.player_dict[current_player].weapon_map = self.weapon_map
+                        if current_player in del_bullets: #Notify client of bullets marked for deletion
+                            self.player_dict[current_player].del_bullets += del_bullets[current_player]
+                        del_bullets[current_player] = [] #Don't send the same bullets twice
+>>>>>>> 9ec30ca8dc5001eab849edb78eb9bda7141e21d7
                         conn.send(pickle.dumps(self.player_dict))
                         #print("sent")
                     except Exception as E:
@@ -141,12 +153,11 @@ class GameInstance:
         while self.running:
             if len(self.player_dict.keys()) == 1:#Check if there is only one player left
                 self.running = False
-                print(list(self.player_dict.values())[0])
-                player = list(self.player_dict.values())[0].name
-                for p in self.clients:
-                    if p[0] == player:
+                player = list(self.player_dict.values())[0].name #Get name of player
+                for p in self.clients: #Find their socket object
+                    if p[0] == player: #(name, ready, conn, addr)
                         p[2].send(pickle.dumps('winner'))#Tell them they're the winner
-                threading.Thread(target=serverRequest.modify, args=(player, 25)).start() #Give them bonus points
+                threading.Thread(target=serverRequest.modify, args=(player, 25)).start() #Give them bonus points for winning
                 self.running = False#End game
                 self.game_end = True#End game
 

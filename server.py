@@ -114,19 +114,11 @@ class GameInstance:
                             self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state],self.storm_next,self.storm_pos[self.storm_state+1],self.storm_rad[self.storm_state+1]]
                         else:#If it's the last storm, there won't be another so no next storm is sent
                             self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state],self.storm_next]
-<<<<<<< HEAD
                         
                         if current_player in del_bullets:#Sends deleted bullets to the player so that the player can remove those bullets
                             self.player_dict[current_player].del_bullets += del_bullets[current_player]
                         del_bullets[current_player] = []
                         #Send connection
-=======
-                                
-                        self.player_dict[current_player].weapon_map = self.weapon_map
-                        if current_player in del_bullets: #Notify client of bullets marked for deletion
-                            self.player_dict[current_player].del_bullets += del_bullets[current_player]
-                        del_bullets[current_player] = [] #Don't send the same bullets twice
->>>>>>> 9ec30ca8dc5001eab849edb78eb9bda7141e21d7
                         conn.send(pickle.dumps(self.player_dict))
                         #print("sent")
                     except Exception as E:

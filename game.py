@@ -15,8 +15,6 @@ def main(menu_obj):
     dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
     openbuilding = image.load('Background/openbuilding.png').convert_alpha()
     collision = image.load('Background/rocks+hole.png').convert_alpha()
-    image_counter = [0] #Nested functions don't allow globalling, list allows usage of memory pointers
-                        #to achieve similar effect
 
     #Shotgun bullet range
     #Gun reload time

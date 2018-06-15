@@ -19,6 +19,7 @@ while running:
     elif mode.lower() == 'menu':
         main = menu.Main(data)
         mode, data = main.draw_home()
+#Quit in as many ways as possible, was giving me issues earlier :(
 pg.quit()
 sys.exit()
 quit()

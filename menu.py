@@ -425,7 +425,7 @@ class Main:
         
     def draw_create(self, left_click):
         'Draw in create room'
-        #Same logic as used in draw_join
+        #Same logic as used in draw_join below
         w, h = self.screen.get_size()
         AAfilledRoundedRect(self.screen,(w//2-700//2,350,700,200),(53,121,169,100), radius=0.05)
         mx, my = mouse.get_pos()
@@ -547,7 +547,8 @@ def check_hover(screen, buttons, button_dict, mouse_pos, left_click, font):
             return (True, word)
         elif state == 'hover':
             hovered = word
-    if hovered: #Reblit each of them with new color
+    if hovered: #Reblit each of them with new color to avoid over usage of class attributes or global variables
+                #Incurs a VERY minor performance hit, buttons aren't overly demanding
         for word, b in button_dict.items():
             if word == hovered:
                 button = render_button(word, (255,255,255), font)
@@ -558,7 +559,7 @@ def check_hover(screen, buttons, button_dict, mouse_pos, left_click, font):
 
 def player_bar(screen, rect, username, master, color, font):
     'screen, rect, username, master, color, font'
-    #Bar containing player info
+    #Bar containing player info in the draw_room screen
     draw.rect(screen, color, rect)
     tx, ty, tw, th = rect #rect sizes
     synonyms = {True: 'Ready', False: 'Waiting'} #maps true and false to words

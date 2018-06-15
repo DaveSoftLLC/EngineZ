@@ -5,72 +5,6 @@ from random import randint #random selection
  
 from BaseGame import * #Main classes
 g = GameMode()
-title_font = font.Font('geonms-font.ttf', 72)
-menu_font = font.Font('geonms-font.ttf', 32)
-background = transform.smoothscale(image.load('nmsplanet.jpg').convert(), (1280,800))
-def AAfilledRoundedRect(surface,rect,color,radius=0.4): #Source: from Stack Overflow
-
-    """
-    AAfilledRoundedRect(surface,rect,color,radius=0.4)
-
-    surface : destination
-    rect    : rectangle
-    color   : rgb or rgba
-    radius  : 0 <= radius <= 1
-    """
-
-    rect         = Rect(rect)
-    color        = Color(*color)
-    alpha        = color.a
-    color.a      = 0
-    pos          = rect.topleft
-    rect.topleft = 0,0
-    rectangle    = Surface(rect.size,SRCALPHA)
-
-    circle       = Surface([min(rect.size)*3]*2,SRCALPHA)
-    draw.ellipse(circle,(0,0,0),circle.get_rect(),0)
-    circle       = transform.smoothscale(circle,[int(min(rect.size)*radius)]*2)
-
-    radius              = rectangle.blit(circle,(0,0))
-    radius.bottomright  = rect.bottomright
-    rectangle.blit(circle,radius)
-    radius.topright     = rect.topright
-    rectangle.blit(circle,radius)
-    radius.bottomleft   = rect.bottomleft
-    rectangle.blit(circle,radius)
-
-    rectangle.fill((0,0,0),rect.inflate(-radius.w,0))
-    rectangle.fill((0,0,0),rect.inflate(0,-radius.h))
-
-    rectangle.fill(color,special_flags=BLEND_RGBA_MAX)
-    rectangle.fill((255,255,255,alpha),special_flags=BLEND_RGBA_MIN)
-
-    return surface.blit(rectangle,pos)
-def loading_screen(percent, background):
-    'Blits a loading sceen with "background" image and "percent" amount of bar filled'
-    for e in event.get(): #Check for user quit
-        if e.type == QUIT:
-            quit()
-    screen = g.screen#Alias for shorter typing
-    title = title_font.render('outcast: the game', True, (255,255,255))
-    msg = menu_font.render('loading', True, (255,255,255))
-    width = 500#Width of progress bar
-    height = 25#Height of progress bar
-    main_status_rect = (screen.get_width()//2-width//2, #Rect tuple of bar underneath progress bar
-                        600,
-                        width,
-                        height)
-    progress_rect = (main_status_rect[0], #Rect tuple of progress bar
-                     main_status_rect[1], int(percent*width), height)
-##        screen.fill(0)
-    screen.blit(background, (0,0))
-    screen.blit(title, (screen.get_width()//2-title.get_width()//2, 100))
-    screen.blit(msg, (screen.get_width()//2-msg.get_width()//2, 550))
-##  Draw in rounded rectangle for base bar and progress bar
-    AAfilledRoundedRect(screen, main_status_rect, (255,255,255), 0.4)
-    AAfilledRoundedRect(screen, progress_rect, (53,121,169), 0.4)
-    display.flip()
-    
 def main(menu_obj):
     'Main game function: takes in menu object'
     conn, username = (menu_obj.client.s, menu_obj.client.name) #Needed for maintaining socket connection
@@ -80,8 +14,6 @@ def main(menu_obj):
     dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
     openbuilding = image.load('Background/openbuilding.png').convert_alpha()
     collision = image.load('Background/rocks+hole.png').convert_alpha()
-    image_counter = [0] #Nested functions don't allow globalling, list allows usage of memory pointers
-                        #to achieve similar effect
 
     #Shotgun bullet range
     #Gun reload time
@@ -100,9 +32,6 @@ def main(menu_obj):
         img = image.load(path).convert_alpha()
 
         x, y = img.get_size()
-        
-        image_counter[0] += 1#Used for loading screen
-        loading_screen(image_counter[0]//44, background)#44 comes from pre-calculated total
         return transform.smoothscale(img, (int(x/factor), int(y/factor)))#Return transformed image
     def get_fps(old_time):
         'Returns FPS based on delta time'

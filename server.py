@@ -162,7 +162,7 @@ class GameInstance:
 ##                        interpolate = gameMath.interpolate(int(nx),int(ny),int(angle),int(b[3]))
                         counter = 0
                         for ix, iy in interpolate:
-                            if (b[2] == 'rpg' and hypot(px- nx, py - ny)<60) or hypot(px - nx, py - ny) < 30:
+                            if hypot(px - nx, py - ny) < 30:
                                 threading.Thread(target=serverRequest.modify, args=(name, 1)).start()
                                 counter += 1
                                 print(counter, name)

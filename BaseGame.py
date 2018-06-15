@@ -50,9 +50,16 @@ class Client:
             p.storm = self.other_player_dict[p.name].storm
             
             for b in self.other_player_dict[p.name].del_bullets:
+                print(b[2])
+                if b[2] == 'RPG':
+                    p.rgif.append([b,0])
+                    print("rpg")
                 if b in p.bullets:
+                    
                     p.bullets.remove(b)
-        
+                    
+                        
+
     def render_other_players(self,Psprite=None):
         p = self.player
         g = self.game
@@ -264,7 +271,8 @@ class Player:
         self.weapon_map = []
         self.storm = []
         self.building = False
-
+        self.rocket_b = []
+        self.rgif = []
     def move(self, direction, background, collisionmap,buildingmap,openbuilding, FPS, speed=None):
         wall = ((150,72,15))
         if speed is None:
@@ -333,6 +341,20 @@ class Player:
     def render_player(self, sprites, game):
         sprite = transform.rotate(sprites[self.state][self.gif_counter//20%len(sprites[self.state])], self.rotation + 90)
         self.rect = game.screen.blit(sprite, (640 - sprite.get_width() // 2, 400 - sprite.get_height() // 2))
+    def rocket_animation(self,screen,anim):
+        print(self.rgif)
+        for i in self.rgif:
+            if i[0][0][0] - screen.get_width() // 2 < p.pos[0] < i[0][0][0] + screen.get_width() //2 \
+                        and i[0][0][1] - screen.get_height() // 2 < p.pos[1] < i[0][0][1] + screen.get_height() // 2:
+                bullet_sprite = anim[i[1]//20%len(anim)]
+                print(bullet_sprite,i[0][0])
+                lx, ly = (i[0][0][0] - self.pos[0] + screen.get_width() // 2, i[0][0][1] - self.pos[1] + screen.get_height() // 2)
+                screen.blit(bullet_sprite, (lx,ly))
+            if i[1] <30:
+                self.rgif[self.rgif.index(i)][1]+=1
+            else:
+                del self.rgif[self.rgif.index(i)]
+            
 
     def get_rect(self):
         return self.rect

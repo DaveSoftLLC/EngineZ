@@ -104,6 +104,7 @@ def main(menu_obj):
                   [scale_and_load(file, 3) for file in glob.glob('Sprites/ShootIdle/*.png')]]
 
     droneSprite = [[scale_and_load(file, 2) for file in glob.glob('newSprites/drone/*.png')]]
+    explode = [scale_and_load(file, 2) for file in glob.glob('Weapons/Rocket/*.png')]
     droneB = False
     p = Player(g, username, (1200, 1200), 10, 'player')
     p.ammo =[100 for i in range(len(g.guns))]
@@ -243,6 +244,9 @@ def main(menu_obj):
             client.render_enemy_bullets(inventory.inventoryP[inventory.state],g.screen)
             inventory.draw_inventory(g.screen,p.ammo)
             Drone.draw_drone(g.screen,g.droneB,dronebuttonlist,(t.time()-g.drone_start))
+            if len(p.rgif)>0:
+                p.rocket_animation(g.screen,explode)
+                
             fps = fps_font.render(str(int(FPS)), True, (0,0,0))
             g.screen.blit(fps, (1200,10))
             if not check_health(p):

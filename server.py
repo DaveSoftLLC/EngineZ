@@ -49,7 +49,7 @@ class GameInstance:
                 self.storm_pos.append([x,y])
         threading.Thread(target=self.check_damage).start()
         threading.Thread(target=self.storm).start()
-        threading.Thread(target-self.check_win).start()
+        threading.Thread(target=self.check_win).start()
     def create_thread(self):
         for c in self.clients:
             conn, addr = (c[2], c[3])
@@ -115,6 +115,7 @@ class GameInstance:
         while not done:
             if len(self.clients) == len(self.player_dict.keys()):
                 done = True
+        print("begin check_win\n")
         while self.running:
             if len(self.player_dict.keys()) == 1:
                 self.running = False
@@ -122,9 +123,9 @@ class GameInstance:
                 for p in self.clients:
                     if p[0] == player:
                         p[2].send(pickle.dumps('winner'))
-                threading.Thread(target=serverRequest.modify, args=(name, 25)).start()
-        self.running = False
-        self.game_end = True
+                threading.Thread(target=serverRequest.modify, args=(player, 25)).start()
+                self.running = False
+                self.game_end = True
 
     def check_damage(self):
         while self.running:
@@ -247,11 +248,14 @@ class Server:
         self.running = True
 
     def clean(self):
+        fpsClock = time.Clock()
         while self.running:
-            rooms = dict(zip(self.rooms.keys(),self.rooms.values()))
-            games = dict(zip(self.game_instances.keys(),self.game_instances.values()))
+            fpsClock.tick(2)
+            rooms = dict(zip(list(self.rooms.keys()),list(self.rooms.values())))
+            games = dict(zip(list(self.game_instances.keys()),list(self.game_instances.values())))
             for room in rooms.keys():
                 if len(self.rooms[room]) == 0:
+                    print(room, self.rooms)
                     del self.rooms[room]
             for game, obj in games.items():
                 if obj.game_end:
@@ -278,7 +282,7 @@ class Server:
                 #print(self.rooms.keys(), room_name)
                 conn.close()
                 return
-            elif len(self.rooms[room_name].values()) >= 5:
+            elif len(self.rooms[room_name]) >= 5:
                 conn.send(pickle.dumps('no_such_room'))
                 #print(self.rooms.keys(), room_name)
                 conn.close()
@@ -289,7 +293,7 @@ class Server:
                 conn.close()
                 return
             else:
-                self.rooms[room_name] = [(data['name'],data['ready'],conn,addr)]
+                self.rooms[room_name] = [[data['name'],data['ready'],conn,addr]]
                 
         conn.send(pickle.dumps('all_good'))
         while self.running:
@@ -306,7 +310,7 @@ class Server:
                         p[1] = ready
                         break
                 else:
-                    self.rooms.setdefault(room_name, []).append([name, ready, conn, addr])
+                    self.rooms[room_name].append([name, ready, conn, addr])
                 start = all([r[1] for r in self.rooms[room_name]])
                 #print(start)
                 if start:
@@ -325,7 +329,8 @@ class Server:
                         players.append(player[:2])
                     msg = pickle.dumps(players)
                     conn.send(msg)
-            except:
+            except Exception as E:
+                print(E)
                 for player in self.rooms[room_name]:
                     if player[0] == name:
                         self.rooms[room_name].remove(player)

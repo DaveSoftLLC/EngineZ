@@ -205,7 +205,7 @@ class GameMode:
         self.running = True
         
 
-    def draw_screen(self, player,p):
+    def draw_screen(self, player):
         'Draw in game UI and background'
         px,py = player.get_pos()
         portion = self.background.subsurface(Rect(px-self.screen.get_width()//2,  #Subsurfaced portion of 12K x 8K image
@@ -311,7 +311,7 @@ class Player:
         elif direction == 'LEFT':
             nx, ny = (self.pos[0] - speed, self.pos[1])
             if self.building and openbuilding.get_at((nx,ny))[3] == 0:
-                building = False
+                self.building = False
             if 0 < nx:
                 if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (self.building == True and openbuilding.get_at((nx,ny)) != wall):
                     self.pos = (nx,ny)

@@ -5,72 +5,7 @@ from random import randint #random selection
  
 from BaseGame import * #Main classes
 g = GameMode()
-title_font = font.Font('geonms-font.ttf', 72)
-menu_font = font.Font('geonms-font.ttf', 32)
-background = transform.smoothscale(image.load('nmsplanet.jpg').convert(), (1280,800))
-def AAfilledRoundedRect(surface,rect,color,radius=0.4): #Source: from Stack Overflow
-
-    """
-    AAfilledRoundedRect(surface,rect,color,radius=0.4)
-
-    surface : destination
-    rect    : rectangle
-    color   : rgb or rgba
-    radius  : 0 <= radius <= 1
-    """
-
-    rect         = Rect(rect)
-    color        = Color(*color)
-    alpha        = color.a
-    color.a      = 0
-    pos          = rect.topleft
-    rect.topleft = 0,0
-    rectangle    = Surface(rect.size,SRCALPHA)
-
-    circle       = Surface([min(rect.size)*3]*2,SRCALPHA)
-    draw.ellipse(circle,(0,0,0),circle.get_rect(),0)
-    circle       = transform.smoothscale(circle,[int(min(rect.size)*radius)]*2)
-
-    radius              = rectangle.blit(circle,(0,0))
-    radius.bottomright  = rect.bottomright
-    rectangle.blit(circle,radius)
-    radius.topright     = rect.topright
-    rectangle.blit(circle,radius)
-    radius.bottomleft   = rect.bottomleft
-    rectangle.blit(circle,radius)
-
-    rectangle.fill((0,0,0),rect.inflate(-radius.w,0))
-    rectangle.fill((0,0,0),rect.inflate(0,-radius.h))
-
-    rectangle.fill(color,special_flags=BLEND_RGBA_MAX)
-    rectangle.fill((255,255,255,alpha),special_flags=BLEND_RGBA_MIN)
-
-    return surface.blit(rectangle,pos)
-def loading_screen(percent, background):
-    'Blits a loading sceen with "background" image and "percent" amount of bar filled'
-    for e in event.get(): #Check for user quit
-        if e.type == QUIT:
-            quit()
-    screen = g.screen#Alias for shorter typing
-    title = title_font.render('outcast: the game', True, (255,255,255))
-    msg = menu_font.render('loading', True, (255,255,255))
-    width = 500#Width of progress bar
-    height = 25#Height of progress bar
-    main_status_rect = (screen.get_width()//2-width//2, #Rect tuple of bar underneath progress bar
-                        600,
-                        width,
-                        height)
-    progress_rect = (main_status_rect[0], #Rect tuple of progress bar
-                     main_status_rect[1], int(percent*width), height)
-##        screen.fill(0)
-    screen.blit(background, (0,0))
-    screen.blit(title, (screen.get_width()//2-title.get_width()//2, 100))
-    screen.blit(msg, (screen.get_width()//2-msg.get_width()//2, 550))
-##  Draw in rounded rectangle for base bar and progress bar
-    AAfilledRoundedRect(screen, main_status_rect, (255,255,255), 0.4)
-    AAfilledRoundedRect(screen, progress_rect, (53,121,169), 0.4)
-    display.flip()
-    
+  
 def main(menu_obj):
     'Main game function: takes in menu object'
     conn, username = (menu_obj.client.s, menu_obj.client.name) #Needed for maintaining socket connection
@@ -87,14 +22,6 @@ def main(menu_obj):
     #Gun reload time
     #Storm show up on minimap
 
-
-    inventory = Inventory(g.guns) #Inventory object
-    dronebuttonlist = [image.load("Background/dronebutton.png"),
-                       image.load("Background/dronebuttondark.png")] #Drone buttons for Ready and Timeout stages
-
-    #collision = image.load('Background/rocks+hole.png').convert_alpha()
-    #buildingcollision = image.load('Background/buildings.png').convert_alpha()
-
     def scale_and_load(path, factor):
         'Takes an image path, scales and converts by factor'
         img = image.load(path).convert_alpha()
@@ -102,7 +29,6 @@ def main(menu_obj):
         x, y = img.get_size()
         
         image_counter[0] += 1#Used for loading screen
-        loading_screen(image_counter[0]//44, background)#44 comes from pre-calculated total
         return transform.smoothscale(img, (int(x/factor), int(y/factor)))#Return transformed image
     def get_fps(old_time):
         'Returns FPS based on delta time'
@@ -115,11 +41,6 @@ def main(menu_obj):
     droneSprite = [[scale_and_load(file, 2) for file in glob.glob('newSprites/drone/*.png')]]
 
     explode = [scale_and_load(file, 2) for file in glob.glob('Weapons/Rocket/*.png')]
-    droneB = False
-    p = Player(g, username, (1200, 1200), 10, 'player')
-    p.ammo =[100 for i in range(len(g.guns))]
-    client = Client(p,0,g, conn, newSprites)
-    threading.Thread(target=client.get_data).start()
 
     droneB = False#Drone on/off boolean
     p = Player(g, username, (1200, 1200), 10, 'player')#Main player instance
@@ -160,13 +81,9 @@ def main(menu_obj):
                     #g.weapon_pickup(p,inventory)
                     client.weapon_pickup(inventory) #Pickup weapon
                 if keys[K_f] and g.current_actor.type == 'player':
-                    g.open_door(p) #Enter buildings
+                    g.open_door(openbuiding) #Enter buildings
                 if keys[K_g] and g.current_actor.type == 'player':
                     inventory.remove_item(p) #Drop items
-
-                    p.open_door(openbuilding)
-                if keys[K_g] and g.current_actor.type == 'player':
-                    inventory.remove_item(p)
                 #open door
                 elif e.key == K_ESCAPE:
                     running = False #Alternative 'exit' key
@@ -178,27 +95,24 @@ def main(menu_obj):
         #SPRINT only for player
         if keys[K_LSHIFT] and m[0] == 1:
             p.speed = 6
-            
         elif keys[K_LSHIFT]:
-            p.speed = 14
-            
-            
+            p.speed = 14  
         else:
             p.speed = 10
             
 ## ----------Move character, while making sure character doesn't go off-screen. Sends in masks for collision checking -----
         #UP
         if keys[K_w] and g.screen.get_height()//2<py-g.current_actor.speed:
-            g.current_actor.move('UP', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS,g.building)
+            g.current_actor.move('UP', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
         #DOWN
         if keys[K_s] and py+g.current_actor.speed<g.background.get_height()-g.screen.get_height()//2:
-            g.current_actor.move('DOWN', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS,g.building)
+            g.current_actor.move('DOWN', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
         #LEFT
         if keys[K_a] and g.screen.get_width()//2<px-g.current_actor.speed:
-            g.current_actor.move('LEFT', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS,g.building)
+            g.current_actor.move('LEFT', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
         #RIGHT
         if keys[K_d] and px+g.current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
-            g.current_actor.move('RIGHT', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS,g.building)
+            g.current_actor.move('RIGHT', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
 ##-------------------------------------------------------------------------------------------------------------------------
         if g.current_actor.type == 'player' and left_click and (t.time() - last_fire > 0.3 or (inventory.inventoryP[inventory.state].rate >0 and t.time() - last_fire > inventory.inventoryP[inventory.state].rate)):
             last_fire = t.time()
@@ -214,72 +128,10 @@ def main(menu_obj):
         #SPRINT only for player
         if keys[K_LSHIFT] and m[0] == 1:
             p.speed = 6
-            
         elif keys[K_LSHIFT]:
             p.speed = 14
-            
-            
         else:
             p.speed = 10
-            
-
-        #UP
-        if keys[K_w] and g.screen.get_height()//2<py-g.current_actor.speed:
-            g.current_actor.move('UP', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
-        #DOWN
-        if keys[K_s] and py+g.current_actor.speed<g.background.get_height()-g.screen.get_height()//2:
-            g.current_actor.move('DOWN', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
-        #LEFT
-        if keys[K_a] and g.screen.get_width()//2<px-g.current_actor.speed:
-            g.current_actor.move('LEFT', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
-        #RIGHT
-        if keys[K_d] and px+g.current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
-            g.current_actor.move('RIGHT', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
-
-        if g.current_actor.type == 'player' and left_click and (t.time() - last_fire > 0.3 or (inventory.inventoryP[inventory.state].rate >0 and t.time() - last_fire > inventory.inventoryP[inventory.state].rate)):
-            last_fire = t.time()
-            p.fire(inventory, FPS)
-            
-        if m[0] == 1 or m[2] ==1:
-            p.state = 1
-        else:
-            p.player_state(inventory)
-                
-
-
-
-            if g.current_actor.type == 'player':
-                p.update_gif(newSprites)
-                p.render_player(newSprites, g)
-                client.render_other_players()
-                client.update_player(p)
-            else:
-                client.render_other_players(newSprites)
-                client.update_drone(g.drone)
-                g.drone.update_gif(droneSprite)
-                g.drone.render_player(droneSprite, g)
-                #If time runs out
-                if t.time()-g.drone_start >10:
-                    client.drone = 0
-                    g.current_actor = p
-                    g.drone_start = t.time()
-                    g.droneB = False
-            #g.draw_weapons(g.screen,g.current_actor.pos)
-            client.draw_weapons(g.screen,g.current_actor.pos)
-            render_bullets(g, p, client, FPS)
-            client.render_enemy_bullets(inventory.inventoryP[inventory.state],g.screen)
-            inventory.draw_inventory(g.screen,p.ammo)
-            Drone.draw_drone(g.screen,g.droneB,dronebuttonlist,(t.time()-g.drone_start))
-            if len(p.rgif)>0:
-                p.rocket_animation(g.screen,explode)
-                
-            fps = fps_font.render(str(int(FPS)), True, (0,0,0))
-            g.screen.blit(fps, (1200,10))
-            if not check_health(p):
-                p.die(g.screen)
-                client.s.send(pickle.dumps("leaving"))
-                g.running = False
-
         g.draw_screen(g.current_actor)
         if g.current_actor.type == 'player': #Player object specific functions
             p.update_gif(newSprites) #Update player GIFS
@@ -297,8 +149,7 @@ def main(menu_obj):
                 g.current_actor = p
                 g.drone_start = t.time()
                 g.droneB = False
-            #---------------------------------
-        #g.draw_weapons(g.screen,g.current_actor.pos)
+            #---------------------------------   
         client.draw_weapons(g.screen,g.current_actor.pos) #Draw weapons on the ground
         render_bullets(g, p, client, FPS) #Draw in player bullets
         client.render_enemy_bullets(inventory.inventoryP[inventory.state],g.screen) #Draw in enemy bullets

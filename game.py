@@ -89,7 +89,7 @@ def main(menu_obj):
                     running = False #Alternative 'exit' key
 
         keys = key.get_pressed()
-        old_time = t.time()
+        old_time = t.time()#Used to keep track of time since previous loop for delta-time based movement speeds
         g.current_actor.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
         px, py = g.current_actor.get_pos()
         #SPRINT only for player
@@ -115,6 +115,7 @@ def main(menu_obj):
             g.current_actor.move('RIGHT', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
 ##-------------------------------------------------------------------------------------------------------------------------
         if g.current_actor.type == 'player' and left_click and (t.time() - last_fire > 0.3 or (inventory.inventoryP[inventory.state].rate >0 and t.time() - last_fire > inventory.inventoryP[inventory.state].rate)):
+            #^^^^^^ Only allow firing if we're the player and weapon not on cooldown
             last_fire = t.time()
             p.fire(inventory, FPS)
             

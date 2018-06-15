@@ -225,7 +225,7 @@ class GameMode:
             draw.circle(self.surfaceALPHA,(0,0,0,0),(nx,ny),int(player.storm[1]))
             self.screen.blit(self.surfaceALPHA,(0,0))
 
-        if player.health > 80:
+        if player.health > 80:#Different colors for different health amount
             health_color = (0, 255, 0)
         elif player.health > 40:
             health_color = (255, 255, 0)
@@ -240,6 +240,7 @@ class GameMode:
         draw.circle(self.screen,(255,0,0),(int(1050+(px/12000)*180),int(50+(py/8000)*120)),2)
         if player.storm!=[]:#Showing on minimap
             if len(player.storm) == 5:
+                #Flatten out game coords to minimap coords
                 draw.circle(self.screen,(0,0,255),(int(1050+(player.storm[0][0]/12000)*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
                 draw.circle(self.screen,(0,255,0),(int(1050+(player.storm[3][0]/12000)*180),int(50+(player.storm[3][1]/8000)*120)),int(player.storm[4]//67),2)
             elif len(player.storm) == 3:
@@ -262,6 +263,7 @@ class GameMode:
             client.drone = 0
             self.current_actor = p
             self.droneB = False
+            #----------------------
                 
 class Player:
     def __init__(self, game, name, pos, speed, mode):
@@ -278,18 +280,18 @@ class Player:
         self.del_bullets = [] #Bullets instructed by server to be deleted
         self.ammo = [] #List of ammo for each of the guns in the inventory
         self.weapon_send = []#[weapon to remove, weapon to add]
-        self.type = mode
-        self.weapon_map = []
-        self.storm = []
-        self.building = False
-        self.rocket_b = []
-        self.rgif = []
+        self.type = mode#Player or Drone
+        self.weapon_map = []#List of weapons player can pickup
+        self.storm = []#Storm data from server
+        self.building = False#Whether or not you can go in buildings
+        self.rocket_b = []#Rocket launcher data
+        self.rgif = []#Rocket launcher GIFs
     def move(self, direction, background, collisionmap,buildingmap,openbuilding, FPS, speed=None):
         'Moves player in direction while validating that move'
         wall = ((150,72,15))
         if speed is None:
             speed = self.speed
-        speed = int(speed/FPS*60) #Bases movement speed on FPS to allow for unlocked FPS
+        speed = int(speed/FPS*60) #Bases movement speed on FPS to allow for unlocked (max 144FPS) FPS
         
         if direction == 'UP':
             nx,ny = (self.pos[0],self.pos[1] - speed) #New x and y pos
@@ -328,6 +330,8 @@ class Player:
         'Remove this health amount from player'
         if self.health-amount > 0: #No negative health
             self.health -= amount
+        else:
+            self.health == 0 #Otherwise, set health to 0
             
     def die(self, screen):
         'Death picture'
@@ -352,6 +356,7 @@ class Player:
                     self.bullets.append([(px+5*cos(radians(spread)), py-5*sin(radians(spread))), spread, inventory.inventoryP[inventory.state].name, ratio])
             else:
                 angle = self.rotation+90 #Player rotation is offset by 90 because the sprites are
+                #Bullet format: [(x,y), angle, gun_name, distance travelled per frame
                 self.bullets.append([(px+5*cos(radians(angle)), py-5*sin(radians(angle))), angle, inventory.inventoryP[inventory.state].name, ratio])               
                 
     def render_player(self, sprites, game):
@@ -363,10 +368,10 @@ class Player:
         print(self.rgif)
         for i in self.rgif:
             if i[0][0][0] - screen.get_width() // 2 < self.pos[0] < i[0][0][0] + screen.get_width() //2 \
-                        and i[0][0][1] - screen.get_height() // 2 < self.pos[1] < i[0][0][1] + screen.get_height() // 2:
-                bullet_sprite = anim[i[1]//10%len(anim)]
+                        and i[0][0][1] - screen.get_height() // 2 < self.pos[1] < i[0][0][1] + screen.get_height() // 2:#Only blit of on screen
+                bullet_sprite = anim[i[1]//10%len(anim)]#Sprite chosen from list
                 print(bullet_sprite,i[0][0])
-                lx, ly = (i[0][0][0] - self.pos[0] + screen.get_width() // 2, i[0][0][1] - self.pos[1] + screen.get_height() // 2)
+                lx, ly = (i[0][0][0] - self.pos[0] + screen.get_width() // 2, i[0][0][1] - self.pos[1] + screen.get_height() // 2)#Convert game coords to screen coords
                 screen.blit(bullet_sprite, (lx,ly))
             if i[1] <30:
                 self.rgif[self.rgif.index(i)][1]+=1

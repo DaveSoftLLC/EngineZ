@@ -54,7 +54,7 @@ class GameInstance:
                 x = randint(self.storm_pos[a-1][0]-(self.storm_rad[a-1]-self.storm_rad[a])+200,self.storm_pos[a-1][0]+(self.storm_rad[a-1]-self.storm_rad[a])-200)
                 y = randint(self.storm_pos[a-1][1]-(self.storm_rad[a-1]-self.storm_rad[a])+200,self.storm_pos[a-1][1]+(self.storm_rad[a-1]-self.storm_rad[a])-200)
                 self.storm_pos.append([x,y])
-        #start server processing logic
+        #start server processing logic in seperate threads
         threading.Thread(target=self.check_damage).start()
         threading.Thread(target=self.storm).start()
         threading.Thread(target=self.check_win).start()
@@ -105,9 +105,9 @@ class GameInstance:
                             self.player_dict[current_player].storm = [self.storm_pos[self.storm_state],self.storm_rad[self.storm_state],self.storm_next]
                                 
                         self.player_dict[current_player].weapon_map = self.weapon_map
-                        if current_player in del_bullets:
+                        if current_player in del_bullets: #Notify client of bullets marked for deletion
                             self.player_dict[current_player].del_bullets += del_bullets[current_player]
-                        del_bullets[current_player] = []
+                        del_bullets[current_player] = [] #Don't send the same bullets twice
                         conn.send(pickle.dumps(self.player_dict))
                         #print("sent")
                     except Exception as E:
@@ -129,12 +129,11 @@ class GameInstance:
         while self.running:
             if len(self.player_dict.keys()) == 1:#Check if there is only one player left
                 self.running = False
-                print(list(self.player_dict.values())[0])
-                player = list(self.player_dict.values())[0].name
-                for p in self.clients:
-                    if p[0] == player:
+                player = list(self.player_dict.values())[0].name #Get name of player
+                for p in self.clients: #Find their socket object
+                    if p[0] == player: #(name, ready, conn, addr)
                         p[2].send(pickle.dumps('winner'))#Tell them they're the winner
-                threading.Thread(target=serverRequest.modify, args=(player, 25)).start() #Give them bonus points
+                threading.Thread(target=serverRequest.modify, args=(player, 25)).start() #Give them bonus points for winning
                 self.running = False#End game
                 self.game_end = True#End game
 

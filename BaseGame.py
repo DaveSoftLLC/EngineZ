@@ -226,10 +226,7 @@ class GameMode:
             client.drone = 0
             self.current_actor = p
             self.droneB = False
-    def open_door(self,p):
-        if self.openbuilding.get_at((p.pos[0],p.pos[1]))[3] != 0:
-            self.building = True
-            print("open")
+    
 ##    def draw_weapons(self,screen,pos):
 ##        for i in self.weapon_map:
 ##            if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \
@@ -266,9 +263,9 @@ class Player:
         self.type = mode
         self.weapon_map = []
         self.storm = []
-        
+        self.building = False
 
-    def move(self, direction, background, collisionmap,buildingmap,openbuilding, FPS,building, speed=None):
+    def move(self, direction, background, collisionmap,buildingmap,openbuilding, FPS, speed=None):
         wall = ((150,72,15))
         if speed is None:
             speed = self.speed
@@ -276,31 +273,36 @@ class Player:
         
         if direction == 'UP':
             nx,ny = (self.pos[0],self.pos[1] - speed)
-            if building and openbuilding.get_at((nx,ny))[3] == 0:
-                building = False
+            if self.building and openbuilding.get_at((nx,ny))[3] == 0:
+                self.building = False
             if 0 < ny :
-                if collisionmap.get_at((nx,ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != wall):
+                if collisionmap.get_at((nx,ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (self.building == True and openbuilding.get_at((nx,ny)) != wall):
                     self.pos = (nx,ny)
         elif direction == 'DOWN':
             nx, ny = (self.pos[0], self.pos[1] + speed)
-            if building and openbuilding.get_at((nx,ny))[3] == 0:
-                building = False
+            if self.building and openbuilding.get_at((nx,ny))[3] == 0:
+                self.building = False
             if ny < background.get_height():
-                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != wall):
+                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (self.building == True and openbuilding.get_at((nx,ny)) != wall):
                     self.pos = (nx,ny)
         elif direction == 'LEFT':
             nx, ny = (self.pos[0] - speed, self.pos[1])
-            if building and openbuilding.get_at((nx,ny))[3] == 0:
+            if self.building and openbuilding.get_at((nx,ny))[3] == 0:
                 building = False
             if 0 < nx:
-                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != wall):
+                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (self.building == True and openbuilding.get_at((nx,ny)) != wall):
                     self.pos = (nx,ny)
         elif direction == 'RIGHT':
             nx, ny = (self.pos[0] + speed, self.pos[1])
+            if self.building and openbuilding.get_at((nx,ny))[3] == 0:
+                self.building = False
             if nx < background.get_width():
-                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (building == True and openbuilding.get_at((nx,ny)) != wall):
+                if collisionmap.get_at((nx, ny))[3] == 0 and buildingmap.get_at((nx,ny))[3] == 0 or (self.building == True and openbuilding.get_at((nx,ny)) != wall):
                     self.pos = (nx,ny)
-
+    def open_door(self,openbuilding):
+        if openbuilding.get_at((self.pos[0],self.pos[1]))[3] != 0:
+            self.building = True
+            print("open")
     def take_damage(self, amount):
         if self.health-amount > 0:
             self.health -= amount

@@ -73,7 +73,7 @@ def main(menu_obj):
     g = GameMode()
     inventory = Inventory(g.guns)
     dronebuttonlist = [image.load("Background/dronebutton.png"),image.load("Background/dronebuttondark.png")]
-    openbuilding = image.load('Background/openbuilding.png')
+    openbuilding = image.load('Background/openbuilding.png').convert_alpha()
     collision = image.load('Background/rocks+hole.png').convert_alpha()
     image_counter = [0]
 
@@ -170,10 +170,9 @@ def main(menu_obj):
                     #g.weapon_pickup(p,inventory)
                     client.weapon_pickup(inventory)
                 if keys[K_f] and g.current_actor.type == 'player':
-                    g.open_door(p)
+                    p.open_door(openbuilding)
                 if keys[K_g] and g.current_actor.type == 'player':
                     inventory.remove_item(p)
-                    
                 #open door
                 elif e.key == K_ESCAPE:
                     running = False
@@ -199,16 +198,16 @@ def main(menu_obj):
 
             #UP
             if keys[K_w] and g.screen.get_height()//2<py-g.current_actor.speed:
-                g.current_actor.move('UP', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS,g.building)
+                g.current_actor.move('UP', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
             #DOWN
             if keys[K_s] and py+g.current_actor.speed<g.background.get_height()-g.screen.get_height()//2:
-                g.current_actor.move('DOWN', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS,g.building)
+                g.current_actor.move('DOWN', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
             #LEFT
             if keys[K_a] and g.screen.get_width()//2<px-g.current_actor.speed:
-                g.current_actor.move('LEFT', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS,g.building)
+                g.current_actor.move('LEFT', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
             #RIGHT
             if keys[K_d] and px+g.current_actor.speed<g.background.get_width()-g.screen.get_width()//2:
-                g.current_actor.move('RIGHT', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS,g.building)
+                g.current_actor.move('RIGHT', g.background, g.collisionmap,g.buildingmap,g.openbuilding, FPS)
 
             if g.current_actor.type == 'player' and left_click and (t.time() - last_fire > 0.3 or (inventory.inventoryP[inventory.state].rate >0 and t.time() - last_fire > inventory.inventoryP[inventory.state].rate)):
                 last_fire = t.time()

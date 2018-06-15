@@ -170,7 +170,7 @@ class Main:
         self.screen = display.set_mode((1280,800)) #Screen
         self.background = [] #List of backgrounds to 'simulate' actual loading
         self.running = True #Flag to see if game is running
-        self.menu_text = ['JOIN', 'CREATE', 'OPTIONS', 'QUIT'] #Text that needs to be blitted on the home screen
+        self.menu_text = ['JOIN', 'CREATE', 'TUTORIAL', 'QUIT'] #Text that needs to be blitted on the home screen
         self.function_text = ['room'] #Non main menu text that still has a corresponding function
         self.menu_color = {key: (212,175,55) for key in self.menu_text} #Colors to keep track for hover
         font.init() #init font system
@@ -450,8 +450,12 @@ class Main:
         self.screen.blit(box, (w//2-bw//2, 435))
         return False
 
-    def draw_options(self):
-        pass
+    def draw_tutorial(self, left_click):
+        keys = key.get_pressed()
+        if keys[K_ESCAPE]:
+            self.mode = 'menu'
+        img = image.load('Background/tutorial.png').convert_alpha()
+        self.screen.blit(img, (0,0))
 
     def render_button(self, text, box_color):
         'Renders a button'

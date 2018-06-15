@@ -132,34 +132,6 @@ def main(menu_obj):
     g.current_actor = p
     myClock = time.Clock()
     last_fire = 0 #Last time user fired for cooldowns
-    #Mouse Cursor
-##    reticle = (               #sized 24x24
-##      "        ........        ",
-##      "      ..   ..   ..      ",
-##      "     ..    ..    ..     ",
-##      "    ..     ..     ..    ",
-##      "   ..      ..      ..   ",
-##      "  ..      oooo      ..  ",
-##      " ..        ..        .. ",
-##      "..         ..         ..",
-##      "..         ..         ..",
-##      "..         ..         ..",
-##      "..   o    X..X    o   ..",
-##      ".....o.....XX.....o.....",
-##      ".....o.....XX.....o.....",
-##      "..   o    X..X    o   ..",
-##      "..         ..         ..",
-##      "..         ..         ..",
-##      "..         ..         ..",
-##      " ..        ..        .. ",
-##      "  ..      oooo      ..  ",
-##      "   ..      ..      ..   ",
-##      "    ..     ..     ..    ",
-##      "     ..    ..    ..     ",
-##      "      ..   ..   ..      ",
-##      "        ........        ")#Took me 2 hours
-##    datatuple,masktuple=cursors.compile(reticle,black='.',white='X',xor='o')#Compile the code
-##    mouse.set_cursor((24,24),(12,12),datatuple,masktuple)
     while g.running:
         m = mouse.get_pressed()
         mx, my = mouse.get_pos()
@@ -272,11 +244,6 @@ def main(menu_obj):
             p.state = 1
         else:
             p.player_state(inventory)
-                
-
-
-
-            g.draw_screen(g.current_actor)
             if g.current_actor.type == 'player':
                 p.update_gif(newSprites)
                 p.render_player(newSprites, g)

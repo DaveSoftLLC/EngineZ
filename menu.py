@@ -507,7 +507,7 @@ def render_button(text, box_color, font):
     button_surf.blit(render_text, (12,3))
     return button_surf
     
-def hover(self, button_list, mouse_pos, left_click):
+def hover(button_list, mouse_pos, left_click):
     'Checks if a user is clicking on or hovering on a dictionary of buttons'
     for word, r in button_list.items():
         if r.collidepoint(mouse_pos):

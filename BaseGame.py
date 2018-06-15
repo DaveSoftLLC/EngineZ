@@ -49,8 +49,7 @@ class Client:
             p.weapon_map = self.other_player_dict[p.name].weapon_map
             p.health = self.other_player_dict[p.name].health
             p.storm = self.other_player_dict[p.name].storm
-            d.storm = self.other_player_dict[p.name].storm
-            d.weapon_map = self.other_player_dict[p.name].weapon_map
+            
             for b in self.other_player_dict[p.name].del_bullets:
                 print(b[2])
                 if b[2] == 'RPG':
@@ -185,7 +184,7 @@ class GameMode:
         self.openbuilding = image.load('Background/openbuilding.png')
         self.running = True
         
-    def draw_screen(self, player):
+    def draw_screen(self, player,p):
         try:
             px,py = player.get_pos()
             portion = self.background.subsurface(Rect(px-self.screen.get_width()//2,
@@ -193,12 +192,20 @@ class GameMode:
                                                  self.screen.get_width(), self.screen.get_height()))
             self.screen.blit(portion, (0, 0))
             #Storm
-            if player.storm!=[]:
-                draw.rect(self.surfaceALPHA,(0,0,255,80),(0,0,1280,800))
-                nx = int(player.storm[0][0]-player.pos[0]+self.screen.get_width()//2)
-                ny = int(player.storm[0][1]-player.pos[1]+self.screen.get_height()//2)
-                draw.circle(self.surfaceALPHA,(0,0,0,0),(nx,ny),int(player.storm[1]))
-                self.screen.blit(self.surfaceALPHA,(0,0))
+            if player.storm!=[] or player.type == 'drone':
+                if player.type != 'drone':
+                    draw.rect(self.surfaceALPHA,(0,0,255,80),(0,0,1280,800))
+                    nx = int(player.storm[0][0]-player.pos[0]+self.screen.get_width()//2)
+                    ny = int(player.storm[0][1]-player.pos[1]+self.screen.get_height()//2)
+                    draw.circle(self.surfaceALPHA,(0,0,0,0),(nx,ny),int(player.storm[1]))
+                    self.screen.blit(self.surfaceALPHA,(0,0))
+                else:
+                    draw.rect(self.surfaceALPHA,(0,0,255,80),(0,0,1280,800))
+                    nx = int(p.storm[0][0]-player.pos[0]+self.screen.get_width()//2)
+                    ny = int(p.storm[0][1]-player.pos[1]+self.screen.get_height()//2)
+                    draw.circle(self.surfaceALPHA,(0,0,0,0),(nx,ny),int(p.storm[1]))
+                    self.screen.blit(self.surfaceALPHA,(0,0))
+                
             if player.health > 80:
                 health_color = (0, 255, 0)
             elif player.health > 40:
@@ -218,6 +225,12 @@ class GameMode:
                     draw.circle(self.screen,(0,255,0),(int(1050+(player.storm[3][0]/12000)*180),int(50+(player.storm[3][1]/8000)*120)),int(player.storm[4]//67),2)
                 elif len(player.storm) == 3:
                     draw.circle(self.screen,(0,0,255),(int(1050+player.storm[0][0]/12000*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
+            elif player.type == 'drone':
+                if len(p.storm) == 5:
+                    draw.circle(self.screen,(0,0,255),(int(1050+(p.storm[0][0]/12000)*180),int(50+(p.storm[0][1]/8000)*120)),int(p.storm[1]//67),2)
+                    draw.circle(self.screen,(0,255,0),(int(1050+(p.storm[3][0]/12000)*180),int(50+(p.storm[3][1]/8000)*120)),int(p.storm[4]//67),2)
+                elif len(p.storm) == 3:
+                    draw.circle(self.screen,(0,0,255),(int(1050+p.storm[0][0]/12000*180),int(50+(p.storm[0][1]/8000)*120)),int(p.storm[1]//67),2)
         except Exception as E:
             print("Error:", E)
 

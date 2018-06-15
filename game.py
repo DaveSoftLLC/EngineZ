@@ -111,20 +111,20 @@ def main(menu_obj):
                   [scale_and_load(file, 3) for file in glob.glob('Sprites/ShootIdle/*.png')]]
 
     droneSprite = [[scale_and_load(file, 2) for file in glob.glob('newSprites/drone/*.png')]]
-<<<<<<< HEAD
+
     explode = [scale_and_load(file, 2) for file in glob.glob('Weapons/Rocket/*.png')]
     droneB = False
     p = Player(g, username, (1200, 1200), 10, 'player')
     p.ammo =[100 for i in range(len(g.guns))]
     client = Client(p,0,g, conn, newSprites)
     threading.Thread(target=client.get_data).start()
-=======
+
     droneB = False#Drone on/off boolean
     p = Player(g, username, (1200, 1200), 10, 'player')#Main player instance
     p.ammo =[100 for i in range(len(g.guns))]#Fill existing guns to the brim
     client = Client(p,0,g, conn, newSprites)#Networking object to communicate with server
     threading.Thread(target=client.get_data).start()#Connect to server
->>>>>>> 5e397018f8ec42ca99a73b979c7eb9d0a6d5613c
+
     drone_start = 31 #Drone can be used first (30 seconds)
     fps_font = font.SysFont('Arial',18)
     g.current_actor = p
@@ -186,23 +186,23 @@ def main(menu_obj):
                     #g.weapon_pickup(p,inventory)
                     client.weapon_pickup(inventory) #Pickup weapon
                 if keys[K_f] and g.current_actor.type == 'player':
-<<<<<<< HEAD
+
                     g.open_door(p) #Enter buildings
                 if keys[K_g] and g.current_actor.type == 'player':
                     inventory.remove_item(p) #Drop items
                     
-=======
+
                     p.open_door(openbuilding)
                 if keys[K_g] and g.current_actor.type == 'player':
                     inventory.remove_item(p)
->>>>>>> df384e14753577e77ee9318908ed7e9f81633d30
+
                 #open door
                 elif e.key == K_ESCAPE:
                     running = False #Alternative 'exit' key
 
         keys = key.get_pressed()
         old_time = t.time()
-<<<<<<< HEAD
+
         g.current_actor.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
         px, py = g.current_actor.get_pos()
         #SPRINT only for player
@@ -239,7 +239,7 @@ def main(menu_obj):
         else:
             p.player_state(inventory)
             
-=======
+
         if 1:
             g.current_actor.rotation = int(degrees(atan2((g.screen.get_width()//2-mx),(g.screen.get_height()//2-my))))
             px, py = g.current_actor.get_pos()
@@ -277,10 +277,10 @@ def main(menu_obj):
             else:
                 p.player_state(inventory)
                 
->>>>>>> df384e14753577e77ee9318908ed7e9f81633d30
 
 
-<<<<<<< HEAD
+
+
             g.draw_screen(g.current_actor)
             if g.current_actor.type == 'player':
                 p.update_gif(newSprites)
@@ -313,8 +313,8 @@ def main(menu_obj):
                 p.die(g.screen)
                 client.s.send(pickle.dumps("leaving"))
                 g.running = False
-=======
-        g.draw_screen(g.current_actor)
+
+        g.draw_screen(g.current_actor,p)
         if g.current_actor.type == 'player': #Player object specific functions
             p.update_gif(newSprites) #Update player GIFS
             p.render_player(newSprites, g) #Draw player
@@ -346,7 +346,7 @@ def main(menu_obj):
             g.running = False
             time.wait(500)
             client.done = True
->>>>>>> 5e397018f8ec42ca99a73b979c7eb9d0a6d5613c
+
         display.flip()
     client.s.close()
     while not client.done: #Wait for client object to display victory page

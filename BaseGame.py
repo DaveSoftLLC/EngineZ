@@ -5,42 +5,54 @@ from math import *
 from pygame import *
 from random import*
 import time as t
-
+#Game constants--
 TCP_IP = '127.0.0.1'#'159.203.147.141'
 TCP_PORT = 4545
 BUFFER_SIZE = 4096
+#----------------
 def check_health(player):
+    'Function that checks if a player is dead'
     if player.health <= 0:
         return False
     return True
 
 class Client:
     def __init__(self, player,drone, game, conn, sprites):
-        self.s = conn
+        'Networking object for this game'
+        self.s = conn #Socket object "inherited" from menu code
         self.player = player
         self.game = game
-        self.other_player_dict = dict()
+        self.other_player_dict = dict() #Dictionary containing info of other players
         self.sprites = sprites
         self.drone = drone
-        
+        self.done = False #Flag for displaying victory screen
 
     def update_player(self, player):
-        self.player = player
+        'Takes in "player" and updates it'
+        self.player = player 
         
     def update_drone(self, drone):
+        'Takes in "drone" and updates it'
         self.drone = drone
         
     def get_data(self):
+        'Data transfer function'
         print('beginning transfer')
         while self.game.running:
             p = self.player
             p.update_gif(self.sprites)
-            binary = pickle.dumps(p)
+            binary = pickle.dumps(p) #Convert player object to binary
             self.s.send(binary)
             data = self.s.recv(BUFFER_SIZE)
             data = pickle.loads(data)
-            if data == 'winner':
-                self.game.running = False
+            if data == 'winner': #Win process
+                self.game.running = False #Shutoff game loop
+                win = image.load('Background/victory.png')
+                self.game.screen.blit(win, (1280//2-win.get_width()//2, #Blit in screen middle
+                                      800//2-win.get_height()//2))
+                display.flip()
+                time.wait(1000)
+                self.done = True
                 return
             self.other_player_dict = data
             if len(self.other_player_dict[p.name].weapon_send)>0 and self.other_player_dict[p.name].weapon_send[0] =="Sent":
@@ -49,11 +61,12 @@ class Client:
             p.health = self.other_player_dict[p.name].health
             p.storm = self.other_player_dict[p.name].storm
             
-            for b in self.other_player_dict[p.name].del_bullets:
+            for b in self.other_player_dict[p.name].del_bullets: #Remove bullets that belong to current player
                 if b in p.bullets:
                     p.bullets.remove(b)
         
     def render_other_players(self,Psprite=None):
+        'Blit in other players'
         p = self.player
         g = self.game
         d = self.drone
@@ -64,16 +77,16 @@ class Client:
             if o.name != current.name:
                 px, py = current.get_pos()
                 ox, oy = o.get_pos()
-                if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() \
-                        and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2:
-                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter //20%len(self.sprites[o.state])], o.rotation + 90)
-                    nx = ox - px + g.screen.get_width() // 2 \
+                if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() \ #Only blit if other player is on screen
+                        and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2: 
+                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter //20%len(self.sprites[o.state])], o.rotation + 90) #Sprite appropriate for other player at their stage
+                    nx = ox - px + g.screen.get_width() // 2 \ #Convert game coords to screen coords
                          - other_sprite.get_width() // 2
-                    ny = oy - py + g.screen.get_height() // 2 \
+                    ny = oy - py + g.screen.get_height() // 2 \ #Same for y
                          - other_sprite.get_height() // 2
-                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter //20%len(self.sprites[o.state])], o.rotation + 90)
+                    other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter //20%len(self.sprites[o.state])], o.rotation + 90) #Rotate 
                     g.screen.blit(other_sprite, (nx,ny))
-        if Psprite: #displaying player
+        if Psprite: #Displaying player for when drone is activated. Process is same as above
             px, py = p.get_pos()
             dx,dy = d.get_pos()
             if dx - g.screen.get_width() // 2 < px < dx + g.screen.get_width() //2 \
@@ -86,58 +99,61 @@ class Client:
                     g.screen.blit(your_Player, (nx,ny))
                     
     def render_enemy_bullets(self, gun,screen):
+        'Draw in enemy bullets'
         p = self.player
         g = self.game
         d = self.drone
         current = p
         if d != 0:
             current = d
-        for o in self.other_player_dict.values():
+        other_players = dict(zip(list(self.other_player_dict.keys()),list(self.other_player_dict.values()))) #Prevent dict changed size errors
+        for o in other_players.values():
             if o.name != current.name:
-                px, py = current.get_pos()
+                px, py = current.get_pos() #Position of player that fired bullets
                 for b in o.bullets:
                     bx = b[0][0]
                     by = b[0][1]
-##                    for a in range(1, 6):
-##                        angle = b[1] + 90 - (3 - a) * 6
-                    #lb = transform.rotate(gun.bulletSprite, b[1])
-                    lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2)
-                    bullet_sprite = map_to_bullet(b[2], self.game)
+                    lx, ly = (bx - px + g.screen.get_width() // 2, by - py + g.screen.get_height() // 2) #Convert game coords to screen coords
+                    bullet_sprite = map_to_bullet(b[2], self.game) #Sprite
                     screen.blit(transform.rotate(bullet_sprite, b[1]), (lx, ly))
-                    #gunType.gun_Bullet(b[2],lx,ly,b[1],screen)
-                    #g.screen.blit(lb, (lx, ly))
+
     def draw_weapons(self,screen,pos):
+        'Draw guns lying on the ground'
         p = self.player
         #print(p.weapon_map)
         for i in p.weapon_map:
-            if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \
+            if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \ #If on-screen
                         and pos[1] - screen.get_height() // 2 < i[1][1] < pos[1] + screen.get_height() // 2:
-                image = self.game.weapon_dict[i[0]].inventory_image
-                nx = i[1][0] - pos[0] + screen.get_width() // 2 \
+                image = self.game.weapon_dict[i[0]].inventory_image #Sprite
+                nx = i[1][0] - pos[0] + screen.get_width() // 2 \ #Convert game coords to local coords
                          - image.get_width() // 2
                 ny = i[1][1] - pos[1] + screen.get_height() // 2 \
                          - image.get_height() // 2
                 screen.blit(image,(nx,ny))
 
     def weapon_pickup(self,inventory):
+        'Pickup weapons'
         p = self.player
         for i in p.weapon_map:
-            if hypot(i[1][0]-25-p.pos[0],i[1][1]-25-p.pos[1]) <100:
-                inventory.add_item(self.game.weapon_dict[i[0]],p,p.weapon_map,i)
+            if hypot(i[1][0]-25-p.pos[0],i[1][1]-25-p.pos[1]) < 100: #Only pickup if gun is within 100px
+                inventory.add_item(self.game.weapon_dict[i[0]],p,p.weapon_map,i) #Add to inventory
                 #del self.weapon_map[self.weapon_map.index(i)]
                 break
 
 class GameMode:
     def __init__(self,server=False):
+        'Logic backend for game'
         self.resolution = (1280,800)
         self.players = {}
-        if not server:
+        if not server: #Only initialize resources if instance isn't a server
             mixer.init()
             font.init()
             self.screen = display.set_mode(self.resolution)
             self.screen.fill((255,255,255))
+            #Fonts--------------------------------------------
             self.title_font = font.Font('geonms-font.ttf', 72)
             self.textFont = font.Font('geonms-font.ttf', 32)
+            #-------------------------------------------------
             background = transform.smoothscale(image.load('nmsplanet.jpg').convert(), (1280,800))
             self.screen.blit(background, (0, 0))
             title = self.title_font.render('outcast: the game', True, (255,255,255))
@@ -145,12 +161,13 @@ class GameMode:
             self.screen.blit(txt, (self.screen.get_width()//2-txt.get_width()//2, 550))
             self.screen.blit(title, (self.screen.get_width()//2-title.get_width()//2, 100))
             display.flip()
-            self.music = mixer.music.load("Outcast.wav")
-            self.background = image.load('Background/MapFinal.png').convert()
-            self.droneB =False
-            self.drone_start = 31
-            self.current_actor = 0
-            self.surfaceALPHA = Surface((1280, 800), SRCALPHA)
+            self.music = mixer.music.load("Outcast.wav") #game music, currently unused
+            self.background = image.load('Background/MapFinal.png').convert() #Actual game background
+            self.droneB =False #Drone toggle flag
+            self.drone_start = 31 #Drone cooldown in seconds
+            self.current_actor = 0 #Initialize variable that remembers if drone or player
+            self.surfaceALPHA = Surface((1280, 800), SRCALPHA) #Storm surface
+            #Gun bullets and icons and data-------------------------------------------------------------------------------------------
             assaultrifle = Gun('AR',image.load('Weapons/lightbullet.png').convert_alpha(),
                                5,image.load('Weapons/machinegun.png').convert_alpha(),0,0.15)
             shotgun = Gun('Shotgun', image.load('Weapons/shellBullet.png').convert_alpha(),
@@ -161,6 +178,7 @@ class GameMode:
             empty = Gun('Empty',0,0,image.load('Weapons/empty.png').convert_alpha(),0,0)
             self.weapon_dict = {"Shotgun":shotgun,"AR":assaultrifle,"Sniper":sniper,"RPG":rpg}
             self.guns = [assaultrifle,shotgun,sniper,rpg,empty,empty]
+            #--------------------------------------------------------------------------------------------------------------------------
             self.buildingmap = image.load('Background/buildings.png').convert_alpha()
             self.building = False
             #weapon_list = [n.name for n in self.guns]
@@ -170,84 +188,67 @@ class GameMode:
 ##                wx,wy = (randint(100,11900),randint(100,7900))
 ##                self.weapon_map.append([weapon,(wx,wy),100])
         else:
+            #Background is needed for server-side authentication
             self.background = image.load('Background/MapFinal.png')
-        self.collisionmap = image.load('Background/rocks+hole.png')
-        
-        self.openbuilding = image.load('Background/openbuilding.png')
+        self.collisionmap = image.load('Background/rocks+hole.png') #Collision map
+        self.openbuilding = image.load('Background/openbuilding.png') #Building interiors
         self.running = True
         
     def draw_screen(self, player):
-        try:
-            px,py = player.get_pos()
-            portion = self.background.subsurface(Rect(px-self.screen.get_width()//2,
-                                                 py-self.screen.get_height()//2,
-                                                 self.screen.get_width(), self.screen.get_height()))
-            self.screen.blit(portion, (0, 0))
-            #Storm
-            if player.storm!=[]:
-                draw.rect(self.surfaceALPHA,(0,0,255,80),(0,0,1280,800))
-                nx = int(player.storm[0][0]-player.pos[0]+self.screen.get_width()//2)
-                ny = int(player.storm[0][1]-player.pos[1]+self.screen.get_height()//2)
-                draw.circle(self.surfaceALPHA,(0,0,0,0),(nx,ny),int(player.storm[1]))
-                self.screen.blit(self.surfaceALPHA,(0,0))
-            if player.health > 80:
-                health_color = (0, 255, 0)
-            elif player.health > 40:
-                health_color = (255, 255, 0)
-            else:
-                health_color = (255, 0, 0)
-            draw.rect(self.screen, 0, (20, 20, 300, 40), 2)
-            draw.rect(self.screen, health_color, (20, 20, int(player.health / 100 * 300), 40))
+        'Draw in game UI and background'
+        px,py = player.get_pos()
+        portion = self.background.subsurface(Rect(px-self.screen.get_width()//2,  #Subsurfaced portion of 12K x 8K image
+                                             py-self.screen.get_height()//2,
+                                             self.screen.get_width(), self.screen.get_height()))
+        self.screen.blit(portion, (0, 0))#First thing to blit
+        #Storm
+        if player.storm!=[]:
+            draw.rect(self.surfaceALPHA,(0,0,255,80),(0,0,1280,800)) #Cover over for storm
+            nx = int(player.storm[0][0]-player.pos[0]+self.screen.get_width()//2) #Game coords to screen coords
+            ny = int(player.storm[0][1]-player.pos[1]+self.screen.get_height()//2)
+            draw.circle(self.surfaceALPHA,(0,0,0,0),(nx,ny),int(player.storm[1])) #Draw in massive storm circle
+            self.screen.blit(self.surfaceALPHA,(0,0))
+        if player.health > 80: #Different colors for different health levels
+            health_color = (0, 255, 0)
+        elif player.health > 40:
+            health_color = (255, 255, 0)
+        else:
+            health_color = (255, 0, 0)
+        draw.rect(self.screen, 0, (20, 20, 300, 40), 2) #Base bar
+        draw.rect(self.screen, health_color, (20, 20, int(player.health / 100 * 300), 40)) #Health amount bar
 
-            #Minimap
-            minimap = transform.scale(self.background,(180,120))
-            self.screen.blit(minimap,(1050,50))
-            draw.circle(self.screen,(255,0,0),(int(1050+(px/12000)*180),int(50+(py/8000)*120)),2)
-            if player.storm!=[]:#Showing on minimap
-                if len(player.storm) == 5:
-                    draw.circle(self.screen,(0,0,255),(int(1050+(player.storm[0][0]/12000)*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
-                    draw.circle(self.screen,(0,255,0),(int(1050+(player.storm[3][0]/12000)*180),int(50+(player.storm[3][1]/8000)*120)),int(player.storm[4]//67),2)
-                elif len(player.storm) == 3:
-                    draw.circle(self.screen,(0,0,255),(int(1050+player.storm[0][0]/12000*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
-        except Exception as E:
-            print("Error:", E)
+        #Minimap
+        minimap = transform.scale(self.background,(180,120)) #scale down map size for minimap
+        self.screen.blit(minimap,(1050,50))
+        draw.circle(self.screen,(255,0,0),(int(1050+(px/12000)*180),int(50+(py/8000)*120)),2)
+        if player.storm!=[]:#If storm exists
+            if len(player.storm) == 5:
+                draw.circle(self.screen,(0,0,255),(int(1050+(player.storm[0][0]/12000)*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
+                draw.circle(self.screen,(0,255,0),(int(1050+(player.storm[3][0]/12000)*180),int(50+(player.storm[3][1]/8000)*120)),int(player.storm[4]//67),2)
+            elif len(player.storm) == 3:
+                draw.circle(self.screen,(0,0,255),(int(1050+player.storm[0][0]/12000*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
 
     def drone_click(self,g,p,client):
+        'Activate drone and process action'
         if self.droneB == False and t.time()-self.drone_start >30:#If the cooldown is down, run
-            self.drone = Drone(g, '%s' % ("ID"), (p.pos), 6, 'drone')
-            self.current_actor = self.drone
-            client.drone = self.drone
-            self.droneB = True
-            self.drone_start=t.time()
-        elif self.droneB == False and t.time()-self.drone_start <30:
+            self.drone = Drone(g, '%s' % ("ID"), (p.pos), 6, 'drone') #Create drone object
+            self.current_actor = self.drone #Set current mode to drone object
+            client.drone = self.drone #Give networking system access to drone object
+            self.droneB = True #Flip flag
+            self.drone_start=t.time() #Remember start time for cooldown
+        elif self.droneB == False and t.time()-self.drone_start <30: #cancel function if it's still on cooldown
             pass
-        else:
-            self.drone_start=t.time()
+        else: #This means we're deactivating the drone
+            self.drone_start=t.time() #Use this for cooldown
+            #Reset variables-------
             client.drone = 0
             self.current_actor = p
             self.droneB = False
+            #----------------------
     def open_door(self,p):
         if self.openbuilding.get_at((p.pos[0],p.pos[1]))[3] != 0:
             self.building = True
             print("open")
-##    def draw_weapons(self,screen,pos):
-##        for i in self.weapon_map:
-##            if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \
-##                        and pos[1] - screen.get_height() // 2 < i[1][1] < pos[1] + screen.get_height() // 2:
-##                image = self.weapon_dict[i[0]].inventory_image
-##                nx = i[1][0] - pos[0] + screen.get_width() // 2 \
-##                         - image.get_width() // 2
-##                ny = i[1][1] - pos[1] + screen.get_height() // 2 \
-##                         - image.get_height() // 2
-##                screen.blit(image,(nx,ny))
-##
-##
-##    def weapon_pickup(self,p,inventory):
-##        for i in self.weapon_map:
-##            if hypot(i[1][0]-25-p.pos[0],i[1][1]-25-p.pos[1]) <100:
-##                inventory.add_item(self.weapon_dict[i[0]],p,self.weapon_map,i)
-##                del self.weapon_map[self.weapon_map.index(i)]
-##                break
                 
 class Player:
     def __init__(self, game, name, pos, speed, mode):

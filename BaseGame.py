@@ -184,7 +184,7 @@ class GameMode:
                                                  self.screen.get_width(), self.screen.get_height()))
             self.screen.blit(portion, (0, 0))
             #Storm
-            if player.storm!=[]:
+            if player.storm!=[] or player.type == 'drone':
                 draw.rect(self.surfaceALPHA,(0,0,255,80),(0,0,1280,800))
                 nx = int(player.storm[0][0]-player.pos[0]+self.screen.get_width()//2)
                 ny = int(player.storm[0][1]-player.pos[1]+self.screen.get_height()//2)

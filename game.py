@@ -276,7 +276,6 @@ def main(menu_obj):
 
 
 
-            g.draw_screen(g.current_actor)
             if g.current_actor.type == 'player':
                 p.update_gif(newSprites)
                 p.render_player(newSprites, g)
@@ -309,7 +308,7 @@ def main(menu_obj):
                 client.s.send(pickle.dumps("leaving"))
                 g.running = False
 
-        g.draw_screen(g.current_actor,p)
+        g.draw_screen(g.current_actor)
         if g.current_actor.type == 'player': #Player object specific functions
             p.update_gif(newSprites) #Update player GIFS
             p.render_player(newSprites, g) #Draw player

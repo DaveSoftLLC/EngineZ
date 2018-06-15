@@ -52,12 +52,34 @@
 		<div class="container">
 			<div class="row justify-content-md-center">
 				<div class="col col-sm-12" id="center-text">
+					<h1>Scoring System</h1>
+				</div>
+			</div>
+			<div class="row justify-content-md-center">
+				<div class="col-sm-8">
+				<table border = 1 cellpadding = 5 style = "font-family: Calibri; color: #000000;" class="table table-striped table-bordered table-hover">
+					<tr><td>Hit</td><td>1 point</td></tr>
+					<tr><td>Kill</td><td>5 points</td></tr>
+					<tr><td>Win</td><td>25 points</td></tr>
+				</table>
+			</div>
+		</div>
+		<div id="top">
+			<div class="parallax">
+		  		<div class="container" id="hero-text">
+		  		</div>
+			</div>
+		</div>
+		<div class="container">
+			<div class="row justify-content-md-center">
+				<div class="col col-sm-12" id="center-text">
 					<h1>Leaderboard</h1>
 				</div>
 			</div>
 			<div class="row justify-content-md-center">
 				<div class="col-sm-8">
 				<table border = 1 cellpadding = 5 style = "font-family: Calibri; color: #000000;" class="table table-striped table-bordered table-hover">
+					<tr><td>Usernames</td><td>Score</td></tr>
 
 
 <?php
@@ -68,7 +90,7 @@ if ($conn->connect_error) {
 	print('Error');
 	die(); /* End if database failed to connect */
 }
-$sql = "SELECT username, highscore FROM `users` ORDER BY highscore DESC;"; /*Query to retrieve usernames and highscores*/
+$sql = "SELECT username, highscore FROM `users` ORDER BY highscore DESC LIMIT 10;"; /*Query to retrieve usernames and highscores*/
 $result = $conn->query($sql);
 $rows = $result->fetch_all(); /*Retrieve as an array*/
 $conn->close();

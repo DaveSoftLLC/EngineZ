@@ -26,7 +26,7 @@ def main(menu_obj):
 
         x, y = img.get_size()
         
-        image_counter[0] += 1#Used for loading screen
+        
         return transform.smoothscale(img, (int(x/factor), int(y/factor)))#Return transformed image
     def get_fps(old_time):
         'Returns FPS based on delta time'
@@ -79,7 +79,7 @@ def main(menu_obj):
                     #g.weapon_pickup(p,inventory)
                     client.weapon_pickup(inventory) #Pickup weapon
                 if keys[K_f] and g.current_actor.type == 'player':
-                    g.open_door(openbuiding) #Enter buildings
+                    p.open_door(openbuiding) #Enter buildings
                 if keys[K_g] and g.current_actor.type == 'player':
                     inventory.remove_item(p) #Drop items
                 #open door

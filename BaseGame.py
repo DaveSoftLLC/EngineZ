@@ -1,4 +1,4 @@
-#James Xu and Zhehai Zhang
+#James Xu and Zhehai (Mark) Zhang
 #Outcast: The Game
 #File of classes used in both client and server
 import pickle #IO serialization
@@ -70,15 +70,11 @@ class Client:
             #Rocket gif animation for explosion on players
             for b in self.other_player_dict[p.name].del_bullets:
                 if b[2] == 'RPG':
-                    p.rgif.append([b,0])
+                    p.rgif.append([b,0])#For rocket animation of exploding
 
             for b in self.other_player_dict[p.name].del_bullets: #Remove bullets that belong to current player
-
                 if b in p.bullets:
-                    
                     p.bullets.remove(b)
-                    
-                        
 
     def render_other_players(self,Psprite=None):
         'Blit in other players'
@@ -239,11 +235,11 @@ class GameMode:
         self.screen.blit(minimap,(1050,50))
         draw.circle(self.screen,(255,0,0),(int(1050+(px/12000)*180),int(50+(py/8000)*120)),2)
         if player.storm!=[]:#Showing on minimap
-            if len(player.storm) == 5:
+            if len(player.storm) == 5:# If there's a storm after that one
                 #Flatten out game coords to minimap coords
                 draw.circle(self.screen,(0,0,255),(int(1050+(player.storm[0][0]/12000)*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
                 draw.circle(self.screen,(0,255,0),(int(1050+(player.storm[3][0]/12000)*180),int(50+(player.storm[3][1]/8000)*120)),int(player.storm[4]//67),2)
-            elif len(player.storm) == 3:
+            elif len(player.storm) == 3: #If it's the last storm
                 draw.circle(self.screen,(0,0,255),(int(1050+player.storm[0][0]/12000*180),int(50+(player.storm[0][1]/8000)*120)),int(player.storm[1]//67),2)
 
 
@@ -365,15 +361,13 @@ class Player:
         self.rect = game.screen.blit(sprite, (640 - sprite.get_width() // 2, 400 - sprite.get_height() // 2))
     def rocket_animation(self,screen,anim):
         'Rocket Animations'
-        print(self.rgif)
-        for i in self.rgif:
+        for i in self.rgif: #rgif is a 3d list with each rcoket and their gif counter 
             if i[0][0][0] - screen.get_width() // 2 < self.pos[0] < i[0][0][0] + screen.get_width() //2 \
                         and i[0][0][1] - screen.get_height() // 2 < self.pos[1] < i[0][0][1] + screen.get_height() // 2:#Only blit of on screen
                 bullet_sprite = anim[i[1]//10%len(anim)]#Sprite chosen from list
-                print(bullet_sprite,i[0][0])
                 lx, ly = (i[0][0][0] - self.pos[0] + screen.get_width() // 2, i[0][0][1] - self.pos[1] + screen.get_height() // 2)#Convert game coords to screen coords
-                screen.blit(bullet_sprite, (lx,ly))
-            if i[1] <30:
+                screen.blit(bullet_sprite, (lx,ly))#Explosion galore
+            if i[1] <30:#Add index to move gif counter
                 self.rgif[self.rgif.index(i)][1]+=1
             else:
                 del self.rgif[self.rgif.index(i)]

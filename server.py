@@ -54,7 +54,6 @@ class GameInstance:
                 x = randint(self.storm_pos[a-1][0]-(self.storm_rad[a-1]-self.storm_rad[a])+200,self.storm_pos[a-1][0]+(self.storm_rad[a-1]-self.storm_rad[a])-200)
                 y = randint(self.storm_pos[a-1][1]-(self.storm_rad[a-1]-self.storm_rad[a])+200,self.storm_pos[a-1][1]+(self.storm_rad[a-1]-self.storm_rad[a])-200)
                 self.storm_pos.append([x,y])
-<<<<<<< HEAD
         #Boolean for starting storm once everyone is ready
         self.stormB = True
         #Deals damage to players at a steady pace
@@ -63,11 +62,7 @@ class GameInstance:
         self.storm_state = 0
         #True initializes storm
         self.storm(True)
-        
-        #Start server processing logic
-=======
         #start server processing logic in seperate threads
->>>>>>> 9ec30ca8dc5001eab849edb78eb9bda7141e21d7
         threading.Thread(target=self.check_damage).start()
         threading.Thread(target=self.storm).start()
         threading.Thread(target=self.check_win).start()

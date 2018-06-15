@@ -88,12 +88,12 @@ class Client:
             if o.name != current.name:
                 px, py = current.get_pos()
                 ox, oy = o.get_pos()
-                if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() \ #Only blit if other player is on screen
-                        and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2: 
+                if px - g.screen.get_width() // 2 < ox < px + g.screen.get_width() and py - g.screen.get_height() // 2 < oy < py + g.screen.get_height() // 2: #Only blit if other player is on screen
                     other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter //20%len(self.sprites[o.state])], o.rotation + 90) #Sprite appropriate for other player at their stage
-                    nx = ox - px + g.screen.get_width() // 2 \ #Convert game coords to screen coords
+                    #Convert game coords to screen coords
+                    nx = ox - px + g.screen.get_width() // 2 \
                          - other_sprite.get_width() // 2
-                    ny = oy - py + g.screen.get_height() // 2 \ #Same for y
+                    ny = oy - py + g.screen.get_height() // 2 \
                          - other_sprite.get_height() // 2
                     other_sprite = transform.rotate(self.sprites[o.state][o.gif_counter //20%len(self.sprites[o.state])], o.rotation + 90) #Rotate 
                     g.screen.blit(other_sprite, (nx,ny))
@@ -104,7 +104,8 @@ class Client:
                         and dy - g.screen.get_height() // 2 < py < dy + g.screen.get_height() // 2:#Checks if your player is on screen
                     your_Player = transform.rotate(Psprite[p.state][p.gif_counter//20%len(Psprite[p.state])], p.rotation + 90)#p.gif_counter is integer division by 20,
                     #if slows gif counter down. It is then modded by length of list of images to prevent index out of range
-                    nx = px - dx + g.screen.get_width() // 2 \ #Converts universal position to screen
+                    #Convert game coords to screen coords
+                    nx = px - dx + g.screen.get_width() // 2 \
                          - your_Player.get_width() // 2
                     ny = py - dy + g.screen.get_height() // 2 \
                          - your_Player.get_height() // 2
@@ -134,10 +135,12 @@ class Client:
         p = self.player
         #print(p.weapon_map)
         for i in p.weapon_map:
-            if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \ #If on-screen
+            #if on screen
+            if pos[0] - screen.get_width() // 2 < i[1][0] < pos[0] + screen.get_width() //2 \
                         and pos[1] - screen.get_height() // 2 < i[1][1] < pos[1] + screen.get_height() // 2:
                 image = self.game.weapon_dict[i[0]].inventory_image #Sprite
-                nx = i[1][0] - pos[0] + screen.get_width() // 2 \ #Convert game coords to local coords
+                #Convert game coords to local coords
+                nx = i[1][0] - pos[0] + screen.get_width() // 2 \
                          - image.get_width() // 2
                 ny = i[1][1] - pos[1] + screen.get_height() // 2 \
                          - image.get_height() // 2

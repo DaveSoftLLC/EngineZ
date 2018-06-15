@@ -171,8 +171,6 @@ class GameInstance:
                         for ix, iy in interpolate:
                             if hypot(px - nx, py - ny) < 30:
                                 threading.Thread(target=serverRequest.modify, args=(name, 1)).start()
-                                counter += 1
-                                print(counter, name)
                                 obj.bullets.remove(b)
                                 if name not in del_bullets.keys():
                                     del_bullets[name] = [b]#Add this bullet to del bullets if player isnt in del bulets
@@ -273,13 +271,13 @@ class Server:
     
     def listen(self):
         'Listen for connections'
-         while self.running:
-              print("Before looking")
-              conn, addr = self.s.accept()
-              print("After looking")
-              conn.settimeout(180)
-              STRUCT = ['room name', 'player list']
-              threading.Thread(target=self.listen_client, args=(conn, addr)).start()#handoff to function for the rest
+        while self.running:
+          print("Before looking")
+          conn, addr = self.s.accept()
+          print("After looking")
+          conn.settimeout(180)
+          STRUCT = ['room name', 'player list']
+          threading.Thread(target=self.listen_client, args=(conn, addr)).start()#handoff to function for the rest
 
     def listen_client(self, conn, addr):
         'Handles logic'

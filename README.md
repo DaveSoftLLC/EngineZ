@@ -1,10 +1,13 @@
 # EngineZ
 
-#READ ME:
-#INSTRUCTIONS
-#RUN SERVER.PY
-#TO OPEN GAME, RUN MAIN.PY
+## Instructions:
+- RUN SERVER.PY\
+- TO OPEN GAME, RUN MAIN.PY
 
-#username: rmckenzie password: ccc
+## Authentication:
+Username: rmckenzie\
+Password: ccc
 
-#test another player: username: testing password: admin
+To test another player, use:\
+Username: testing\
+Password: admin

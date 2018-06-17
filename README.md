@@ -1,7 +1,7 @@
 # EngineZ
 
 ## Instructions:
-- RUN SERVER.PY\
+- RUN SERVER.PY
 - TO OPEN GAME, RUN MAIN.PY
 
 ## Authentication:

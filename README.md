@@ -1,6 +1,7 @@
 # EngineZ
 
 ## Instructions:
+- Make sure port 3306 is open for MySQL
 - RUN SERVER.PY
 - TO OPEN GAME, RUN MAIN.PY
 

@@ -1,8 +1,8 @@
 <?php
 //config.php
 
-$dbusername = "pma";
-$dbpassword = "EzhE2ycfK6VsiqWQ";
-$dbname = "cloudAuthenticate";
-$dbservername = "localhost";
+$dbusername = "PUT YOUR OWN";
+$dbpassword = "PUT YOUR OWN";
+$dbname = "PUT YOUR OWN";
+$dbservername = "PUT YOUR OWN";
 ?>
